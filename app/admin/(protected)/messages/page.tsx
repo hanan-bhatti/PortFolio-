@@ -1,26 +1,65 @@
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/admin/PageHeader";
-import MessagesTable from "@/components/admin/MessagesTable";
+import InboxView from "@/components/admin/InboxView";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminMessagesPage() {
-  const messages = await prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" } });
+  const messages = await prisma.contactMessage.findMany({
+    orderBy: { createdAt: "asc" },
+  });
+
+  // Group messages by email
+  const threadsMap: { [email: string]: any } = {};
+
+  messages.forEach((m) => {
+    const email = m.email.toLowerCase();
+    if (!threadsMap[email]) {
+      threadsMap[email] = {
+        email: m.email,
+        name: m.name,
+        lastMessageAt: m.createdAt,
+        hasUnread: false,
+        messages: [],
+      };
+    }
+
+    threadsMap[email].messages.push({
+      id: m.id,
+      name: m.name,
+      email: m.email,
+      subject: m.subject,
+      message: m.message,
+      read: m.read,
+      isAdminReply: m.isAdminReply,
+      createdAt: m.createdAt.toISOString(),
+    });
+
+    if (m.createdAt > threadsMap[email].lastMessageAt) {
+      threadsMap[email].lastMessageAt = m.createdAt;
+    }
+
+    if (!m.isAdminReply && !m.read) {
+      threadsMap[email].hasUnread = true;
+    }
+
+    if (!m.isAdminReply) {
+      threadsMap[email].name = m.name;
+    }
+  });
+
+  // Convert to array and sort by lastMessageAt descending
+  const threads = Object.values(threadsMap)
+    .map((t: any) => ({
+      ...t,
+      lastMessageAt: t.lastMessageAt.toISOString(),
+    }))
+    .sort((a: any, b: any) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
 
   return (
     <div>
-      <PageHeader title="Messages" crumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Messages" }]} />
-      <MessagesTable
-        messages={messages.map((m) => ({
-          id: m.id,
-          name: m.name,
-          email: m.email,
-          subject: m.subject,
-          message: m.message,
-          read: m.read,
-          createdAt: m.createdAt.toISOString(),
-        }))}
-      />
+      <PageHeader title="Inbox Messages" crumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Messages" }]} />
+      <InboxView initialThreads={threads} />
     </div>
   );
 }

@@ -18,6 +18,21 @@ export async function POST(req: Request): Promise<NextResponse> {
 
   const message = await prisma.contactMessage.create({ data: parsed.data });
 
+  const rawBody = body as any;
+  if (rawBody && typeof rawBody.visitorId === "string") {
+    try {
+      const visitorExists = await prisma.visitor.findUnique({ where: { id: rawBody.visitorId } });
+      if (visitorExists) {
+        await prisma.contactMessage.update({
+          where: { id: message.id },
+          data: { visitorId: rawBody.visitorId },
+        });
+      }
+    } catch (e) {
+      // fail silently
+    }
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_EMAIL_TO;
   const from = process.env.CONTACT_EMAIL_FROM;

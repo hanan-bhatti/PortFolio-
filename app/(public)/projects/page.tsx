@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import Hero3D from "@/components/3d/Hero3D";
 import ProjectsGrid from "@/components/ui/ProjectsGrid";
 
 export const dynamic = "force-dynamic";
@@ -14,25 +13,47 @@ export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({ orderBy: [{ order: "asc" }, { createdAt: "desc" }] });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-32 pb-20">
-      <div className="relative mb-12">
-        <Hero3D variant="icosahedron" className="absolute -top-16 right-0 hidden h-48 w-48 md:block" />
-        <h1 className="text-4xl font-bold text-white md:text-5xl">
-          <span className="gradient-text">Projects</span>
-        </h1>
-        <p className="mt-3 max-w-xl text-zinc-400">Things I have built — from full-stack apps to small experiments.</p>
-      </div>
-      <ProjectsGrid
-        projects={projects.map((p) => ({
-          slug: p.slug,
-          title: p.title,
-          description: p.description,
-          techStack: p.techStack,
-          coverImage: p.coverImage,
-          liveUrl: p.liveUrl,
-          githubUrl: p.githubUrl,
-        }))}
+    <div
+      className="w-full min-h-screen relative"
+      style={{
+        backgroundColor: "#0a0a0a",
+        backgroundImage: `
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: "40px 40px",
+      }}
+    >
+      {/* Radial Gradient Overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: "radial-gradient(ellipse at center, transparent 0%, rgba(10, 10, 10, 0.7) 70%, #0a0a0a 100%)",
+        }}
       />
+
+      {/* Content Container */}
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-32 pb-20">
+        <div className="relative mb-12">
+          <h1 className="font-syne font-extrabold text-[clamp(3rem,8vw,6rem)] leading-none text-white uppercase">
+            PROJECTS
+          </h1>
+          <p className="mt-3 max-w-xl font-inter font-normal text-[14px] text-text-muted">
+            {"Things I've built — from full-stack apps to small experiments."}
+          </p>
+        </div>
+        <ProjectsGrid
+          projects={projects.map((p) => ({
+            slug: p.slug,
+            title: p.title,
+            description: p.description,
+            techStack: p.techStack,
+            coverImage: p.coverImage,
+            liveUrl: p.liveUrl,
+            githubUrl: p.githubUrl,
+          }))}
+        />
+      </div>
     </div>
   );
 }

@@ -10,11 +10,16 @@ export default function ParallaxCover({ src, alt }: { src: string; alt: string }
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
   return (
-    <div ref={ref} className="relative h-[45vh] w-full overflow-hidden md:h-[55vh]">
+    <div ref={ref} className="relative h-[40vh] w-full overflow-hidden md:h-[60vh]">
       <motion.div style={{ y }} className="absolute inset-0">
         <Image src={src} alt={alt} fill className="object-cover" priority />
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+      <div
+        className="absolute inset-0 z-1 pointer-events-none"
+        style={{
+          background: "linear-gradient(to top, #0a0a0a 0%, rgba(10,10,10,0.3) 60%, rgba(10,10,10,0) 100%)",
+        }}
+      />
     </div>
   );
 }

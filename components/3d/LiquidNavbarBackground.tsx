@@ -76,24 +76,24 @@ const fragmentShader = `
     vec2 diff = p - uPillCenter;
     float speed = length(uVelocity);
     
-    // Trailing liquid ripple wave simulation based on velocity
-    float waveX = sin(diff.x * 0.12 - uTime * 12.0) * min(4.0, speed * 0.12) * 0.45;
-    float waveY = cos(diff.y * 0.12 - uTime * 10.0) * min(4.0, speed * 0.12) * 0.45;
+    // Stronger trailing liquid ripple wave simulation based on velocity
+    float waveX = sin(diff.x * 0.10 - uTime * 14.0) * min(5.0, speed * 0.15) * 0.6;
+    float waveY = cos(diff.y * 0.10 - uTime * 12.0) * min(5.0, speed * 0.15) * 0.6;
     
     // Add continuous subtle fluid breathing waves
-    float breathe = sin(diff.x * 0.06 + uTime * 3.5) * cos(diff.y * 0.06 + uTime * 2.5) * 0.6;
+    float breathe = sin(diff.x * 0.05 + uTime * 4.0) * cos(diff.y * 0.05 + uTime * 3.0) * 0.8;
     
     vec2 deformedDiff = diff + vec2(waveX, waveY + breathe);
     
     float dPill = sdRoundedBox(deformedDiff, pillHalf - 1.0, pillRadius);
     
-    // The active pill is a raised lens (curves down over a 12px span)
-    float hPill = clamp(-dPill / 12.0, 0.0, 1.0);
-    hPill = smoothstep(0.0, 1.0, hPill);
+    // The active pill is a raised lens (curves down over a 10px span)
+    float hPill = clamp(-dPill / 10.0, 0.0, 1.0);
+    hPill = smoothstep(0.0, 1.0, hPill) * step(1.0, uPillSize.x);
     
-    // Base thickness is 0.12, active pill adds 0.28.
+    // Base thickness is 0.10, active pill adds 0.45.
     // Fades to 0 at the navbar outer edge.
-    return hNavbar * (0.12 + hPill * 0.28);
+    return hNavbar * (0.10 + hPill * 0.45);
   }
 
   void main() {
@@ -115,8 +115,8 @@ const fragmentShader = `
     float hx = getHeight(localPos + vec2(eps, 0.0));
     float hy = getHeight(localPos + vec2(0.0, eps));
     
-    // Slope scale determines lens refractive strength and bevel sharpness
-    float slopeScale = 0.14; 
+    // Slope scale determines lens refractive strength and bevel sharpness (increased for liquid dome)
+    float slopeScale = 0.22; 
     
     float nx = (hx - h) / eps;
     float ny = (hy - h) / eps;
@@ -125,14 +125,26 @@ const fragmentShader = `
     vec3 N = normalize(vec3(-nx * slopeScale, -ny * slopeScale, 1.0));
     vec3 V = vec3(0.0, 0.0, 1.0); // View direction (orthographic camera)
 
+    // Calculate active pill height local factor
+    vec2 pillHalf = uPillSize * 0.5;
+    float dPill = sdRoundedBox(localPos - uPillCenter, pillHalf - 1.0, pillHalf.y - 1.0);
+    float hPill = smoothstep(0.0, 1.0, clamp(-dPill / 10.0, 0.0, 1.0)) * step(1.0, uPillSize.x);
+
+    // Magnification (zoom) effect inside the liquid lens
+    vec2 pillUV = uPillCenter / uSize;
+    // Zoom factor: less than 1.0 magnifies, greater than 1.0 shrinks.
+    // We zoom in on the background underneath the pill
+    float zoomFactor = 1.0 - hPill * 0.28; 
+    vec2 baseUV = localPos / uSize;
+    vec2 toCenter = baseUV - pillUV;
+
     // Physical Refraction with Chromatic Aberration (RGB color splitting)
     // Refraction offsets UVs proportional to normal slope
-    float refractionStrength = 0.06;
-    vec2 baseUV = localPos / uSize;
+    float refractionStrength = 0.08;
     
-    vec2 uvR = baseUV + N.xy * refractionStrength * 1.00;
-    vec2 uvG = baseUV + N.xy * refractionStrength * 1.05;
-    vec2 uvB = baseUV + N.xy * refractionStrength * 1.10;
+    vec2 uvR = pillUV + toCenter * zoomFactor + N.xy * refractionStrength * 1.00;
+    vec2 uvG = pillUV + toCenter * zoomFactor + N.xy * refractionStrength * 1.15;
+    vec2 uvB = pillUV + toCenter * zoomFactor + N.xy * refractionStrength * 1.30;
 
     vec3 refractedColor;
     refractedColor.r = getBgColor(uvR).r;
@@ -141,49 +153,46 @@ const fragmentShader = `
 
     // Fresnel Reflection (Schlick's approximation)
     float cosTheta = max(dot(N, V), 0.0);
-    float fresnel = pow(1.0 - cosTheta, 4.0);
+    float fresnel = pow(1.0 - cosTheta, 3.5);
     
-    // Rim highlights highlighting physical contours
-    vec3 rimHighlight = vec3(1.0) * fresnel * 0.45;
+    // Rim highlights highlighting physical contours (stronger edge reflection)
+    vec3 rimHighlight = vec3(1.0) * fresnel * 0.65;
 
-    // Specular Reflection (Apple style sharp glossy look)
+    // Specular Reflection (Apple style sharp glossy look + broad wet gloss)
     // Primary key light (Top-Left)
-    vec3 lightPos1 = normalize(vec3(-0.4, 0.6, 0.75));
+    vec3 lightPos1 = normalize(vec3(-0.35, 0.55, 0.75));
     vec3 H1 = normalize(lightPos1 + V);
-    float spec1 = pow(max(dot(N, H1), 0.0), 160.0) * 1.4;
+    float spec1Sharp = pow(max(dot(N, H1), 0.0), 160.0) * 1.6;
+    float spec1Broad = pow(max(dot(N, H1), 0.0), 24.0) * 0.35;
+    float spec1 = spec1Sharp + spec1Broad;
 
     // Secondary fill light (Bottom-Right)
-    vec3 lightPos2 = normalize(vec3(0.6, -0.3, 0.5));
+    vec3 lightPos2 = normalize(vec3(0.55, -0.25, 0.5));
     vec3 H2 = normalize(lightPos2 + V);
-    float spec2 = pow(max(dot(N, H2), 0.0), 32.0) * 0.22;
+    float spec2 = pow(max(dot(N, H2), 0.0), 32.0) * 0.25;
 
     // Active Pill Glow Backdrop (like the Moon glow in the user's reference)
-    // Calculate distance to pill center
-    vec2 pillHalf = uPillSize * 0.5;
-    float dPill = sdRoundedBox(localPos - uPillCenter, pillHalf - 1.0, pillHalf.y - 1.0);
-    float hPill = smoothstep(0.0, 1.0, clamp(-dPill / 10.0, 0.0, 1.0));
-    
     float pulse = 0.94 + 0.06 * sin(uTime * 3.5);
     // Warm/desert-sand glow for active tab
-    vec3 activeGlow = vec3(1.0, 0.88, 0.78) * hPill * 0.18 * pulse;
+    vec3 activeGlow = vec3(1.0, 0.88, 0.78) * hPill * 0.22 * pulse;
     // Add extra color flare on hover
-    activeGlow += vec3(0.851, 0.682, 0.58) * hPill * uHover * 0.1;
+    activeGlow += vec3(0.851, 0.682, 0.58) * hPill * uHover * 0.12;
 
     // Custom Glass Edge Highlight
     // Highlights the exact edge contour where the glass bevel starts
     float edgeHighlight = smoothstep(-1.0, 0.0, dNavbar) * smoothstep(1.0, 0.0, dNavbar);
-    vec3 edgeShine = vec3(1.0) * edgeHighlight * 0.28 * max(0.0, N.x * -0.5 + N.y * 0.5 + 0.5);
+    vec3 edgeShine = vec3(1.0) * edgeHighlight * 0.35 * max(0.0, N.x * -0.5 + N.y * 0.5 + 0.5);
 
-    // Glass body composition
-    vec3 glassTint = vec3(0.96, 0.98, 1.0);
-    // Combine refraction with a subtle glass body tint
-    vec3 finalColor = mix(refractedColor, glassTint, 0.06);
+    // Glass body composition with thickness-dependent tinting
+    vec3 glassTint = vec3(0.92, 0.96, 1.0); // Clean turquoise/ice glass tint
+    float thickness = h; 
+    vec3 finalColor = mix(refractedColor, glassTint, 0.04 + thickness * 0.12);
 
     // Add specular highlights, edge highlights, active glows, and rim light
     finalColor += vec3(spec1) + vec3(spec2) + rimHighlight + activeGlow + edgeShine;
 
     // Opacity based on Fresnel reflection + specular highlights
-    float alpha = clamp(0.12 + fresnel * 0.42 + spec1 * 0.5 + spec2 * 0.1, 0.0, 1.0);
+    float alpha = clamp(0.12 + fresnel * 0.48 + spec1 * 0.6 + spec2 * 0.1, 0.0, 1.0);
 
     // Render output
     gl_FragColor = vec4(finalColor, alpha * borderAlpha);

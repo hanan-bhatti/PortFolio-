@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/admin/PageHeader";
@@ -14,21 +15,23 @@ export default async function AdminPostsPage() {
         title="Posts"
         crumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Posts" }]}
         action={
-          <Link href="/admin/posts/new" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500">
+          <Link href="/admin/posts/new" className="border border-amber bg-amber px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black hover:bg-amber/90 transition-all">
             + New Post
           </Link>
         }
       />
-      <PostsTable
-        posts={posts.map((p) => ({
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          published: p.published,
-          views: p.views,
-          createdAt: p.createdAt.toISOString(),
-        }))}
-      />
+      <Suspense fallback={<div className="font-mono text-xs text-zinc-500">Loading posts...</div>}>
+        <PostsTable
+          posts={posts.map((p) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            published: p.published,
+            views: p.views,
+            createdAt: p.createdAt.toISOString(),
+          }))}
+        />
+      </Suspense>
     </div>
   );
 }

@@ -1,15 +1,21 @@
-import Skeleton from "@/components/ui/Skeleton";
+"use client";
+
+import { Skeleton } from "boneyard-js/react";
 
 export default function Loading() {
   return (
     <div className="mx-auto max-w-6xl px-4 pt-32 pb-20">
-      <Skeleton className="mx-auto h-24 w-72" />
-      <Skeleton className="mx-auto mt-10 h-11 w-full max-w-md rounded-full" />
-      <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-80" />
-        ))}
+      <div className="relative mb-16 flex flex-col items-center justify-center text-center">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white">
+          The <span className="gradient-text font-black">Blog</span>
+        </h1>
+        <p className="mt-4 text-zinc-400 max-w-md">
+          Articles on web development, software engineering, and modern tech.
+        </p>
       </div>
+      <Skeleton name="blog-index" loading={true}>
+        <div />
+      </Skeleton>
     </div>
   );
 }

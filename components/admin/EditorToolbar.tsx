@@ -27,8 +27,8 @@ function Btn({
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
       className={cn(
-        "rounded px-2 py-1 text-sm transition-colors",
-        active ? "bg-indigo-600 text-white" : "text-zinc-300 hover:bg-white/10"
+        "rounded-none px-2 py-1 font-mono text-xs transition-colors",
+        active ? "bg-amber text-black font-bold" : "text-zinc-300 hover:bg-white/5"
       )}
     >
       {children}
@@ -61,7 +61,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
   const currentLang = (editor.getAttributes("codeBlock").language as string | undefined) ?? "plaintext";
 
   return (
-    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 rounded-t-2xl border-b border-white/10 bg-[#13131c] p-2">
+    <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 rounded-none border-b border-[#262626] bg-[#0c0c0c] p-2">
       <Btn title="Bold" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}>
         <b>B</b>
       </Btn>
@@ -74,7 +74,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       <Btn title="Strikethrough" active={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()}>
         <s>S</s>
       </Btn>
-      <span className="mx-1 h-5 w-px bg-white/10" />
+      <span className="mx-1 h-5 w-px bg-[#262626]" />
       {HEADINGS.map((level) => (
         <Btn
           key={level}
@@ -85,7 +85,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
           H{level}
         </Btn>
       ))}
-      <span className="mx-1 h-5 w-px bg-white/10" />
+      <span className="mx-1 h-5 w-px bg-[#262626]" />
       <Btn title="Bullet list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
         •≡
       </Btn>
@@ -105,7 +105,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
         <select
           value={currentLang}
           onChange={(e) => editor.chain().focus().updateAttributes("codeBlock", { language: e.target.value }).run()}
-          className="rounded border border-white/10 bg-black/40 px-1.5 py-0.5 text-xs text-zinc-300"
+          className="rounded-none border border-[#262626] bg-[#0c0c0c] px-1.5 py-0.5 font-mono text-[10px] text-zinc-300 outline-none focus:border-amber"
         >
           {LANGS.map((lang) => (
             <option key={lang} value={lang}>
@@ -117,7 +117,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       <Btn title="Horizontal rule" onClick={() => editor.chain().focus().setHorizontalRule().run()}>
         ―
       </Btn>
-      <span className="mx-1 h-5 w-px bg-white/10" />
+      <span className="mx-1 h-5 w-px bg-[#262626]" />
       <Btn title="Align left" active={editor.isActive({ textAlign: "left" })} onClick={() => editor.chain().focus().setTextAlign("left").run()}>
         ☰←
       </Btn>
@@ -127,7 +127,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       <Btn title="Align right" active={editor.isActive({ textAlign: "right" })} onClick={() => editor.chain().focus().setTextAlign("right").run()}>
         →☰
       </Btn>
-      <span className="mx-1 h-5 w-px bg-white/10" />
+      <span className="mx-1 h-5 w-px bg-[#262626]" />
       <Btn title="Highlight" active={editor.isActive("highlight")} onClick={() => editor.chain().focus().toggleHighlight().run()}>
         ✍
       </Btn>
@@ -147,9 +147,9 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
             const url = res[0]?.url;
             if (url) editor.chain().focus().setImage({ src: url }).run();
           }}
-          onUploadError={(error: Error) => toast.error(`Upload failed: ${error.message}`)}
+          onUploadError={(error: Error) => { toast.error(`Upload failed: ${error.message}`); }}
           appearance={{
-            button: "h-7 rounded bg-white/10 px-2 text-xs text-zinc-300 hover:bg-white/20",
+            button: "h-7 rounded-none border border-[#262626] bg-black/40 px-3 text-[10px] font-mono text-zinc-300 hover:bg-zinc-900 transition-colors",
             allowedContent: "hidden",
           }}
           content={{ button: "\ud83d\uddbc Image" }}
@@ -157,20 +157,20 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       </div>
 
       {ytOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setYtOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#15151f] p-6" onClick={(e) => e.stopPropagation()}>
-            <h3 className="mb-3 font-semibold text-white">Embed YouTube video</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm" onClick={() => setYtOpen(false)}>
+          <div className="w-full max-w-md rounded-none border border-[#F59E0B] bg-[#0a0a0a] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-4 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] border-b border-[#262626] pb-3">Embed YouTube video</h3>
             <input
               value={ytUrl}
               onChange={(e) => setYtUrl(e.target.value)}
               placeholder="https://www.youtube.com/watch?v=..."
-              className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-3 py-2 font-mono text-xs text-white placeholder-zinc-600 outline-none focus:border-[#F59E0B]"
             />
-            <div className="mt-4 flex justify-end gap-2">
-              <button type="button" onClick={() => setYtOpen(false)} className="rounded-lg px-4 py-2 text-sm text-zinc-400 hover:bg-white/5">
+            <div className="mt-6 flex justify-end gap-3 font-mono text-[10px] font-bold uppercase tracking-widest">
+              <button type="button" onClick={() => setYtOpen(false)} className="border border-[#262626] bg-black/40 px-4 py-2.5 text-zinc-300 hover:bg-zinc-900 transition-colors">
                 Cancel
               </button>
-              <button type="button" onClick={insertYoutube} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500">
+              <button type="button" onClick={insertYoutube} className="bg-[#F59E0B] px-4 py-2.5 text-black hover:bg-[#F59E0B]/90 transition-colors">
                 Embed
               </button>
             </div>

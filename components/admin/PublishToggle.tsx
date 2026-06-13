@@ -22,8 +22,10 @@ export default function PublishToggle({ id, published }: { id: string; published
         })
       }
       className={cn(
-        "rounded-full px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50",
-        published ? "bg-emerald-500/15 text-emerald-400" : "bg-zinc-500/15 text-zinc-400"
+        "border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50",
+        published
+          ? "border-[#10B981] bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20"
+          : "border-zinc-700 bg-zinc-800/40 text-zinc-400 hover:bg-zinc-800"
       )}
     >
       {published ? "Published" : "Draft"}

@@ -16,30 +16,67 @@ export default function PostCard({ post }: { post: PostCardData }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="glass group block overflow-hidden rounded-2xl transition-shadow hover:glow-cyan"
+      className="relative h-[280px] w-full overflow-hidden block border border-border rounded-none bg-bg-elevated text-left group transition-all duration-200 hover:border-amber"
     >
-      <div className="relative h-44 w-full bg-surface-light">
+      {/* Cover Image or Fallback */}
+      <div className="absolute inset-0 w-full h-full">
         {post.coverImage ? (
-          <Image src={post.coverImage} alt={post.title} fill className="object-cover" />
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover absolute inset-0 w-full h-full grayscale-[20%] transition-all duration-400 ease-out group-hover:grayscale-0 group-hover:scale-[1.03]"
+          />
         ) : (
-          <div className="flex h-full items-center justify-center text-4xl font-bold text-white/10">✦</div>
+          <div className="absolute inset-0 flex h-full w-full items-center justify-center bg-bg-elevated text-5xl font-bold text-white/5 uppercase font-syne">
+            {post.title.charAt(0)}
+          </div>
         )}
       </div>
-      <div className="p-5">
-        <div className="flex items-center gap-3 text-xs text-zinc-500">
+
+      {/* Gradient Overlay */}
+      <div
+        className="absolute inset-0 z-1 pointer-events-none"
+        style={{
+          background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 45%, rgba(0,0,0,0.1) 100%)",
+        }}
+      />
+
+      {/* Top-right Arrow */}
+      <span className="absolute top-4 right-4 z-10 font-syne font-bold text-[1.2rem] text-amber opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        ↗
+      </span>
+
+      {/* Overlaid Content */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 z-10 flex flex-col justify-end pointer-events-none">
+        {/* Date · Read Time */}
+        <div className="flex items-center gap-2 font-inter font-normal text-[11px] text-white/55 mb-2">
           <span>{formatDate(post.createdAt)}</span>
           <span>·</span>
           <span>{post.readMins} min read</span>
         </div>
-        <h3 className="mt-2 text-lg font-semibold text-white group-hover:text-cyan-accent">{post.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{post.excerpt}</p>
-        <ul className="mt-3 flex flex-wrap gap-2">
+
+        {/* Title */}
+        <h3 className="font-syne font-bold text-[1.1rem] text-white leading-[1.3] line-clamp-2">
+          {post.title}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="font-inter font-normal text-[12px] text-white/60 mt-[0.4rem] line-clamp-2">
+          {post.excerpt}
+        </p>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2 mt-[0.75rem]">
           {post.tags.map((tag) => (
-            <li key={tag} className="rounded-full bg-cyan-accent/10 px-2.5 py-0.5 text-xs text-cyan-300">
+            <span
+              key={tag}
+              className="font-inter font-medium text-[10px] text-amber"
+            >
               #{tag}
-            </li>
+            </span>
           ))}
-        </ul>
+        </div>
       </div>
     </Link>
   );

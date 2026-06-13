@@ -1,59 +1,392 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/settings";
-import Hero3D from "@/components/3d/Hero3D";
-import Reveal from "@/components/ui/Reveal";
 import ContactForm from "@/components/forms/ContactForm";
+import { SocialRow, type SocialItem } from "@/components/ui/SocialRow";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch with me.",
+  description:
+    "Get in touch with Hanan Bhatti — open to work, freelance, and collaboration.",
 };
 
-export default async function ContactPage() {
-  const settings = await getSiteSettings();
-  const socials = [
-    { label: "GitHub", href: settings.socialGithub, icon: "\u2387" },
-    { label: "LinkedIn", href: settings.socialLinkedin, icon: "in" },
-    { label: "Twitter / X", href: settings.socialTwitter, icon: "\ud835\udd4f" },
-    { label: "Email", href: settings.socialEmail ? `mailto:${settings.socialEmail}` : "", icon: "@" },
-  ].filter((s) => s.href !== "");
+// ─── Marquee ────────────────────────────────────────────────────────────────
+function ContactMarquee() {
+  const items = [
+    "LET'S TALK",
+    "OPEN TO WORK",
+    "LAHORE, PK",
+    "AVAILABLE FOR FREELANCE",
+    "BUILD WITH ME",
+    "GMT+5",
+    "REPLY WITHIN 24HRS",
+  ];
+
+  const content = (
+    <div className="flex items-center gap-6 pr-6">
+      {items.map((item, i) => (
+        <span key={i} className="flex items-center gap-6">
+          <span style={{ color: "var(--amber)" }}>●</span>
+          <span>{item}</span>
+        </span>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="relative mx-auto max-w-5xl px-4 pt-32 pb-20">
-      <Hero3D variant="torusknot" className="absolute top-20 right-0 -z-10 hidden h-96 w-96 opacity-40 md:block" />
-      <h1 className="text-4xl font-bold text-white md:text-5xl">
-        Get in <span className="gradient-text">Touch</span>
-      </h1>
-      <p className="mt-3 max-w-xl text-zinc-400">
-        Have a question, a project idea or just want to say hi? My inbox is always open.
-      </p>
-
-      <div className="mt-12 grid gap-12 md:grid-cols-2">
-        <Reveal>
-          <ContactForm />
-        </Reveal>
-        <Reveal delay={0.15}>
-          <ul className="space-y-4">
-            {socials.map((s) => (
-              <li key={s.label}>
-                <a
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="glass group flex items-center gap-4 rounded-2xl p-4 transition-shadow hover:glow-cyan"
-                >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-accent/20 font-mono text-lg text-cyan-accent transition-transform group-hover:scale-110">
-                    {s.icon}
-                  </span>
-                  <span className="text-zinc-200 group-hover:text-white">{s.label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
+    <div
+      style={{
+        background: "var(--bg-surface)",
+        borderTop: "1px solid var(--border)",
+        padding: "14px 0",
+        overflow: "hidden",
+        userSelect: "none",
+      }}
+    >
+      <div className="animate-marquee-scroll flex text-[12px] font-semibold tracking-[0.15em] font-inter"
+        style={{ color: "var(--text-muted)", whiteSpace: "nowrap" }}
+      >
+        {content}
+        {content}
       </div>
+    </div>
+  );
+}
+
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+export default async function ContactPage() {
+  const settings = await getSiteSettings();
+
+  const socials: SocialItem[] = [
+    settings.socialGithub && {
+      label: "GitHub",
+      href: settings.socialGithub,
+      icon: "github" as const,
+    },
+    settings.socialLinkedin && {
+      label: "LinkedIn",
+      href: settings.socialLinkedin,
+      icon: "linkedin" as const,
+    },
+    settings.socialTwitter && {
+      label: "Twitter / X",
+      href: settings.socialTwitter,
+      icon: "twitter" as const,
+    },
+    settings.socialEmail && {
+      label: "Email",
+      href: `mailto:${settings.socialEmail}`,
+      icon: "email" as const,
+    },
+  ].filter(Boolean) as SocialItem[];
+
+  return (
+    <div
+      style={{
+        background: "var(--bg)",
+        minHeight: "100vh",
+        overflowX: "hidden",
+        position: "relative",
+      }}
+    >
+      {/* ── SECTION 1: HERO ─────────────────────────────────────── */}
+      <section
+        style={{
+          position: "relative",
+          paddingTop: "clamp(6rem, 14vh, 10rem)",
+          paddingLeft: "clamp(1.5rem, 6vw, 6rem)",
+          paddingRight: "clamp(1.5rem, 6vw, 6rem)",
+          paddingBottom: "4rem",
+        }}
+      >
+        {/* Background ghost text */}
+        <span
+          aria-hidden="true"
+          className="contact-ghost-text"
+          style={{
+            position: "absolute",
+            top: "5%",
+            left: "1%",
+            fontFamily: "var(--font-syne), Syne, sans-serif",
+            fontWeight: 800,
+            fontSize: "clamp(3.5rem, 8vw, 8rem)",
+            color: "rgba(255,255,255,0.04)",
+            transform: "rotate(-3deg)",
+            pointerEvents: "none",
+            userSelect: "none",
+            whiteSpace: "nowrap",
+            zIndex: 0,
+            lineHeight: 1,
+          }}
+        >
+          DON&apos;T BE SHY.
+        </span>
+
+        {/* Foreground content */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {/* Label */}
+          <p
+            style={{
+              fontFamily: "var(--font-inter), Inter, sans-serif",
+              fontWeight: 600,
+              fontSize: "11px",
+              letterSpacing: "0.2em",
+              color: "var(--green)",
+              marginBottom: "1.5rem",
+            }}
+          >
+            CONTACT
+          </p>
+
+          {/* Stacked heading */}
+          <div
+            className="contact-heading"
+            style={{
+              fontFamily: "var(--font-syne), Syne, sans-serif",
+              fontWeight: 800,
+              fontSize: "clamp(4rem, 10vw, 8rem)",
+              lineHeight: 0.92,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            <div style={{ color: "#fff" }}>Let&apos;s</div>
+            <div
+              className="contact-build-offset"
+              style={{
+                color: "var(--amber)",
+                transform: "translateX(4rem)",
+              }}
+            >
+              build
+            </div>
+            <div
+              className="contact-something-offset"
+              style={{ color: "#fff", transform: "translateX(1rem)" }}
+            >
+              something.
+            </div>
+          </div>
+
+          {/* Sub-label */}
+          <p
+            className="contact-sublabel"
+            style={{
+              marginTop: "2rem",
+              marginLeft: "1rem",
+              fontFamily: "var(--font-inter), Inter, sans-serif",
+              fontWeight: 400,
+              fontStyle: "italic",
+              fontSize: "14px",
+              color: "var(--text-muted)",
+              borderLeft: "2px solid var(--amber)",
+              paddingLeft: "1rem",
+            }}
+          >
+            — or just say hi. Either works.
+          </p>
+        </div>
+      </section>
+
+      {/* ── SECTION 2: FORM + SOCIALS ───────────────────────────── */}
+      <section
+        style={{
+          position: "relative",
+          paddingLeft: "clamp(1.5rem, 6vw, 6rem)",
+          paddingRight: "clamp(1.5rem, 6vw, 6rem)",
+          paddingBottom: "6rem",
+        }}
+      >
+        {/* Decorative vertical amber line */}
+        <div
+          aria-hidden="true"
+          className="contact-deco-line"
+          style={{
+            position: "absolute",
+            right: "25%",
+            top: "10%",
+            width: "1px",
+            height: "120px",
+            background: "var(--amber)",
+            opacity: 0.4,
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Decorative crosshair */}
+        <div
+          aria-hidden="true"
+          className="contact-deco-cross"
+          style={{
+            position: "absolute",
+            left: "5%",
+            bottom: "30%",
+            color: "var(--green)",
+            opacity: 0.3,
+            fontSize: "2rem",
+            fontFamily: "var(--font-syne), Syne, sans-serif",
+            fontWeight: 700,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        >
+          +
+        </div>
+
+        {/* Decorative amber bar */}
+        <div
+          aria-hidden="true"
+          className="contact-deco-bar"
+          style={{
+            position: "absolute",
+            right: "10%",
+            bottom: "20%",
+            width: "40px",
+            height: "6px",
+            background: "var(--amber)",
+            opacity: 0.5,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          className="contact-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "60% 40%",
+            gap: "5rem",
+            alignItems: "start",
+          }}
+        >
+          {/* ── LEFT: FORM ─────────────────────────────────────── */}
+          <div>
+            <ContactForm />
+          </div>
+
+          {/* ── RIGHT: SOCIALS ─────────────────────────────────── */}
+          <div className="contact-right-col" style={{ position: "relative", overflow: "hidden", maxWidth: "100%", paddingRight: "2rem" }}>
+            {/* Ghost initials */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                right: "-2rem",
+                top: "-2rem",
+                width: "20vw",
+                height: "20vw",
+                opacity: 0.03,
+                transform: "rotate(12deg)",
+                pointerEvents: "none",
+                userSelect: "none",
+                zIndex: 0,
+              }}
+            >
+              <img
+                src="/logo.svg"
+                alt="Hanan Bhatti Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </div>
+
+            {/* Social links */}
+            <div style={{ position: "relative", zIndex: 1 }}>
+              {socials.map((s) => (
+                <SocialRow key={s.label} {...s} />
+              ))}
+            </div>
+
+            {/* Location info */}
+            <div style={{ marginTop: "1.5rem", position: "relative", zIndex: 1 }}>
+              <p
+                style={{
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
+                  fontWeight: 400,
+                  fontSize: "12px",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Based in Lahore, Pakistan
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
+                  fontWeight: 400,
+                  fontSize: "11px",
+                  color: "rgba(255,255,255,0.3)",
+                  marginTop: "4px",
+                }}
+              >
+                GMT+5 · Usually awake at 2am
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 3: MARQUEE ──────────────────────────────────── */}
+      <ContactMarquee />
+
+      {/* ── RESPONSIVE STYLES ───────────────────────────────────── */}
+      <style>{`
+        /* ── Mobile (<768px) ─────────────────────────── */
+        @media (max-width: 767px) {
+
+          /* ghost background text: smaller + no bleed */
+          .contact-ghost-text {
+            font-size: clamp(2rem, 11vw, 4rem) !important;
+            left: 0 !important;
+            top: 3% !important;
+          }
+
+          /* hero heading: tighter size */
+          .contact-heading {
+            font-size: clamp(3rem, 13vw, 5rem) !important;
+          }
+
+          /* remove "build" and "something." horizontal offsets */
+          .contact-build-offset {
+            transform: translateX(0) !important;
+          }
+          .contact-something-offset {
+            transform: translateX(0) !important;
+          }
+
+          /* sub-label: remove left margin so it doesn't push off edge */
+          .contact-sublabel {
+            margin-left: 0 !important;
+          }
+
+          /* switch to single column */
+          .contact-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2.5rem !important;
+          }
+
+          /* right column: no extra padding-right on mobile */
+          .contact-right-col {
+            padding-right: 0 !important;
+          }
+
+          /* hide purely decorative elements */
+          .contact-deco-line,
+          .contact-deco-cross,
+          .contact-deco-bar {
+            display: none !important;
+          }
+        }
+
+        /* ── Tablet (768px – 1023px) ─────────────────── */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .contact-grid {
+            grid-template-columns: 58% 42% !important;
+            gap: 3rem !important;
+          }
+          .contact-heading {
+            font-size: clamp(3.5rem, 8vw, 6rem) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

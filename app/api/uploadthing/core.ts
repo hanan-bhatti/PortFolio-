@@ -12,7 +12,17 @@ export const fileRouter = {
       return { user: session.user.email ?? "admin" };
     })
     .onUploadComplete(({ file }) => {
-      return { url: file.url };
+      return { url: file.ufsUrl };
+    }),
+
+  photoUploader: f({ image: { maxFileSize: "16MB", maxFileCount: 20 } })
+    .middleware(async () => {
+      const session = await auth();
+      if (!session?.user) throw new UploadThingError("Unauthorized");
+      return { user: session.user.email ?? "admin" };
+    })
+    .onUploadComplete(({ file }) => {
+      return { url: file.ufsUrl };
     }),
 } satisfies FileRouter;
 

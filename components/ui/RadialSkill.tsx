@@ -28,8 +28,8 @@ export default function RadialSkill({ name, level }: { name: string; level: numb
         />
         <defs>
           <linearGradient id="skill-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#06b6d4" />
+            <stop offset="0%" stopColor="var(--color-indigo-accent)" />
+            <stop offset="100%" stopColor="var(--color-cyan-accent)" />
           </linearGradient>
         </defs>
       </svg>

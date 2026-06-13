@@ -33,6 +33,7 @@ model Project {
   coverImage  String?
   featured    Boolean  @default(false)
   order       Int      @default(0)
+  resumeBullets String?  @db.Text
   createdAt   DateTime @default(now())
 }
 
@@ -58,17 +59,132 @@ model Experience {
 }
 
 model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String
-  message   String   @db.Text
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  subject     String
+  message     String   @db.Text
+  read        Boolean  @default(false)
+  isAdminReply Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  visitorId   String?
+  visitor     Visitor? @relation(fields: [visitorId], references: [id], onDelete: SetNull)
 }
 
 model SiteSettings {
   id    String @id @default(cuid())
   key   String @unique
   value String @db.Text
+}
+
+model Visitor {
+  id          String   @id @default(cuid())
+  fingerprint String   @unique  // hash of IP + userAgent
+  country     String?
+  city        String?
+  device      String?  // "mobile" | "desktop" | "tablet"
+  browser     String?
+  os          String?
+  firstSeen   DateTime @default(now())
+  lastSeen    DateTime @updatedAt
+  visits      Int      @default(1)
+  consentType String   @default("essential") // "essential" | "all"
+  
+  pageViews   PageView[]
+  formSubmissions ContactMessage[]
+}
+
+model PageView {
+  id            String   @id @default(cuid())
+  visitorId     String
+  visitor       Visitor  @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  path          String   // e.g. "/projects/authn"
+  referrer      String?  // e.g. "https://google.com"
+  duration      Int?     // seconds spent on page
+  timestamp     DateTime @default(now())
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  utmContent    String?
+  utmTerm       String?
+  trafficSource String?
+}
+
+model ResumeSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+}
+
+model Education {
+  id          String   @id @default(cuid())
+  degree      String
+  institution String
+  field       String?
+  startYear   String
+  endYear     String?
+  current     Boolean  @default(false)
+  description String?  @db.Text
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Certification {
+  id        String   @id @default(cuid())
+  name      String
+  issuer    String
+  year      String?
+  url       String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model ResumeDownload {
+  id          String   @id @default(cuid())
+  visitorIp   String?
+  country     String?
+  city        String?
+  userAgent   String?
+  downloadedAt DateTime @default(now())
+}
+
+model Photo {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  imageUrl    String
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  exif_data   Json?    @db.JsonB
+  createdAt   DateTime @default(now())
+}
+
+model AdminUser {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  passwordHash     String
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean  @default(false)
+  resetToken       String?  @unique
+  resetTokenExpiry DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  sessions         AdminSession[]
+}
+
+model AdminSession {
+  id          String   @id @default(cuid())
+  userId      String
+  user        AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token       String   @unique
+  ipAddress   String?
+  userAgent   String?
+  deviceType  String?
+  browser     String?
+  os          String?
+  country     String?
+  city        String?
+  active      Boolean  @default(true)
+  lastUsedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
 }

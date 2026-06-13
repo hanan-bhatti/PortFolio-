@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { readingTime } from "@/lib/utils";
-import Hero3D from "@/components/3d/Hero3D";
 import BlogIndex from "@/components/blog/BlogIndex";
 
 export const dynamic = "force-dynamic";
@@ -19,9 +18,16 @@ export default async function BlogPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pt-32 pb-20">
-      <div className="relative mb-12 flex h-40 items-center justify-center md:h-56">
-        <Hero3D variant="blogtext" className="absolute inset-0 hidden md:block" />
-        <h1 className="text-5xl font-bold gradient-text md:hidden">Blog</h1>
+      <div className="relative mb-12 flex flex-col items-start text-left">
+        <span className="font-inter font-semibold text-[11px] tracking-[0.2em] text-text-muted mb-4 uppercase">
+          WRITING
+        </span>
+        <h1 className="font-syne font-extrabold text-[clamp(3rem,7vw,5.5rem)] leading-none text-white uppercase">
+          The <span className="text-amber">Blog</span>
+        </h1>
+        <p className="mt-4 font-inter font-normal text-[14px] text-text-muted max-w-[480px]">
+          Articles on web development, software engineering, and modern tech.
+        </p>
       </div>
       <BlogIndex
         posts={posts.map((post) => ({

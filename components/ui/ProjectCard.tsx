@@ -13,41 +13,82 @@ export interface ProjectCardData {
 
 export default function ProjectCard({ project }: { project: ProjectCardData }) {
   return (
-    <div className="glass group relative overflow-hidden rounded-2xl transition-shadow hover:glow-indigo">
-      <div className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-indigo-accent/20 blur-3xl" />
+    <div className="bg-bg-surface border border-border overflow-hidden rounded-none transition-all duration-200 hover:border-amber hover:-translate-y-1 flex flex-col justify-between h-full">
       <Link href={`/projects/${project.slug}`} className="block">
-        <div className="relative h-44 w-full bg-surface-light">
+        {/* Cover Image Area */}
+        <div className="relative h-[220px] w-full overflow-hidden bg-bg-elevated">
           {project.coverImage ? (
-            <Image src={project.coverImage} alt={project.title} fill className="object-cover" />
+            <Image
+              src={project.coverImage}
+              alt={project.title}
+              fill
+              className="object-cover grayscale-[20%]"
+            />
           ) : (
-            <div className="flex h-full items-center justify-center text-4xl font-bold text-white/10">
+            <div className="flex h-full w-full items-center justify-center bg-bg-elevated text-4xl font-bold text-white/10 uppercase font-syne">
               {project.title.charAt(0)}
             </div>
           )}
-        </div>
-        <div className="p-5">
-          <h3 className="text-lg font-semibold text-white group-hover:text-cyan-accent">{project.title}</h3>
-          <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{project.description}</p>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {project.techStack.map((tech) => (
-              <li key={tech} className="rounded-full bg-indigo-accent/15 px-2.5 py-0.5 text-xs text-indigo-300">
-                {tech}
-              </li>
-            ))}
-          </ul>
+
+          {/* Dark Gradient Overlay */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{
+              background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+
+          {/* Project Info on Top of Gradient */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 z-20 flex flex-col gap-1 text-left">
+            <h3 className="font-syne font-bold text-[1.1rem] text-white">
+              {project.title}
+            </h3>
+            <p className="font-inter font-normal text-[12px] text-white/60 truncate">
+              {project.description}
+            </p>
+          </div>
         </div>
       </Link>
-      <div className="flex gap-4 border-t border-white/5 px-5 py-3">
-        {project.liveUrl ? (
-          <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-accent hover:underline">
-            Live ↗
-          </a>
-        ) : null}
-        {project.githubUrl ? (
-          <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-400 hover:text-white hover:underline">
-            GitHub ↗
-          </a>
-        ) : null}
+
+      {/* Below Image Area */}
+      <div className="p-4 flex flex-col justify-between flex-grow">
+        {/* Tech tags */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.techStack.map((tech) => (
+            <span
+              key={tech}
+              className="font-inter font-medium text-[11px] text-green border border-green-dim px-[10px] py-[3px] tracking-[0.08em] whitespace-nowrap"
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+
+        {/* Bottom Row */}
+        <div className="flex justify-between items-center mt-auto border-t border-border/40 pt-3">
+          {project.githubUrl ? (
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-inter font-medium text-[12px] text-text-muted hover:text-amber transition-colors duration-200"
+            >
+              GitHub ↗
+            </a>
+          ) : (
+            <span />
+          )}
+          {project.liveUrl && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-inter font-medium text-[12px] text-amber hover:underline transition-colors duration-200"
+            >
+              Live Demo ↗
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

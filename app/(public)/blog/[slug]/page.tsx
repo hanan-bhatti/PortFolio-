@@ -41,6 +41,18 @@ export default async function BlogPostPage({ params }: Props) {
 
   const { html, toc } = renderPostContent(post.content);
 
+  // Fetch all published posts to determine prev/next navigation
+  const allPosts = await prisma.post.findMany({
+    where: { published: true },
+    select: { slug: true, title: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const currentIndex = allPosts.findIndex((p) => p.slug === slug);
+  const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+  const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+  const showNav = allPosts.length > 1;
+
   const related = await prisma.post.findMany({
     where: {
       published: true,
@@ -52,69 +64,116 @@ export default async function BlogPostPage({ params }: Props) {
   });
 
   return (
-    <article className="pb-20">
-      {post.coverImage ? (
-        <ParallaxCover src={post.coverImage} alt={post.title} />
-      ) : (
-        <div className="h-32" />
-      )}
-
-      <div className="mx-auto max-w-6xl px-4">
-        <header className="mx-auto max-w-3xl pt-10">
-          <Link href="/blog" className="text-sm text-cyan-accent hover:underline">
+    <div className="min-h-screen bg-bg w-full flex flex-col justify-between" style={{ background: "#0a0a0a" }}>
+      <article className="w-full flex-grow pb-20">
+        {/* Cover image or fallback hero */}
+        <div className="relative w-full">
+          {post.coverImage ? (
+            <ParallaxCover src={post.coverImage} alt={post.title} />
+          ) : (
+            <div
+              className="w-full h-[200px] md:h-[300px] relative border-b border-border"
+              style={{
+                backgroundColor: "var(--bg-elevated)",
+                backgroundImage: `
+                  linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+                `,
+                backgroundSize: "30px 30px",
+              }}
+            />
+          )}
+          <Link
+            href="/blog"
+            className="absolute top-6 left-[max(2rem,5vw)] z-10 font-inter font-medium text-[13px] text-white/70 hover:text-amber transition-colors duration-200 flex items-center justify-center min-h-[44px] px-5 py-3 md:min-h-0 md:px-0 md:py-0"
+          >
             ← Back to Blog
           </Link>
-          <h1 className="mt-4 text-4xl font-bold text-white md:text-5xl">{post.title}</h1>
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
-            <span>{formatDate(post.createdAt)}</span>
-            <span>·</span>
-            <span>{readingTime(post.content)} min read</span>
-            <span>·</span>
-            <span>{post.views + 1} views</span>
-          </div>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <li key={tag} className="rounded-full bg-cyan-accent/10 px-2.5 py-0.5 text-xs text-cyan-300">
-                #{tag}
-              </li>
-            ))}
-          </ul>
-        </header>
-
-        <div className="mt-10 flex gap-10">
-          <div
-            className="prose-blog mx-auto max-w-3xl min-w-0 flex-1"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-          <aside className="w-64 shrink-0">
-            <Toc items={toc} />
-          </aside>
         </div>
 
-        {related.length > 0 && (
-          <section className="mx-auto mt-20 max-w-5xl">
-            <h2 className="mb-6 text-2xl font-bold text-white">
-              Related <span className="gradient-text">Posts</span>
-            </h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((r) => (
-                <PostCard
-                  key={r.id}
-                  post={{
-                    slug: r.slug,
-                    title: r.title,
-                    excerpt: r.excerpt,
-                    coverImage: r.coverImage,
-                    tags: r.tags,
-                    createdAt: r.createdAt.toISOString(),
-                    readMins: readingTime(r.content),
-                  }}
-                />
+        <div className="mx-auto px-5 md:px-4 w-full max-w-full md:max-w-6xl break-words [overflow-wrap:anywhere] [word-break:break-word]">
+          <header className="mx-auto max-w-3xl pt-10 w-full">
+            <h1 className="mt-4 text-[clamp(1.8rem,6vw,3rem)] md:text-[clamp(2.5rem,5vw,4.5rem)] font-bold text-white leading-tight w-full max-w-full">
+              {post.title}
+            </h1>
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
+              <span>{formatDate(post.createdAt)}</span>
+              <span>·</span>
+              <span>{readingTime(post.content)} min read</span>
+              <span>·</span>
+              <span>{post.views + 1} views</span>
+            </div>
+            
+            {/* Tags - restyled per user request */}
+            <div className="mt-4 flex flex-wrap gap-2 justify-start">
+              {post.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="font-inter font-semibold text-[11px] text-green border border-green-dim px-[10px] py-[3px] tracking-[0.08em] whitespace-nowrap bg-transparent uppercase"
+                >
+                  {tag}
+                </span>
               ))}
             </div>
-          </section>
-        )}
-      </div>
-    </article>
+          </header>
+
+          <div className="mt-10 grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10 w-full max-w-full">
+            <div
+              className="prose-blog w-full max-w-full lg:max-w-3xl min-w-0"
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+            <aside className="hidden lg:block w-60 shrink-0">
+              <Toc items={toc} />
+            </aside>
+          </div>
+
+          {related.length > 0 && (
+            <section className="mx-auto mt-20 max-w-5xl">
+              <h2 className="mb-6 text-2xl font-bold text-white">
+                Related <span className="gradient-text">Posts</span>
+              </h2>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {related.map((r) => (
+                  <PostCard
+                    key={r.id}
+                    post={{
+                      slug: r.slug,
+                      title: r.title,
+                      excerpt: r.excerpt,
+                      coverImage: r.coverImage,
+                      tags: r.tags,
+                      createdAt: r.createdAt.toISOString(),
+                      readMins: readingTime(r.content),
+                    }}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </article>
+
+      {/* Bottom Navigation */}
+      {showNav && (prevPost || nextPost) && (
+        <nav className="w-full border-t border-border py-8 px-[max(2rem,5vw)] flex justify-between items-center bg-transparent mt-20">
+          {prevPost ? (
+            <Link
+              href={`/blog/${prevPost.slug}`}
+              className="font-inter font-medium text-[13px] text-text-muted hover:text-amber transition-colors duration-200"
+            >
+              ← Previous Post
+            </Link>
+          ) : null}
+          {nextPost ? (
+            <Link
+              href={`/blog/${nextPost.slug}`}
+              className="font-inter font-medium text-[13px] text-text-muted hover:text-amber transition-colors duration-200 ml-auto"
+            >
+              Next Post →
+            </Link>
+          ) : null}
+        </nav>
+      )}
+    </div>
   );
 }
