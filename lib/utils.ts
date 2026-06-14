@@ -41,3 +41,27 @@ export function readingTime(tiptapJson: string): number {
   }
   return Math.max(1, Math.ceil(words / 200));
 }
+
+export function extractTwitterUsername(urlOrHandle: string): string {
+  if (!urlOrHandle) return "@hananbhatti_";
+  const clean = urlOrHandle.trim();
+  if (!clean) return "@hananbhatti_";
+
+  try {
+    if (clean.includes("twitter.com") || clean.includes("x.com")) {
+      const url = new URL(clean.startsWith("http") ? clean : `https://${clean}`);
+      const pathParts = url.pathname.split("/").filter(Boolean);
+      if (pathParts[0]) {
+        return `@${pathParts[0]}`;
+      }
+    }
+  } catch {
+    // Ignore URL parsing exceptions
+  }
+
+  if (clean.startsWith("@")) {
+    return clean;
+  }
+
+  return `@${clean}`;
+}

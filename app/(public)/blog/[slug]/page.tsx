@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { formatDate, readingTime } from "@/lib/utils";
+import { formatDate, readingTime, extractTwitterUsername } from "@/lib/utils";
 import { renderPostContent } from "@/lib/tiptap-html";
 import ParallaxCover from "@/components/blog/ParallaxCover";
 import Toc from "@/components/blog/Toc";
 import PostCard from "@/components/blog/PostCard";
+import { getSiteSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +17,17 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await prisma.post.findUnique({ where: { slug } });
+  const [post, settings] = await Promise.all([
+    prisma.post.findUnique({ where: { slug } }),
+    getSiteSettings(),
+  ]);
+  
   if (!post || !post.published) return { title: "Post not found" };
 
+  const twitterHandle = extractTwitterUsername(settings.socialTwitter);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
   const canonicalUrl = `${siteUrl}/blog/${slug}`;
-  const title = `${post.title} | Hanan Bhatti`;
+  const title = `${post.title} | ${settings.siteName}`;
   
   // Truncate description dynamically to fit within 150-160 characters
   let description = post.excerpt;
@@ -42,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       type: "article",
-      siteName: "Hanan Bhatti",
+      siteName: settings.siteName,
       url: canonicalUrl,
       title,
       description,
@@ -62,8 +68,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      site: "@hananbhatti_",
-      creator: "@hananbhatti_",
+      site: twitterHandle,
+      creator: twitterHandle,
       images: [ogImageUrl],
     },
   };

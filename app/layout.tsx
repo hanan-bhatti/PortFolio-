@@ -3,6 +3,8 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Syne, Inter } from "next/font/google";
 import { Toaster } from "sonner";
+import { getSiteSettings } from "@/lib/settings";
+import { extractTwitterUsername } from "@/lib/utils";
 import "./globals.css";
 import "./bones/registry";
 
@@ -22,46 +24,52 @@ export const viewport = {
   themeColor: "#0a0a0a",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site"),
-  title: { default: "Hanan Bhatti — Portfolio", template: "%s | Hanan Bhatti" },
-  description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
-  alternates: {
-    canonical: "https://hanan-bhatti.site",
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Hanan Bhatti",
-    url: "https://hanan-bhatti.site",
-    title: "Hanan Bhatti — Portfolio",
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const twitterHandle = extractTwitterUsername(settings.socialTwitter);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: { default: `${settings.siteName} — Portfolio`, template: `%s | ${settings.siteName}` },
     description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
-    locale: "en_US",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Hanan Bhatti — Portfolio",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Hanan Bhatti — Portfolio",
-    description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
-    creator: "@hananbhatti_",
-    site: "@hananbhatti_",
-    images: ["/og-image.png"],
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    apple: "/apple-icon.png",
-  },
-};
+    alternates: {
+      canonical: siteUrl,
+    },
+    openGraph: {
+      type: "website",
+      siteName: settings.siteName,
+      url: siteUrl,
+      title: `${settings.siteName} — Portfolio`,
+      description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
+      locale: "en_US",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: `${settings.siteName} — Portfolio`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${settings.siteName} — Portfolio`,
+      description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
+      creator: twitterHandle,
+      site: twitterHandle,
+      images: ["/og-image.png"],
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.ico" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon.svg", type: "image/svg+xml" },
+      ],
+      apple: "/apple-icon.png",
+    },
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

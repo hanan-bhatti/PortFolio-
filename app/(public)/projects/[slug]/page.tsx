@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSiteSettings } from "@/lib/settings";
+import { extractTwitterUsername } from "@/lib/utils";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -10,9 +12,14 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = await prisma.project.findUnique({ where: { slug } });
+  const [project, settings] = await Promise.all([
+    prisma.project.findUnique({ where: { slug } }),
+    getSiteSettings(),
+  ]);
+  
   if (!project) return { title: "Project not found" };
 
+  const twitterHandle = extractTwitterUsername(settings.socialTwitter);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
   const canonicalUrl = `${siteUrl}/projects/${slug}`;
   const title = `${project.title} — Open Source Project`;
@@ -31,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       type: "website",
-      siteName: "Hanan Bhatti",
+      siteName: settings.siteName,
       url: canonicalUrl,
       title,
       description,
@@ -49,8 +56,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      site: "@hananbhatti_",
-      creator: "@hananbhatti_",
+      site: twitterHandle,
+      creator: twitterHandle,
       images: [ogImageUrl],
     },
   };
