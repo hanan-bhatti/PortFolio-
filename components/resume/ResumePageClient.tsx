@@ -93,7 +93,7 @@ export default function ResumePageClient({
             useCORS: true,
             letterRendering: true,
           },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+          jsPDF: { unit: "in", format: "a3", orientation: "portrait" },
           pagebreak: { mode: ["css", "legacy"] }
         };
 

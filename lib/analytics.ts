@@ -3,6 +3,13 @@ let visitorId: string | null = null;
 export async function initAnalytics(): Promise<string | null> {
   if (typeof window === "undefined") return null;
 
+  if (visitorId) return visitorId;
+  const cached = sessionStorage.getItem("visitorId");
+  if (cached) {
+    visitorId = cached;
+    return visitorId;
+  }
+
   try {
     const res = await fetch("/api/analytics/identify", {
       method: "POST",
