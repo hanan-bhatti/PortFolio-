@@ -1,7 +1,7 @@
 ---
 type: project
 created: 2026-06-13
-updated: 2026-06-13
+updated: 2026-06-14
 ---
 
 # Technical Decisions
@@ -16,3 +16,11 @@ updated: 2026-06-13
 ## Version Control & Hosting
 - Set primary repository remote (`origin`) to GitHub (`git@github.com:hanan-bhatti/PortFolio-.git`).
 - Renamed the GitLab remote to `gitlab` for archive purposes.
+
+## Client-Side PDF Generation (Resume)
+- Generate the resume PDF entirely client-side using a dynamic import of `html2pdf.js` to avoid browser binary (Chromium) execution overhead and cold starts in Vercel serverless functions.
+- Format the PDF output canvas size as A3 portrait (`format: "a3"` in jsPDF) to allow comprehensive multi-section resume content to fit on exactly one page.
+- Avoid inline flex gaps on structural layout containers; use CSS classes (e.g. `.resume-col`) to easily reset gaps (`gap: 0 !important`) and tighten margins/paddings when printing or generating PDFs.
+
+## Analytics Network Request Caching
+- Cache the visitor ID in memory and check `sessionStorage` inside `initAnalytics` before triggering `/api/analytics/identify` POST requests. This prevents duplicate identify calls on initial page load caused by multiple concurrent client providers mounting.

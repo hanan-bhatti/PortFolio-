@@ -6,3 +6,5 @@
 - [project] 2FA TOTP: standard Base32 secrets and correct 64-bit counter buffers → tech-decisions.md
 - [project] Next.js searchParams: wrap in Suspense boundaries to prevent de-opts → tech-decisions.md
 - [project] Remote repository: set to GitHub, archived GitLab remote as 'gitlab' → tech-decisions.md
+- [project] Client-side PDF: Dynamic import html2pdf.js, single A3 portrait formatting, and class-based spacing → tech-decisions.md
+- [project] Analytics caching: cache visitorId in memory and sessionStorage to prevent duplicate identify calls → tech-decisions.md
