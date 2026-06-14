@@ -7,7 +7,9 @@ export const metadata = { robots: { index: false } };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user) redirect("/admin/login");
+  if (!session?.user?.id || !session?.sessionToken) {
+    redirect("/admin/login");
+  }
 
   const unreadCount = await prisma.contactMessage.count({ where: { read: false } });
 

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { getSiteSettings } from "@/lib/settings";
 import PageHeader from "@/components/admin/PageHeader";
 import SettingsForm from "@/components/admin/SettingsForm";
@@ -13,7 +14,7 @@ export default async function AdminSettingsPage() {
   const session = await auth();
   
   if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+    redirect("/admin/login");
   }
 
   const user = await prisma.adminUser.findUnique({
