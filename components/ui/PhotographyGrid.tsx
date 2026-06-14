@@ -44,7 +44,11 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
               {/* A standard <img> tag is optimal for pure CSS masonry columns because it automatically scales the height proportionally based on the source image, making column layouts perfect without predefined heights! */}
               {/* Let's use a standard img tag with tailwind and lazy loading! */}
               <img
-                src={photo.imageUrl}
+                src={
+                  photo.imageUrl.startsWith("http") || (photo.imageUrl.startsWith("/") && !photo.imageUrl.startsWith("/_next"))
+                    ? `/_next/image?url=${encodeURIComponent(photo.imageUrl)}&w=640&q=75`
+                    : photo.imageUrl
+                }
                 alt={photo.title ?? "Photograph"}
                 loading="lazy"
                 className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"

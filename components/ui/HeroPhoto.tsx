@@ -167,6 +167,15 @@ export default function HeroPhoto({ src, alt }: HeroPhotoProps) {
 
   // Load image with fallback retry for CORS/CDN compatibility
   useEffect(() => {
+    // Route through Next.js image optimization endpoint to resize and compress the image
+    const isLocalPublic = src.startsWith("/") && !src.startsWith("/_next");
+    const isRemote = src.startsWith("http");
+    
+    let optimizedSrc = src;
+    if (isLocalPublic || isRemote) {
+      optimizedSrc = `/_next/image?url=${encodeURIComponent(src)}&w=640&q=75`;
+    }
+
     const img = new window.Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
@@ -180,9 +189,9 @@ export default function HeroPhoto({ src, alt }: HeroPhotoProps) {
         imgRef.current = retryImg;
         triggerRender();
       };
-      retryImg.src = src;
+      retryImg.src = optimizedSrc;
     };
-    img.src = src;
+    img.src = optimizedSrc;
   }, [src, triggerRender]);
 
   // Track size changes

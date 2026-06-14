@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import SkillIcon from "@/components/ui/SkillIcon";
 import { FiMail, FiPhone, FiMapPin, FiDownload } from "react-icons/fi";
 
@@ -147,17 +148,24 @@ export default function ResumePageClient({
             }}
           >
             {photoUrl && (
-              <img
-                src={photoUrl}
-                alt={settings.resume_name}
+              <div
                 style={{
                   width: 80,
                   height: 80,
-                  objectFit: "cover",
                   flexShrink: 0,
+                  position: "relative",
                   border: "3px solid #F59E0B",
                 }}
-              />
+              >
+                <Image
+                  src={photoUrl}
+                  alt={settings.resume_name || "Profile Photo"}
+                  fill
+                  sizes="80px"
+                  priority
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
             )}
             <div style={{ flex: 1 }}>
               <h1
