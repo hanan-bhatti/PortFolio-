@@ -322,7 +322,7 @@ export default function ResumePageClient({
           {/* Two-Column Grid for sections */}
           <div className="resume-columns" style={{ marginTop: "2rem" }}>
             {/* Left Column: Work Experience & Projects */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            <div className="resume-col">
               {/* Experience */}
               {experience.length > 0 && (
                 <ResumeSection title="Work Experience">
@@ -400,7 +400,7 @@ export default function ResumePageClient({
             </div>
 
             {/* Right Column: Skills, Education, Certifications */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            <div className="resume-col">
               {/* Skills */}
               {skills.length > 0 && (
                 <ResumeSection title="Skills">
@@ -527,6 +527,11 @@ export default function ResumePageClient({
           grid-template-columns: 1.65fr 1fr;
           gap: 2.5rem;
         }
+        .resume-col {
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+        }
         @media (max-width: 768px) {
           .resume-columns {
             grid-template-columns: 1fr;
@@ -561,6 +566,10 @@ export default function ResumePageClient({
 
         /* Styles applied during print media OR during HTML2PDF compilation */
         @media print, .html2pdf-printing {
+          .resume-col {
+            gap: 0 !important;
+          }
+
           /* Ensure wrapping containers don't add fixed heights, background, or spacing */
           .w-full.min-h-screen,
           div[style*="linear-gradient"],
@@ -610,8 +619,8 @@ export default function ResumePageClient({
           .resume-section {
             break-inside: avoid !important;
             page-break-inside: avoid !important;
-            margin-bottom: 1.5rem !important;
-            padding-bottom: 1.5rem !important;
+            margin-bottom: 1rem !important;
+            padding-bottom: 1rem !important;
           }
 
           .resume-entry {
