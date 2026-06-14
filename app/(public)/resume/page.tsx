@@ -4,16 +4,51 @@ import { getResumeSettings } from "@/lib/resume";
 import { getSiteSettings } from "@/lib/settings";
 import ResumePageClient from "@/components/resume/ResumePageClient";
 import type { Metadata } from "next";
+import { extractTwitterUsername } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [rs, ss] = await Promise.all([getResumeSettings(), getSiteSettings()]);
   const name = rs.resume_name || ss.siteName;
-  const title = rs.resume_title || ss.tagline;
+  const titleText = rs.resume_title || ss.tagline;
+  const description = rs.resume_summary || `Resume of ${name}, ${titleText}`;
+
+  const twitterHandle = extractTwitterUsername(ss.socialTwitter);
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
+  const canonicalUrl = `${siteUrl}/resume`;
+  const pageTitle = `Resume — ${name}`;
+
   return {
-    title: `Resume — ${name}`,
-    description: rs.resume_summary || `Resume of ${name}, ${title}`,
+    title: pageTitle,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "website",
+      siteName: ss.siteName,
+      url: canonicalUrl,
+      title: pageTitle,
+      description,
+      locale: "en_US",
+      images: [
+        {
+          url: `${siteUrl}/_next/image?url=${encodeURIComponent("/og-image.png")}&w=1200&q=75`,
+          width: 1200,
+          height: 630,
+          alt: `${name} — Resume`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description,
+      site: twitterHandle,
+      creator: twitterHandle,
+      images: [`${siteUrl}/_next/image?url=${encodeURIComponent("/og-image.png")}&w=1200&q=75`],
+    },
   };
 }
 

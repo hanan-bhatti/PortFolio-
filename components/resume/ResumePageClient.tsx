@@ -140,7 +140,7 @@ export default function ResumePageClient({
               />
             )}
             <div style={{ flex: 1 }}>
-              <p
+              <h1
                 style={{
                   fontFamily: "var(--font-syne), Syne, sans-serif",
                   fontSize: "clamp(1.2rem, 3vw, 1.35rem)",
@@ -152,7 +152,7 @@ export default function ResumePageClient({
                 }}
               >
                 {settings.resume_name || "Your Name"}
-              </p>
+              </h1>
               {settings.resume_title && (
                 <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#F59E0B", margin: "0 0 12px", fontWeight: 650 }}>
                   {settings.resume_title}

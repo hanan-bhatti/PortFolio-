@@ -141,7 +141,7 @@ export default async function ContactPage() {
           </p>
 
           {/* Stacked heading */}
-          <div
+          <h1
             className="contact-heading"
             style={{
               fontFamily: "var(--font-syne), Syne, sans-serif",
@@ -167,7 +167,7 @@ export default async function ContactPage() {
             >
               something.
             </div>
-          </div>
+          </h1>
 
           {/* Sub-label */}
           <p
