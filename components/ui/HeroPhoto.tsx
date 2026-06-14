@@ -170,9 +170,10 @@ export default function HeroPhoto({ src, alt }: HeroPhotoProps) {
     // Route through Next.js image optimization endpoint to resize and compress the image
     const isLocalPublic = src.startsWith("/") && !src.startsWith("/_next");
     const isRemote = src.startsWith("http");
+    const isDev = process.env.NODE_ENV === "development";
     
     let optimizedSrc = src;
-    if (isLocalPublic || isRemote) {
+    if (!isDev && (isLocalPublic || isRemote)) {
       optimizedSrc = `/_next/image?url=${encodeURIComponent(src)}&w=640&q=75`;
     }
 

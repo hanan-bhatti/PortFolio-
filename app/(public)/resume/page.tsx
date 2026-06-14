@@ -53,8 +53,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ResumePage() {
-  const [settings, education, certifications, experience, skills, projects] = await Promise.all([
+  const [settings, siteSettings, education, certifications, experience, skills, projects] = await Promise.all([
     getResumeSettings(),
+    getSiteSettings(),
     prisma.education.findMany({ orderBy: [{ order: "asc" }] }),
     prisma.certification.findMany({ orderBy: [{ order: "asc" }] }),
     prisma.experience.findMany({ orderBy: [{ order: "asc" }, { startDate: "desc" }] }),
@@ -70,7 +71,12 @@ export default async function ResumePage() {
 
   return (
     <ResumePageClient
-      settings={settings}
+      settings={{
+        ...settings,
+        social_github: siteSettings.socialGithub || "",
+        social_linkedin: siteSettings.socialLinkedin || "",
+        social_twitter: siteSettings.socialTwitter || "",
+      }}
       education={education}
       certifications={certifications}
       experience={experience.map((e) => ({

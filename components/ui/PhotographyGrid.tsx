@@ -45,7 +45,8 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
               {/* Let's use a standard img tag with tailwind and lazy loading! */}
               <img
                 src={
-                  photo.imageUrl.startsWith("http") || (photo.imageUrl.startsWith("/") && !photo.imageUrl.startsWith("/_next"))
+                  process.env.NODE_ENV !== "development" &&
+                  (photo.imageUrl.startsWith("http") || (photo.imageUrl.startsWith("/") && !photo.imageUrl.startsWith("/_next")))
                     ? `/_next/image?url=${encodeURIComponent(photo.imageUrl)}&w=640&q=75`
                     : photo.imageUrl
                 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import SkillIcon from "@/components/ui/SkillIcon";
-import { FiMail, FiPhone, FiMapPin, FiDownload } from "react-icons/fi";
+import { FiMail, FiPhone, FiMapPin, FiDownload, FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 
 type Settings = Record<string, string>;
 type EducationItem = {
@@ -63,6 +63,9 @@ export default function ResumePageClient({
   projects,
   totalDownloads,
 }: Props) {
+  const gitDisplay = settings.social_github ? "github.com/" + settings.social_github.replace(/https?:\/\/(www\.)?github\.com\//i, "").replace(/\/$/, "") : "";
+  const liDisplay = settings.social_linkedin ? "linkedin.com/in/" + settings.social_linkedin.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//i, "").replace(/\/$/, "") : "";
+  const twDisplay = settings.social_twitter ? "@" + settings.social_twitter.replace(/https?:\/\/(www\.)?(twitter|x)\.com\//i, "").replace(/\/$/, "") : "";
   const [downloading, setDownloading] = useState(false);
   const [activeDownloadId, setActiveDownloadId] = useState<string | null>(null);
   const photoUrl = settings.resume_photo_url || settings.resume_hero_photo_url || "";
@@ -92,9 +95,17 @@ export default function ResumePageClient({
       if (res.ok) {
         const data = await res.json();
         downloadId = data.downloadId || null;
+      } else {
+        throw new Error(`Server returned status ${res.status}`);
       }
     } catch (err) {
       console.error("Failed to register download:", err);
+      // Fallback ID generation so the verification link is still printed on PDF
+      if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        downloadId = crypto.randomUUID();
+      } else {
+        downloadId = `fallback-${Date.now()}`;
+      }
     } finally {
       setDownloading(false);
       if (downloadId) {
@@ -214,6 +225,42 @@ export default function ResumePageClient({
                     <FiMapPin size={14} style={{ color: "var(--green)" }} />
                     <span>{settings.resume_location}</span>
                   </span>
+                )}
+                {settings.social_github && (
+                  <a 
+                    href={settings.social_github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#555555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    className="hover:text-amber transition-colors"
+                  >
+                    <FiGithub size={14} style={{ color: "var(--green)" }} />
+                    <span>{gitDisplay}</span>
+                  </a>
+                )}
+                {settings.social_linkedin && (
+                  <a 
+                    href={settings.social_linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#555555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    className="hover:text-amber transition-colors"
+                  >
+                    <FiLinkedin size={14} style={{ color: "var(--green)" }} />
+                    <span>{liDisplay}</span>
+                  </a>
+                )}
+                {settings.social_twitter && (
+                  <a 
+                    href={settings.social_twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#555555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    className="hover:text-amber transition-colors"
+                  >
+                    <FiTwitter size={14} style={{ color: "var(--green)" }} />
+                    <span>{twDisplay}</span>
+                  </a>
                 )}
               </div>
             </div>
