@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SkillIcon from "@/components/ui/SkillIcon";
 import { FiMail, FiPhone, FiMapPin, FiDownload } from "react-icons/fi";
 
@@ -63,18 +63,38 @@ export default function ResumePageClient({
   totalDownloads,
 }: Props) {
   const [downloading, setDownloading] = useState(false);
+  const [activeDownloadId, setActiveDownloadId] = useState<string | null>(null);
   const photoUrl = settings.resume_photo_url || settings.resume_hero_photo_url || "";
   const skillGroups = groupSkills(skills);
 
+  useEffect(() => {
+    if (activeDownloadId) {
+      const printTimer = setTimeout(() => {
+        window.print();
+        setActiveDownloadId(null);
+      }, 150);
+      return () => clearTimeout(printTimer);
+    }
+  }, [activeDownloadId]);
+
   const handleDownload = async () => {
     setDownloading(true);
+    let downloadId: string | null = null;
     try {
-      await fetch("/api/resume/download", { method: "POST" });
-    } catch {
-      // best-effort
+      const res = await fetch("/api/resume/download", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        downloadId = data.downloadId || null;
+      }
+    } catch (err) {
+      console.error("Failed to register download:", err);
     } finally {
       setDownloading(false);
-      window.print();
+      if (downloadId) {
+        setActiveDownloadId(downloadId);
+      } else {
+        window.print();
+      }
     }
   };
 
@@ -361,12 +381,39 @@ export default function ResumePageClient({
               )}
             </div>
           </div>
+
+          {/* Verification footer (prints only) */}
+          {activeDownloadId && (
+            <div
+              className="print-only"
+              style={{
+                marginTop: "2.5rem",
+                paddingTop: "1.2rem",
+                borderTop: "1px dashed #d1d5db",
+                fontSize: 11,
+                color: "#4b5563",
+                fontFamily: "Inter, sans-serif",
+                textAlign: "center",
+              }}
+            >
+              Verify the authenticity of this resume at:{" "}
+              <a
+                href={`${typeof window !== "undefined" ? window.location.origin : "https://hanan-bhatti.site"}/verify/${activeDownloadId}`}
+                style={{ color: "#D97706", textDecoration: "underline", fontWeight: 600 }}
+              >
+                {`${typeof window !== "undefined" ? window.location.origin : "https://hanan-bhatti.site"}/verify/${activeDownloadId}`}
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>
 
       {/* ─── Screen & Print Styles ─── */}
       <style>{`
+        .print-only {
+          display: none;
+        }
         .resume-columns {
           display: grid;
           grid-template-columns: 1.65fr 1fr;
@@ -462,6 +509,10 @@ export default function ResumePageClient({
             margin-bottom: 0 !important;
             padding-bottom: 0 !important;
             border-bottom: none !important;
+          }
+
+          .print-only {
+            display: block !important;
           }
         }
       `}</style>

@@ -18,9 +18,36 @@ export default async function VerifyPage({ params }: { params: Promise<{ downloa
   const record = await prisma.resumeDownload.findUnique({ where: { id: downloadId } });
   if (!record) notFound();
 
-  const rs = await getResumeSettings();
+  const [rs, latestEdu, latestCert, latestProject] = await Promise.all([
+    getResumeSettings(),
+    prisma.education.findFirst({ orderBy: { createdAt: "desc" } }),
+    prisma.certification.findFirst({ orderBy: { createdAt: "desc" } }),
+    prisma.project.findFirst({ orderBy: { createdAt: "desc" } }),
+  ]);
+
   const name = rs.resume_name || "Portfolio";
   const title = rs.resume_title || "";
+
+  // Check if anything has been updated or created since the download date
+  let isOutdated = false;
+  const downloadTime = new Date(record.downloadedAt).getTime();
+  const bufferMs = 5000; // 5-second buffer to handle download request timing
+
+  let maxDbDate = 0;
+  if (latestEdu) maxDbDate = Math.max(maxDbDate, latestEdu.createdAt.getTime());
+  if (latestCert) maxDbDate = Math.max(maxDbDate, latestCert.createdAt.getTime());
+  if (latestProject) maxDbDate = Math.max(maxDbDate, latestProject.createdAt.getTime());
+
+  if (maxDbDate > downloadTime + bufferMs) {
+    isOutdated = true;
+  }
+
+  if (rs.resume_last_updated) {
+    const lastUpdatedTime = new Date(rs.resume_last_updated).getTime();
+    if (lastUpdatedTime > downloadTime + bufferMs) {
+      isOutdated = true;
+    }
+  }
 
   return (
     <main
@@ -69,6 +96,22 @@ export default async function VerifyPage({ params }: { params: Promise<{ downloa
           />
           VERIFIED DOWNLOAD
         </div>
+
+        {isOutdated && (
+          <div
+            style={{
+              border: "1px solid var(--amber)",
+              background: "rgba(245, 158, 11, 0.05)",
+              padding: "1rem",
+              marginBottom: "1.5rem",
+              color: "var(--amber)",
+              fontSize: 13,
+              lineHeight: 1.5,
+            }}
+          >
+            <strong>⚠️ Outdated Document:</strong> This resume has been updated since it was downloaded. We recommend downloading the latest version from the resume page to ensure you have the most up-to-date details.
+          </div>
+        )}
 
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-0.01em" }}>
           Resume Download Record
