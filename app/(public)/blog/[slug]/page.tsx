@@ -18,16 +18,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await prisma.post.findUnique({ where: { slug } });
   if (!post || !post.published) return { title: "Post not found" };
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
+  const canonicalUrl = `${siteUrl}/blog/${slug}`;
+  const title = `${post.title} | Hanan Bhatti`;
+  
+  // Truncate description dynamically to fit within 150-160 characters
+  let description = post.excerpt;
+  if (description.length > 160) {
+    description = description.slice(0, 157) + "...";
+  }
+
+  // Optimize OG image size and dimensions using Next.js Image Optimizer
+  const ogImageUrl = post.coverImage
+    ? `${siteUrl}/_next/image?url=${encodeURIComponent(post.coverImage)}&w=1200&q=75`
+    : `${siteUrl}/og-image.png`;
+
   return {
-    title: post.title,
-    description: post.excerpt,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       type: "article",
-      title: post.title,
-      description: post.excerpt,
-      images: post.coverImage ? [post.coverImage] : [],
+      siteName: "Hanan Bhatti",
+      url: canonicalUrl,
+      title,
+      description,
+      locale: "en_US",
       publishedTime: post.createdAt.toISOString(),
       tags: post.tags,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${post.title} — ${description.slice(0, 50)}...`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      site: "@hananbhatti_",
+      creator: "@hananbhatti_",
+      images: [ogImageUrl],
     },
   };
 }
@@ -65,6 +102,33 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg w-full flex flex-col justify-between" style={{ background: "#0a0a0a" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": post.title,
+            "description": post.excerpt,
+            "image": post.coverImage || undefined,
+            "datePublished": post.createdAt.toISOString(),
+            "dateModified": post.updatedAt.toISOString(),
+            "author": {
+              "@type": "Person",
+              "name": "Hanan Bhatti",
+              "url": "https://hanan-bhatti.site"
+            },
+            "publisher": {
+              "@type": "Person",
+              "name": "Hanan Bhatti"
+            },
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site"}/blog/${slug}`
+            }
+          }),
+        }}
+      />
       <article className="w-full flex-grow pb-20">
         {/* Cover image or fallback hero */}
         <div className="relative w-full">

@@ -12,13 +12,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = await prisma.project.findUnique({ where: { slug } });
   if (!project) return { title: "Project not found" };
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
+  const canonicalUrl = `${siteUrl}/projects/${slug}`;
+  const title = `${project.title} — Open Source Project`;
+  const description = project.description;
+
+  // Optimize OG image size and dimensions using Next.js Image Optimizer
+  const ogImageUrl = project.coverImage
+    ? `${siteUrl}/_next/image?url=${encodeURIComponent(project.coverImage)}&w=1200&q=75`
+    : `${siteUrl}/og-image.png`;
+
   return {
-    title: project.title,
-    description: project.description,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      title: project.title,
-      description: project.description,
-      images: project.coverImage ? [project.coverImage] : [],
+      type: "website",
+      siteName: "Hanan Bhatti",
+      url: canonicalUrl,
+      title,
+      description,
+      locale: "en_US",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${project.title} — ${description.slice(0, 50)}...`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      site: "@hananbhatti_",
+      creator: "@hananbhatti_",
+      images: [ogImageUrl],
     },
   };
 }
@@ -40,6 +73,25 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-bg w-full flex flex-col justify-between" style={{ background: "#0a0a0a" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": project.title,
+            "description": project.description,
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "All",
+            "downloadUrl": project.githubUrl || undefined,
+            "author": {
+              "@type": "Person",
+              "name": "Hanan Bhatti",
+              "url": "https://hanan-bhatti.site"
+            }
+          }),
+        }}
+      />
       {/* Hero Section */}
       <section className="relative w-full h-[60vh] overflow-hidden bg-bg-surface border-b border-border">
         {project.coverImage ? (

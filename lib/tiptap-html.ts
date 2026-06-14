@@ -93,12 +93,20 @@ export function renderPostContent(content: string): { html: string; toc: TocItem
     return `<pre><code${attrs}>${highlighted}</code></pre>`;
   });
 
+  // Shift body headings down by one level to enforce a single H1 on the page
+  html = html.replace(/<(\/?)h([1-4])([^>]*)>/g, (_match, closeSlash, lvl, attrs) => {
+    const nextLvl = Number(lvl) + 1;
+    return `<${closeSlash}h${nextLvl}${attrs}>`;
+  });
+
   const toc: TocItem[] = [];
 
-  html = html.replace(/<h([1-4])([^>]*)>([\s\S]*?)<\/h\1>/g, (_match, lvl: string, attrs: string, inner: string) => {
+  // Parse h2 to h5 for the table of contents
+  html = html.replace(/<h([2-5])([^>]*)>([\s\S]*?)<\/h\1>/g, (_match, lvl: string, attrs: string, inner: string) => {
     const text = inner.replace(/<[^>]+>/g, "").trim();
     const id = `${slugify(text) || "section"}-${toc.length}`;
-    toc.push({ id, text, level: Number(lvl) });
+    // Adjust TOC level back by 1 so the visual indentation in the TOC component is preserved
+    toc.push({ id, text, level: Number(lvl) - 1 });
     return `<h${lvl}${attrs} id="${id}">${inner}</h${lvl}>`;
   });
 
