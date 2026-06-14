@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/ExperienceForm.tsx
+ * @description React component for ExperienceForm.tsx under the admin category.
+ * 
+ * @exports
+ * - ExperienceForm (default): Main React component or function
+ */
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

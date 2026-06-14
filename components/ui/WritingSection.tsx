@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/WritingSection.tsx
+ * @description React component for WritingSection.tsx under the ui category.
+ * 
+ * @exports
+ * - WritingSection (default): Main React component or function
+ */
+
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";

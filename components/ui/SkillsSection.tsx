@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/SkillsSection.tsx
+ * @description React component for SkillsSection.tsx under the ui category.
+ * 
+ * @exports
+ * - SkillsSection (default): Main React component or function
+ */
+
 import SkillIcon from "./SkillIcon";
 
 interface Skill {

@@ -1,3 +1,12 @@
+/**
+ * @file app/api/uploadthing/core.ts
+ * @description Next.js API route handling requests for the core.ts endpoint.
+ * 
+ * @exports
+ * - AppFileRouter: Type/Interface definition
+ * - fileRouter: Constant / Helper
+ */
+
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { auth } from "@/lib/auth";

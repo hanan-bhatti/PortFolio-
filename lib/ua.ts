@@ -1,3 +1,12 @@
+/**
+ * @file lib/ua.ts
+ * @description User-agent parser utility to identify device type, browser, and operating system from a user-agent string.
+ * 
+ * @exports
+ * - ParsedUA: Interface describing the structured user-agent details (deviceType, browser, os)
+ * - parseUserAgent(uaString): Parsed user agent string into device type, browser name, and operating system
+ */
+
 export interface ParsedUA {
   deviceType: "desktop" | "mobile" | "tablet";
   browser: string;

@@ -1,3 +1,12 @@
+/**
+ * @file lib/prisma.ts
+ * @description Instantiates and extends the Prisma Client with custom global hooks.
+ * Automatically touches the 'resume_last_updated' setting when write operations occur on resume-related models.
+ * 
+ * @exports
+ * - prisma: Extended PrismaClient instance containing automated update hooks
+ */
+
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };

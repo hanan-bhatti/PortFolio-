@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/blog/BlogIndex.tsx
+ * @description React component for BlogIndex.tsx under the blog category.
+ * 
+ * @exports
+ * - BlogIndex (default): Main React component or function
+ */
+
 import { useMemo, useState } from "react";
 import PostCard, { type PostCardData } from "@/components/blog/PostCard";
 import { cn } from "@/lib/utils";

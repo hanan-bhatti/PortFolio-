@@ -1,3 +1,12 @@
+/**
+ * @file components/ui/ProjectCard.tsx
+ * @description React component for ProjectCard.tsx under the ui category.
+ * 
+ * @exports
+ * - ProjectCard (default): Main React component or function
+ * - ProjectCardData: Type/Interface definition
+ */
+
 import Image from "next/image";
 import Link from "next/link";
 

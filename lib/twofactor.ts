@@ -1,3 +1,13 @@
+/**
+ * @file lib/twofactor.ts
+ * @description Two-Factor Authentication utility handling Base32 encoding/decoding and TOTP token generation & verification.
+ * 
+ * @exports
+ * - generateTwoFactorSecret(): Generates a cryptographically secure random Base32 string (80 bits entropy)
+ * - generateTOTP(secret, timeStep): Generates a 6-digit TOTP token using HMAC-SHA1 and dynamic truncation
+ * - verifyTOTP(token, secret, timeStep): Validates a 6-digit TOTP token allowing a +/- 1 step drift window
+ */
+
 import crypto from "crypto";
 
 // Base32 Alphabet

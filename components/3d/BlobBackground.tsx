@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/3d/BlobBackground.tsx
+ * @description React component for BlobBackground.tsx under the 3d category.
+ * 
+ * @exports
+ * - BlobBackground (default): Main React component or function
+ */
+
 import { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { MeshDistortMaterial } from "@react-three/drei";

@@ -1,3 +1,12 @@
+/**
+ * @file lib/tiptap-html.ts
+ * @description Services for converting Tiptap JSON content to HTML, applying syntax highlighting, adjusting header levels, and building Tables of Contents (TOC).
+ * 
+ * @exports
+ * - TocItem: Interface representing a Table of Contents heading item
+ * - renderPostContent(content): Parses Tiptap JSON, highlights code blocks, lowers headings (SEO), and populates a TOC
+ */
+
 import { generateHTML } from "@tiptap/html";
 import type { JSONContent } from "@tiptap/core";
 import { baseExtensions, lowlight } from "@/lib/tiptap-extensions";
@@ -80,6 +89,27 @@ export function renderPostContent(content: string): { html: string; toc: TocItem
   }
 
   let html = generateHTML(json, baseExtensions());
+
+  // Rewrite image sources to use Next.js image optimizer and add lazy loading
+  html = html.replace(/<img\s+([^>]*)\b(src=["']([^"']+)["'])([^>]*)>/g, (match, before, srcAttr, src, after) => {
+    // Skip relative URLs, data URLs, or already optimized URLs
+    if (src.startsWith("/") || src.startsWith("data:") || src.includes("_next/image")) {
+      return match;
+    }
+
+    const optimizedSrc = `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=75`;
+    
+    let extraAttrs = "";
+    const combined = before + " " + after;
+    if (!combined.includes("loading=")) {
+      extraAttrs += ' loading="lazy"';
+    }
+    if (!combined.includes("decoding=")) {
+      extraAttrs += ' decoding="async"';
+    }
+
+    return `<img ${before} src="${optimizedSrc}" ${after}${extraAttrs}>`;
+  });
 
   // Apply server-side syntax highlighting to code blocks
   html = html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, attrs: string, codeContent: string) => {

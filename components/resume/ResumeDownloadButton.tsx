@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/resume/ResumeDownloadButton.tsx
+ * @description React component for ResumeDownloadButton.tsx under the resume category.
+ * 
+ * @exports
+ * - ResumeDownloadButton (default): Main React component or function
+ */
+
 import { useState, useEffect } from "react";
 
 export default function ResumeDownloadButton() {

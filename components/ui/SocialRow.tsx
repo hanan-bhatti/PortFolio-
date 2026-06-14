@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * @file components/ui/SocialRow.tsx
+ * @description React component for SocialRow.tsx under the ui category.
+ * 
+ * @exports
+ * - SocialIconKey: Type/Interface definition
+ * - SocialItem: Type/Interface definition
+ * - SocialRow(): Function
+ */
+
 import { SiGithub } from "react-icons/si";
 import { FaLinkedin, FaXTwitter } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";

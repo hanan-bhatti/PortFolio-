@@ -1,3 +1,12 @@
+/**
+ * @file app/admin/(protected)/projects/[id]/edit/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - EditProjectPage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/admin/PageHeader";

@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * @file components/admin/InboxView.tsx
+ * @description React component for InboxView.tsx under the admin category.
+ * 
+ * @exports
+ * - InboxView (default): Main React component or function
+ * - MessageThread: Type/Interface definition
+ * - ThreadMessage: Type/Interface definition
+ */
+
 import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

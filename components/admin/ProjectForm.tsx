@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * @file components/admin/ProjectForm.tsx
+ * @description React component for ProjectForm.tsx under the admin category.
+ * 
+ * @exports
+ * - ProjectForm (default): Main React component or function
+ * - ProjectFormData: Type/Interface definition
+ */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -9,6 +18,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { slugify } from "@/lib/utils";
 import { UploadButton } from "@/lib/uploadthing";
+import { compressImages } from "@/lib/image-compress";
 import { createProjectAction, updateProjectAction } from "@/lib/actions";
 import type { ProjectInput } from "@/lib/validations";
 
@@ -166,11 +176,20 @@ export default function ProjectForm({ project }: { project: ProjectFormData | nu
         ) : null}
         <UploadButton
           endpoint="imageUploader"
+          onBeforeUploadBegin={async (files: File[]) => {
+            toast.loading("Compressing and uploading image...", { id: "project-upload" });
+            return compressImages(files);
+          }}
           onClientUploadComplete={(res) => {
             const url = res[0]?.url;
-            if (url) setValue("coverImage", url);
+            if (url) {
+              setValue("coverImage", url);
+              toast.success("Cover image uploaded successfully", { id: "project-upload" });
+            }
           }}
-          onUploadError={(error: Error) => { toast.error(`Upload failed: ${error.message}`); }}
+          onUploadError={(error: Error) => {
+            toast.error(`Upload failed: ${error.message}`, { id: "project-upload" });
+          }}
         />
       </div>
 

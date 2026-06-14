@@ -1,3 +1,12 @@
+/**
+ * @file components/blog/PostCard.tsx
+ * @description React component for PostCard.tsx under the blog category.
+ * 
+ * @exports
+ * - PostCard (default): Main React component or function
+ * - PostCardData: Type/Interface definition
+ */
+
 import Image from "next/image";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";

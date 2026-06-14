@@ -1,3 +1,11 @@
+/**
+ * @file app/api/analytics/identify/route.ts
+ * @description Next.js API route handling requests for the route.ts endpoint.
+ * 
+ * @exports
+ * - POST(): Function
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";

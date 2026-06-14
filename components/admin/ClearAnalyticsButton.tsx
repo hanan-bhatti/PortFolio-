@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/ClearAnalyticsButton.tsx
+ * @description React component for ClearAnalyticsButton.tsx under the admin category.
+ * 
+ * @exports
+ * - ClearAnalyticsButton (default): Main React component or function
+ */
+
 import { useTransition, useState } from "react";
 import EditorialModal from "./EditorialModal";
 

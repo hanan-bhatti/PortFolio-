@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/resume/ResumePageClient.tsx
+ * @description React component for ResumePageClient.tsx under the resume category.
+ * 
+ * @exports
+ * - ResumePageClient (default): Main React component or function
+ */
+
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import SkillIcon from "@/components/ui/SkillIcon";

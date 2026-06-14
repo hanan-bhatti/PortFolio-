@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * @file components/admin/ProjectsManager.tsx
+ * @description React component for ProjectsManager.tsx under the admin category.
+ * 
+ * @exports
+ * - AdminProjectRow: Type/Interface definition
+ * - ProjectsManager (default): Main React component or function
+ */
+
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";

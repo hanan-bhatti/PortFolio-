@@ -1,3 +1,12 @@
+/**
+ * @file app/admin/(protected)/analytics/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - AnalyticsDashboardPage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/admin/PageHeader";
 import ClearAnalyticsButton from "@/components/admin/ClearAnalyticsButton";

@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/ExperimentsSection.tsx
+ * @description React component for ExperimentsSection.tsx under the ui category.
+ * 
+ * @exports
+ * - ExperimentsSection (default): Main React component or function
+ */
+
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 

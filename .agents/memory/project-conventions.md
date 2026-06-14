@@ -1,7 +1,7 @@
 ---
 type: project
 created: 2026-05-25
-updated: 2026-05-25
+updated: 2026-06-14
 ---
 
 # Project Conventions
@@ -18,3 +18,10 @@ updated: 2026-05-25
 - Consent verification: use `<EditorialModal />` before performing deletion or critical destructive actions.
 - Text selection: text highlighting uses a solid amber background (`var(--amber)`) and black text (`#000000`).
 - Scrollbars: custom sharp, thin (8px) dark scrollbar that transitions to amber on hover.
+
+## Code Documentation Standard
+- Every TypeScript/TSX source file under `lib/`, `components/`, and `app/` must include a standard file-level JSDoc header comment listing:
+  - `@file`: Relative path to the file.
+  - `@description`: Brief, clear description of the file's responsibility.
+  - `@exports`: Listing of exports/methods with brief explanations of what they do.
+

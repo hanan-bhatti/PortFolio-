@@ -1,3 +1,11 @@
+/**
+ * @file app/(public)/layout.tsx
+ * @description Next.js route view page or layout component for layout.tsx.
+ * 
+ * @exports
+ * - PublicLayout (default): Main React component or function
+ */
+
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/ui/Navbar";

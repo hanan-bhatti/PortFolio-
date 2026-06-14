@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/ExperienceManager.tsx
+ * @description React component for ExperienceManager.tsx under the admin category.
+ * 
+ * @exports
+ * - ExperienceManager (default): Main React component or function
+ */
+
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";

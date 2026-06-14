@@ -1,3 +1,13 @@
+/**
+ * @file app/(public)/projects/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - ProjectsPage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ * - metadata: Constant / Helper
+ */
+
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import ProjectsGrid from "@/components/ui/ProjectsGrid";

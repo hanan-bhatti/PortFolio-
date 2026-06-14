@@ -1,3 +1,13 @@
+/**
+ * @file app/(public)/verify/[downloadId]/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - VerifyPage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ * - metadata: Constant / Helper
+ */
+
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getResumeSettings } from "@/lib/resume";

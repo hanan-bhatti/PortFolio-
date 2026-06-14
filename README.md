@@ -2,60 +2,54 @@
 
 Production-grade personal portfolio with a 3D organic-blob aesthetic. Built with Next.js 15 (App Router), React Three Fiber, Tailwind CSS v4, TipTap, Prisma + PostgreSQL, NextAuth v5, Uploadthing and Resend.
 
-## Features
+## Quick Start
 
-- **3D theme**: morphing GLSL blob background with mouse parallax, unique 3D hero per page (lazy-loaded, SSR-safe, error-bounded, CSS fallback on mobile)
-- **Public pages**: Home (typewriter hero), Projects (tag filter + detail pages), About (radial skills + animated timeline), Blog (search, tags, pagination, TipTap rendering with lowlight syntax highlighting, TOC, view counter, related posts), Contact (Zod-validated form + Resend email)
-- **Admin** (`/admin`, NextAuth credentials): dashboard with stats, full TipTap post editor (toolbar, images, YouTube, tables, code blocks, character count, live preview), project CRUD with dnd-kit drag ordering, contact inbox, site settings
-- Strict TypeScript (no `any`), React Hook Form + Zod on every form, Geist Sans/Mono via `next/font`
-
-## Setup
-
-1. **Install dependencies**
+1. **Install dependencies**:
    ```bash
    npm install
    ```
-2. **Configure environment** — copy `.env.example` to `.env` and fill in:
-   - `DATABASE_URL` — PostgreSQL connection string
-   - `AUTH_SECRET` — `openssl rand -base64 32`
-   - `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` — admin login (bcrypt hash)
-   - `RESEND_API_KEY`, `CONTACT_EMAIL_TO`, `CONTACT_EMAIL_FROM` — contact emails
-   - `UPLOADTHING_TOKEN` — image uploads
-3. **Generate an admin password hash**
+
+2. **Configure environment**: Copy `.env.example` to `.env` and fill out:
    ```bash
-   node -e "require('bcryptjs').hash('your-password', 10).then(console.log)"
+   cp .env.example .env
    ```
-4. **Push the schema**
+
+3. **Initialize the database**:
    ```bash
    npm run db:push
    ```
-5. **Run**
+
+4. **Run development server**:
    ```bash
    npm run dev
    ```
 
-Visit `http://localhost:3000` and `http://localhost:3000/admin/login`.
+5. Visit `http://localhost:3000` to view the public site and `http://localhost:3000/admin/login` for the admin portal.
 
-## Deployment (Vercel)
+## Features
 
-1. Import the repo in Vercel.
-2. Add all environment variables from `.env.example`.
-3. Use a hosted PostgreSQL (Neon, Supabase, etc.) for `DATABASE_URL`.
-4. Deploy — `prisma generate` runs automatically before build.
+- **3D Theme**: Morphing GLSL blob background with mouse parallax, unique 3D hero per page (lazy-loaded, SSR-safe, error-bounded, with mobile CSS fallbacks).
+- **Public Pages**: Home (typewriter hero), Projects (tag filter + details), About (radial skills + animated timeline), Blog (search, tags, pagination, TipTap rendering, TOC, related posts), Contact (Zod-validated + Resend integration).
+- **Admin Portal** (`/admin`): NextAuth-protected dashboard, TipTap post editor, project CRUD with dnd-kit ordering, inbox management, 2FA/TOTP security, and site settings.
+- **Strict Quality**: Strict TypeScript (no `any`), Zod-validated input layers, custom JSDoc file headers, and Next.js Turbopack-compatible configuration.
 
-## Structure
+## Configuration
 
-```
-app/
-  (public)/        # user-facing pages
-  admin/           # protected admin pages (+ /admin/login)
-  api/             # contact, posts, projects, uploadthing, auth
-components/
-  3d/              # R3F scenes, lazy wrappers, error boundary
-  admin/           # admin UI (editor, tables, forms)
-  blog/            # blog cards, TOC, parallax cover
-  forms/           # public forms
-  ui/              # shared UI
-lib/               # prisma, auth, actions, validations, tiptap
-prisma/            # schema
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | *Required* |
+| `AUTH_SECRET` | Secret key for NextAuth session signing | *Required* |
+| `RESEND_API_KEY` | Resend service API key for emails | *Optional* |
+| `CONTACT_EMAIL_TO` | Recipient email for contact messages | *Optional* |
+| `CONTACT_EMAIL_FROM` | Sender email address for automated alerts | `onboarding@resend.dev` |
+| `UPLOADTHING_TOKEN` | Uploadthing authentication token for files | *Optional* |
+
+## Documentation
+
+- [Project Specifications & Memory](file://./.agents/memory/MEMORY.md)
+- [Architecture Decision Records (ADRs)](file://./docs/adr/ADR-001-codebase-cleanup.md)
+- [Developer Guidelines (llms.txt)](file://./llms.txt)
+
+## License
+
+MIT

@@ -1,3 +1,17 @@
+/**
+ * @file lib/validations.ts
+ * @description Zod validation schemas and TypeScript types defining input verification rules for contacts, posts, projects, skills, experiences, and settings.
+ * 
+ * @exports
+ * - contactSchema / ContactInput: Rules for contact form submissions
+ * - postSchema / PostInput: Rules for creating/editing blog posts
+ * - projectSchema / ProjectInput: Rules for creating/editing projects
+ * - skillSchema / SkillInput: Rules for adding/modifying skills
+ * - experienceSchema / ExperienceInput: Rules for experiences/jobs
+ * - settingsSchema / SettingsInput: Rules for site settings
+ * - aboutSchema / AboutInput: Rules for about-me settings
+ */
+
 import { z } from "zod";
 
 export const contactSchema = z.object({

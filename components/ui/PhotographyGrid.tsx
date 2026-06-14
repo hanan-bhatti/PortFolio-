@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/PhotographyGrid.tsx
+ * @description React component for PhotographyGrid.tsx under the ui category.
+ * 
+ * @exports
+ * - PhotographyGrid (default): Main React component or function
+ */
+
 import { useState } from "react";
 import Image from "next/image";
 import PhotoLightbox from "./PhotoLightbox";

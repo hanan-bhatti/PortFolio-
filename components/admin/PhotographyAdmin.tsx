@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/PhotographyAdmin.tsx
+ * @description React component for PhotographyAdmin.tsx under the admin category.
+ * 
+ * @exports
+ * - PhotographyAdmin (default): Main React component or function
+ */
+
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useUploadThing } from "@/lib/uploadthing";

@@ -1,3 +1,12 @@
+/**
+ * @file components/ui/Footer.tsx
+ * @description React component for Footer.tsx under the ui category.
+ * 
+ * @exports
+ * - Footer (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { SiGithub, SiX, SiGmail } from "react-icons/si";

@@ -8,3 +8,7 @@
 - [project] Remote repository: set to GitHub, archived GitLab remote as 'gitlab' → tech-decisions.md
 - [project] Client-side PDF: Dynamic import html2pdf.js, single A3 portrait formatting, and class-based spacing → tech-decisions.md
 - [project] Analytics caching: cache visitorId in memory and sessionStorage to prevent duplicate identify calls → tech-decisions.md
+- [project] Standardize file JSDoc headers under lib/, components/, and app/ → project-conventions.md
+- [project] Relocate root spec/task markdown files to .agents/memory/ → tech-decisions.md
+- [project] Maintain llms.txt and CHANGELOG.md at the root → tech-decisions.md
+

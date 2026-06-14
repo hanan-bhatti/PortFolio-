@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/Sidebar.tsx
+ * @description React component for Sidebar.tsx under the admin category.
+ * 
+ * @exports
+ * - Sidebar (default): Main React component or function
+ */
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";

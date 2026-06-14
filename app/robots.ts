@@ -1,3 +1,11 @@
+/**
+ * @file app/robots.ts
+ * @description Next.js route view page or layout component for robots.ts.
+ * 
+ * @exports
+ * - robots (default): Main React component or function
+ */
+
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {

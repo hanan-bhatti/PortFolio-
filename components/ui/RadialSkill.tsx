@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/RadialSkill.tsx
+ * @description React component for RadialSkill.tsx under the ui category.
+ * 
+ * @exports
+ * - RadialSkill (default): Main React component or function
+ */
+
 import { motion } from "framer-motion";
 
 export default function RadialSkill({ name, level }: { name: string; level: number }) {

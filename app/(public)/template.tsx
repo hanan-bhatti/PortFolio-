@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file app/(public)/template.tsx
+ * @description Next.js route view page or layout component for template.tsx.
+ * 
+ * @exports
+ * - Template (default): Main React component or function
+ */
+
 import { motion } from "framer-motion";
 
 export default function Template({ children }: { children: React.ReactNode }) {

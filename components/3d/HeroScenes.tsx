@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * @file components/3d/HeroScenes.tsx
+ * @description React component for HeroScenes.tsx under the 3d category.
+ * 
+ * @exports
+ * - HeroScene (default): Main React component or function
+ * - HeroVariant: Type/Interface definition
+ */
+
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Center, Float, MeshDistortMaterial, Text3D } from "@react-three/drei";

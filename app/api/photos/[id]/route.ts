@@ -1,3 +1,12 @@
+/**
+ * @file app/api/photos/[id]/route.ts
+ * @description Next.js API route handling requests for the route.ts endpoint.
+ * 
+ * @exports
+ * - DELETE(): Function
+ * - PATCH(): Function
+ */
+
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

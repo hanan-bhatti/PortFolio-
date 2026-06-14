@@ -1,3 +1,14 @@
+/**
+ * @file lib/auth.ts
+ * @description NextAuth v5 configuration file handling credential validation, 2FA/TOTP verification, session tracking in the database, login alerts, and route protection.
+ * 
+ * @exports
+ * - handlers: NextAuth API route handlers (GET/POST)
+ * - auth: Session detection and route-guard middleware function
+ * - signIn: Helper to log users in
+ * - signOut: Helper to log users out
+ */
+
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";

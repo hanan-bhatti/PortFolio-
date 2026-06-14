@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/Navbar.tsx
+ * @description React component for Navbar.tsx under the ui category.
+ * 
+ * @exports
+ * - Navbar (default): Main React component or function
+ */
+
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";

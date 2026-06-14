@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/PublishToggle.tsx
+ * @description React component for PublishToggle.tsx under the admin category.
+ * 
+ * @exports
+ * - PublishToggle (default): Main React component or function
+ */
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/StatsBar.tsx
+ * @description React component for StatsBar.tsx under the ui category.
+ * 
+ * @exports
+ * - StatsBar (default): Main React component or function
+ */
+
 import React, { useEffect, useState } from "react";
 
 interface StatsBarProps {

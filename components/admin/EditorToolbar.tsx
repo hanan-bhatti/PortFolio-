@@ -1,10 +1,19 @@
 "use client";
 
+/**
+ * @file components/admin/EditorToolbar.tsx
+ * @description React component for EditorToolbar.tsx under the admin category.
+ * 
+ * @exports
+ * - EditorToolbar (default): Main React component or function
+ */
+
 import { useState } from "react";
 import type { Editor } from "@tiptap/react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UploadButton } from "@/lib/uploadthing";
+import { compressImages } from "@/lib/image-compress";
 
 const LANGS = ["plaintext", "typescript", "javascript", "python", "bash", "json", "css", "xml", "sql", "go", "rust"] as const;
 const HEADINGS = [1, 2, 3, 4] as const;
@@ -143,16 +152,25 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       <div className="text-xs">
         <UploadButton
           endpoint="imageUploader"
+          onBeforeUploadBegin={async (files: File[]) => {
+            toast.loading("Compressing and uploading image...", { id: "editor-upload" });
+            return compressImages(files);
+          }}
           onClientUploadComplete={(res) => {
             const url = res[0]?.url;
-            if (url) editor.chain().focus().setImage({ src: url }).run();
+            if (url) {
+              editor.chain().focus().setImage({ src: url }).run();
+              toast.success("Image uploaded successfully", { id: "editor-upload" });
+            }
           }}
-          onUploadError={(error: Error) => { toast.error(`Upload failed: ${error.message}`); }}
+          onUploadError={(error: Error) => {
+            toast.error(`Upload failed: ${error.message}`, { id: "editor-upload" });
+          }}
           appearance={{
             button: "h-7 rounded-none border border-[#262626] bg-black/40 px-3 text-[10px] font-mono text-zinc-300 hover:bg-zinc-900 transition-colors",
             allowedContent: "hidden",
           }}
-          content={{ button: "\ud83d\uddbc Image" }}
+          content={{ button: "🖼 Image" }}
         />
       </div>
 

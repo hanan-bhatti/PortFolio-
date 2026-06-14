@@ -1,3 +1,12 @@
+/**
+ * @file app/api/analytics/pageview/route.ts
+ * @description Next.js API route handling requests for the route.ts endpoint.
+ * 
+ * @exports
+ * - PATCH(): Function
+ * - POST(): Function
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 

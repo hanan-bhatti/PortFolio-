@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/Typewriter.tsx
+ * @description React component for Typewriter.tsx under the ui category.
+ * 
+ * @exports
+ * - Typewriter (default): Main React component or function
+ */
+
 import { useEffect, useState } from "react";
 
 export default function Typewriter({ words }: { words: string[] }) {

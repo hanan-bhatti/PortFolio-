@@ -1,3 +1,20 @@
+/**
+ * @file lib/actions.ts
+ * @description Next.js Server Actions for admin panel functionalities including user authentication, 2FA setup, blog posts, project management, email replies, message routing, password resets, and session revoking.
+ * 
+ * @exports
+ * - ActionResult: Interface defining standard error and ID responses for actions
+ * - loginAction(input): Handles admin credentials and returns authentication result
+ * - logoutAction(): Revokes and terminates the current user session
+ * - createPostAction(input) / updatePostAction(id, input) / deletePostAction(id) / togglePublishAction(id): Blog post management
+ * - createProjectAction(input) / updateProjectAction(id, input) / deleteProjectAction(id) / reorderProjectsAction(orderedIds): Projects grid configuration
+ * - markMessageReadAction(id, read) / deleteMessageAction(id) / sendReplyAction(email, replyMessage) / markThreadReadAction(email) / deleteThreadAction(email): Contact inbox operations
+ * - saveSettingsAction(input) / saveAboutSettingsAction(input): General and About metadata persistence
+ * - enable2FAAction(secret, code) / disable2FAAction(code): Two-factor security configuration
+ * - revokeSessionAction(sessionId): Terminates active user browser sessions
+ * - requestPasswordResetAction(email) / resetPasswordAction(token, newPassword) / changePasswordAction(currentPassword, newPassword): Admin password flow
+ */
+
 "use server";
 
 import { revalidatePath } from "next/cache";

@@ -1,8 +1,17 @@
 "use client";
 
+/**
+ * @file components/admin/PostEditor.tsx
+ * @description React component for PostEditor.tsx under the admin category.
+ * 
+ * @exports
+ * - PostEditor (default): Main React component or function
+ * - PostEditorData: Type/Interface definition
+ */
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
 import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -11,7 +20,8 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { baseExtensions } from "@/lib/tiptap-extensions";
 import { slugify, cn } from "@/lib/utils";
-import { UploadButton } from "@/lib/uploadthing";
+import { UploadButton, useUploadThing } from "@/lib/uploadthing";
+import { compressImage, compressImages } from "@/lib/image-compress";
 import { createPostAction, updatePostAction } from "@/lib/actions";
 import EditorToolbar from "@/components/admin/EditorToolbar";
 
@@ -47,6 +57,25 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
   const [tagInput, setTagInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
 
+  const { startUpload } = useUploadThing("imageUploader");
+
+  const uploadImageFile = async (file: File): Promise<string | null> => {
+    try {
+      const toastId = toast.loading("Compressing and uploading image...", { id: "editor-drag-drop" });
+      const compressed = await compressImage(file);
+      const res = await startUpload([compressed]);
+      if (res && res[0]) {
+        toast.success("Image uploaded successfully!", { id: "editor-drag-drop" });
+        return res[0].url;
+      }
+      toast.error("Upload failed: No URL returned", { id: "editor-drag-drop" });
+      return null;
+    } catch (err: any) {
+      toast.error(`Upload failed: ${err.message}`, { id: "editor-drag-drop" });
+      return null;
+    }
+  };
+
   const editor = useEditor({
     extensions: [
       ...baseExtensions(),
@@ -57,6 +86,49 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
     immediatelyRender: false,
     editorProps: {
       attributes: { class: "prose-blog min-h-[420px] px-4 py-3 focus:outline-none" },
+      handleDrop(view, event, slice, moved) {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+          const file = event.dataTransfer.files[0];
+          if (file && file.type.startsWith("image/")) {
+            event.preventDefault();
+            uploadImageFile(file).then((url) => {
+              if (url) {
+                const { schema } = view.state;
+                if (schema.nodes.image) {
+                  const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
+                  const node = schema.nodes.image.create({ src: url });
+                  const transaction = view.state.tr.insert(coordinates?.pos ?? view.state.selection.from, node);
+                  view.dispatch(transaction);
+                }
+              }
+            });
+            return true;
+          }
+        }
+        return false;
+      },
+      handlePaste(view, event, slice) {
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItem = items.find((item) => item.type.startsWith("image/"));
+        if (imageItem) {
+          const file = imageItem.getAsFile();
+          if (file) {
+            event.preventDefault();
+            uploadImageFile(file).then((url) => {
+              if (url) {
+                const { schema } = view.state;
+                if (schema.nodes.image) {
+                  const node = schema.nodes.image.create({ src: url });
+                  const transaction = view.state.tr.replaceSelectionWith(node);
+                  view.dispatch(transaction);
+                }
+              }
+            });
+            return true;
+          }
+        }
+        return false;
+      }
     },
   });
 
@@ -165,6 +237,49 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
             <>
               {editor ? <EditorToolbar editor={editor} /> : null}
               <EditorContent editor={editor} />
+              {editor && (
+                <BubbleMenu
+                  editor={editor}
+                  tippyOptions={{ duration: 100 }}
+                  shouldShow={({ editor }) => editor.isActive("image")}
+                >
+                  <div className="flex items-center gap-1 border border-[#262626] bg-[#0c0c0c] p-1 font-mono text-xs shadow-lg">
+                    <span className="px-2 text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Size:</span>
+                    {(["25%", "50%", "75%", "100%"] as const).map((sz) => (
+                      <button
+                        key={sz}
+                        type="button"
+                        onClick={() => editor.chain().focus().updateAttributes("image", { width: sz }).run()}
+                        className={cn(
+                          "px-2 py-0.5 hover:bg-white/5 transition-colors cursor-pointer text-[10px]",
+                          editor.getAttributes("image").width === sz || (!editor.getAttributes("image").width && sz === "100%")
+                            ? "bg-amber text-black font-bold"
+                            : "text-zinc-300"
+                        )}
+                      >
+                        {sz}
+                      </button>
+                    ))}
+                    <span className="mx-1 h-4 w-px bg-[#262626]" />
+                    <span className="px-2 text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Align:</span>
+                    {(["left", "center", "right"] as const).map((al) => (
+                      <button
+                        key={al}
+                        type="button"
+                        onClick={() => editor.chain().focus().updateAttributes("image", { alignment: al }).run()}
+                        className={cn(
+                          "px-2 py-0.5 hover:bg-white/5 transition-colors cursor-pointer text-[10px] capitalize",
+                          editor.getAttributes("image").alignment === al || (!editor.getAttributes("image").alignment && al === "center")
+                            ? "bg-amber text-black font-bold"
+                            : "text-zinc-300"
+                        )}
+                      >
+                        {al}
+                      </button>
+                    ))}
+                  </div>
+                </BubbleMenu>
+              )}
             </>
           )}
           <div className="border-t border-[#262626] px-4 py-2 text-right font-mono text-[10px] text-zinc-550">
@@ -190,12 +305,19 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           ) : null}
           <UploadButton
             endpoint="imageUploader"
+            onBeforeUploadBegin={async (files: File[]) => {
+              toast.loading("Compressing and uploading cover image...", { id: "cover-upload" });
+              return compressImages(files);
+            }}
             onClientUploadComplete={(res) => {
               const url = res[0]?.url;
-              if (url) setCoverImage(url);
+              if (url) {
+                setCoverImage(url);
+                toast.success("Cover image uploaded successfully!", { id: "cover-upload" });
+              }
             }}
             onUploadError={(error: Error) => {
-              toast.error(`Upload failed: ${error.message}`);
+              toast.error(`Upload failed: ${error.message}`, { id: "cover-upload" });
             }}
             appearance={{
               button: "w-full rounded-none border border-dashed border-[#262626] hover:border-amber py-3 text-xs font-bold font-mono uppercase tracking-widest text-zinc-400 hover:text-amber bg-black/20 transition-colors cursor-pointer text-center",

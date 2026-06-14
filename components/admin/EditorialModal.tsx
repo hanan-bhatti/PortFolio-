@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/EditorialModal.tsx
+ * @description React component for EditorialModal.tsx under the admin category.
+ * 
+ * @exports
+ * - EditorialModal (default): Main React component or function
+ */
+
 import { useEffect } from "react";
 import { FiAlertTriangle, FiInfo, FiTrash2 } from "react-icons/fi";
 import { cn } from "@/lib/utils";

@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/HeroSection.tsx
+ * @description React component for HeroSection.tsx under the ui category.
+ * 
+ * @exports
+ * - HeroSection (default): Main React component or function
+ */
+
 import { useRef } from "react";
 import Link from "next/link";
 import HeroPhoto from "./HeroPhoto";

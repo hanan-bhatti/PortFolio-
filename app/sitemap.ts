@@ -1,3 +1,11 @@
+/**
+ * @file app/sitemap.ts
+ * @description Next.js route view page or layout component for sitemap.ts.
+ * 
+ * @exports
+ * - sitemap (default): Main React component or function
+ */
+
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 

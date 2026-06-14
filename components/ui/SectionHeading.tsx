@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/SectionHeading.tsx
+ * @description Standardized title component for section titles with support for gradients and description subtitles.
+ * 
+ * @exports
+ * - SectionHeading: React component representing page or section headers
+ */
+
 export default function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-10 text-center">

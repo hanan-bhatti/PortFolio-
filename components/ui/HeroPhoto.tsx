@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/HeroPhoto.tsx
+ * @description React component for HeroPhoto.tsx under the ui category.
+ * 
+ * @exports
+ * - HeroPhoto (default): Main React component or function
+ */
+
 import { useEffect, useRef, useState, useCallback } from "react";
 
 interface HeroPhotoProps {

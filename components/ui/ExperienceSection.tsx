@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/ExperienceSection.tsx
+ * @description React component for ExperienceSection.tsx under the ui category.
+ * 
+ * @exports
+ * - ExperienceSection (default): Main React component or function
+ */
+
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 

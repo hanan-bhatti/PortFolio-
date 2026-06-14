@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/GithubActivity.tsx
+ * @description React component for GithubActivity.tsx under the ui category.
+ * 
+ * @exports
+ * - GithubActivity (default): Main React component or function
+ */
+
 import React, { useState } from "react";
 
 interface GithubActivityProps {

@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/SkillsManager.tsx
+ * @description React component for SkillsManager.tsx under the admin category.
+ * 
+ * @exports
+ * - SkillsManager (default): Main React component or function
+ */
+
 import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";

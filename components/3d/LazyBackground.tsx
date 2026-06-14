@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/3d/LazyBackground.tsx
+ * @description React component for LazyBackground.tsx under the 3d category.
+ * 
+ * @exports
+ * - LazyBackground (default): Main React component or function
+ */
+
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { ThreeErrorBoundary } from "./ThreeErrorBoundary";

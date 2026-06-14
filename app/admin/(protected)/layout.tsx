@@ -1,3 +1,12 @@
+/**
+ * @file app/admin/(protected)/layout.tsx
+ * @description Next.js route view page or layout component for layout.tsx.
+ * 
+ * @exports
+ * - AdminLayout (default): Main React component or function
+ * - metadata: Constant / Helper
+ */
+
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

@@ -1,3 +1,12 @@
+/**
+ * @file app/admin/login/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - AdminLoginPage (default): Main React component or function
+ * - metadata: Constant / Helper
+ */
+
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";

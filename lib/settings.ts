@@ -1,3 +1,12 @@
+/**
+ * @file lib/settings.ts
+ * @description Settings retrieval service managing default site configuration and about-me metadata values from the database.
+ * 
+ * @exports
+ * - getSiteSettings(): Resolves database/default values for general site details, statistics, and theme toggles
+ * - getAboutSettings(): Resolves database/default values for about-me story sections, stacks, and CTAs
+ */
+
 import { prisma } from "@/lib/prisma";
 import type { SettingsInput, AboutInput } from "@/lib/validations";
 

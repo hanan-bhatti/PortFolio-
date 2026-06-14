@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * @file components/admin/MessagesTable.tsx
+ * @description React component for MessagesTable.tsx under the admin category.
+ * 
+ * @exports
+ * - AdminMessageRow: Type/Interface definition
+ * - MessagesTable (default): Main React component or function
+ */
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

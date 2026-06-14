@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/ScrollingMarquee.tsx
+ * @description React component for ScrollingMarquee.tsx under the ui category.
+ * 
+ * @exports
+ * - ScrollingMarquee (default): Main React component or function
+ */
+
 import React from "react";
 
 interface ScrollingMarqueeProps {

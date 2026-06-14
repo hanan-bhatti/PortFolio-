@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/ProjectsGrid.tsx
+ * @description React component for ProjectsGrid.tsx under the ui category.
+ * 
+ * @exports
+ * - ProjectsGrid (default): Main React component or function
+ */
+
 import { useMemo, useState } from "react";
 import ProjectCard, { type ProjectCardData } from "@/components/ui/ProjectCard";
 import { cn } from "@/lib/utils";

@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/SettingsForm.tsx
+ * @description React component for SettingsForm.tsx under the admin category.
+ * 
+ * @exports
+ * - SettingsForm (default): Main React component or function
+ */
+
 import { useTransition, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -15,6 +23,7 @@ import {
   changePasswordAction,
 } from "@/lib/actions";
 import { UploadButton } from "@/lib/uploadthing";
+import { compressImages } from "@/lib/image-compress";
 import { cn, formatDate } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
 
@@ -368,15 +377,19 @@ export default function SettingsForm({
               <div className="flex justify-start">
                 <UploadButton
                   endpoint="imageUploader"
+                  onBeforeUploadBegin={async (files: File[]) => {
+                    toast.loading("Compressing and uploading photo...", { id: "settings-photo-upload" });
+                    return compressImages(files);
+                  }}
                   onClientUploadComplete={(res) => {
                     const url = res[0]?.url;
                     if (url) {
                       setValue("heroPhotoUrl", url, { shouldDirty: true });
-                      toast.success("Hero photo uploaded");
+                      toast.success("Hero photo uploaded", { id: "settings-photo-upload" });
                     }
                   }}
                   onUploadError={(error: Error) => {
-                    toast.error(`Upload failed: ${error.message}`);
+                    toast.error(`Upload failed: ${error.message}`, { id: "settings-photo-upload" });
                   }}
                 />
               </div>

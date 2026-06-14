@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/forms/ContactForm.tsx
+ * @description React component for ContactForm.tsx under the forms category.
+ * 
+ * @exports
+ * - ContactForm (default): Main React component or function
+ */
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";

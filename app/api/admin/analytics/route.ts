@@ -1,3 +1,12 @@
+/**
+ * @file app/api/admin/analytics/route.ts
+ * @description Next.js API route handling requests for the route.ts endpoint.
+ * 
+ * @exports
+ * - GET(): Function
+ * - dynamic: Constant / Helper
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";

@@ -1,3 +1,11 @@
+/**
+ * @file app/api/posts/[slug]/route.ts
+ * @description Next.js API route handling requests for the route.ts endpoint.
+ * 
+ * @exports
+ * - GET(): Function
+ */
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 

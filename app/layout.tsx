@@ -1,3 +1,13 @@
+/**
+ * @file app/layout.tsx
+ * @description Next.js route view page or layout component for layout.tsx.
+ * 
+ * @exports
+ * - RootLayout (default): Main React component or function
+ * - generateMetadata(): Function
+ * - viewport: Constant / Helper
+ */
+
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";

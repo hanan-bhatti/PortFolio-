@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/SkillForm.tsx
+ * @description React component for SkillForm.tsx under the admin category.
+ * 
+ * @exports
+ * - SkillForm (default): Main React component or function
+ */
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

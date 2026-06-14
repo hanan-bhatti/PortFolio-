@@ -1,3 +1,12 @@
+/**
+ * @file lib/resume.ts
+ * @description Resume settings utility to retrieve resume configuration and touch/update the last-modified timestamp in the database.
+ * 
+ * @exports
+ * - getResumeSettings(): Resolves database/default values for general resume identity and contact details
+ * - touchResumeLastUpdated(): Updates the 'resume_last_updated' setting to the current ISO string date/time
+ */
+
 import { prisma } from "@/lib/prisma";
 
 export async function getResumeSettings(): Promise<Record<string, string>> {

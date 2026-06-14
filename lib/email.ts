@@ -1,3 +1,12 @@
+/**
+ * @file lib/email.ts
+ * @description Email transmission utility integrated with Resend, falling back to mock development logging if Resend API keys are not configured.
+ * 
+ * @exports
+ * - SendEmailOptions: Interface defining the structure of email options (to, subject, text, html, replyTo)
+ * - sendEmail(options): Sends an email using the Resend SDK or logs a mock email representation in development
+ */
+
 import { Resend } from "resend";
 
 export interface SendEmailOptions {

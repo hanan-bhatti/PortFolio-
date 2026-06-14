@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/3d/LiquidNavbarBackground.tsx
+ * @description React component for LiquidNavbarBackground.tsx under the 3d category.
+ * 
+ * @exports
+ * - LiquidNavbarBackground (default): Main React component or function
+ */
+
 import { useEffect, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";

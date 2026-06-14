@@ -1,0 +1,21 @@
+# Portfolio
+> Production-grade personal developer portfolio with 3D aesthetic, blog engine, and full admin dashboard.
+
+## Core Files
+- [app/(public)/]: Public layout and pages (Home, About, Projects, Blog, Contact, Photography).
+- [app/admin/]: NextAuth-protected administrative dashboard pages for CRUD and site settings.
+- [app/api/]: Public and administrative endpoints (analytics, auth, email, photo reordering).
+- [components/3d/]: React Three Fiber components, canvas scenes, and shader backdrops.
+- [components/ui/]: Shared layout components (Navbar, Footer, SectionHeading, timelines, marquees).
+- [lib/actions.ts]: Main next-safe Server Actions for authentication, posts, projects, and settings.
+- [lib/auth.ts]: NextAuth v5 configuration, credentials validation, and session tracking.
+- [lib/prisma.ts]: DB client instance with automated query extensions for tracking update times.
+- [lib/utils.ts]: General helper utility library (class names merging, slugification, date formatters).
+- [prisma/schema.prisma]: Database definitions for posts, projects, messages, sessions, and settings.
+
+## Key Concepts
+- **3D Morphing GLSL Blob**: The background employs custom shaders with mouse parallax effects. Falling back to static gradients on mobile devices for speed.
+- **Admin Authentication**: Uses NextAuth credentials strategy with optional 2FA/TOTP verification, session revocation, and email notifications on login.
+- **TipTap Rich Text Editor**: A complete editor configured in the admin panel which outputs JSON content rendered on the server side into styled HTML.
+- **Prisma Extended Client Hook**: Auto-touches the `resume_last_updated` date whenever skills, projects, certifications, or settings are modified.
+- **Analytical Engine**: First-party privacy-respecting analytics track unique sessions, page views, and UTM referral campaigns.

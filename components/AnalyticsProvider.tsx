@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/AnalyticsProvider.tsx
+ * @description React component for AnalyticsProvider.tsx under the AnalyticsProvider.tsx category.
+ * 
+ * @exports
+ * - AnalyticsProvider (default): Main React component or function
+ */
+
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { initAnalytics, trackPageView, trackDuration } from "@/lib/analytics";

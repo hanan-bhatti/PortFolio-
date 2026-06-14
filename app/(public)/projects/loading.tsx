@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file app/(public)/projects/loading.tsx
+ * @description Next.js route view page or layout component for loading.tsx.
+ * 
+ * @exports
+ * - Loading (default): Main React component or function
+ */
+
 import { Skeleton } from "boneyard-js/react";
 
 export default function Loading() {

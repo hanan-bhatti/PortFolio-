@@ -1,3 +1,11 @@
+/**
+ * @file components/admin/SkillIcon.tsx
+ * @description React component for SkillIcon.tsx under the admin category.
+ * 
+ * @exports
+ * - SkillIcon (default): Main React component or function
+ */
+
 import * as SiIcons from "react-icons/si";
 
 interface SkillIconProps {

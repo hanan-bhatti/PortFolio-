@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/Reveal.tsx
+ * @description A scroll-reveal animation wrapper utilizing Framer Motion to animate child elements as they enter the viewport.
+ * 
+ * @exports
+ * - Reveal: React client component animating standard vertical fade-in reveals
+ */
+
 "use client";
 
 import { motion } from "framer-motion";

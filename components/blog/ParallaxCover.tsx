@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/blog/ParallaxCover.tsx
+ * @description React component for ParallaxCover.tsx under the blog category.
+ * 
+ * @exports
+ * - ParallaxCover (default): Main React component or function
+ */
+
 import { useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";

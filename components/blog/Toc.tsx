@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/blog/Toc.tsx
+ * @description React component for Toc.tsx under the blog category.
+ * 
+ * @exports
+ * - Toc (default): Main React component or function
+ */
+
 import { useEffect, useState } from "react";
 import type { TocItem } from "@/lib/tiptap-html";
 

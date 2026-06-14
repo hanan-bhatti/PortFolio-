@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/ResumeAdmin.tsx
+ * @description React component for ResumeAdmin.tsx under the admin category.
+ * 
+ * @exports
+ * - ResumeAdmin (default): Main React component or function
+ */
+
 import { useState, useTransition, useCallback } from "react";
 import Link from "next/link";
 import SkillIcon from "@/components/ui/SkillIcon";
@@ -23,6 +31,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { UploadButton } from "@/lib/uploadthing";
+import { compressImages } from "@/lib/image-compress";
 import Image from "next/image";
 
 type Settings = Record<string, string>;
@@ -219,14 +228,20 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
         />
         <UploadButton
           endpoint="imageUploader"
+          onBeforeUploadBegin={async (files: File[]) => {
+            toast.loading("Compressing and uploading image...", { id: `resume-upload-${key}` });
+            return compressImages(files);
+          }}
           onClientUploadComplete={(res) => {
             const url = res?.[0]?.url;
             if (url) {
               setForm((p) => ({ ...p, [key]: url }));
-              toast.success("Image uploaded");
+              toast.success("Image uploaded successfully", { id: `resume-upload-${key}` });
             }
           }}
-          onUploadError={(err) => { toast.error(err.message); }}
+          onUploadError={(err) => {
+            toast.error(`Upload failed: ${err.message}`, { id: `resume-upload-${key}` });
+          }}
           appearance={{ button: { background: "var(--amber)", color: "#000", fontWeight: 700, fontSize: 12, padding: "6px 14px", border: "none", cursor: "pointer" }, allowedContent: { display: "none" } }}
         />
       </div>

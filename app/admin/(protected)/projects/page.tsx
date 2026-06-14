@@ -1,3 +1,12 @@
+/**
+ * @file app/admin/(protected)/projects/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - AdminProjectsPage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";

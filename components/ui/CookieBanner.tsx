@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/CookieBanner.tsx
+ * @description React component for CookieBanner.tsx under the ui category.
+ * 
+ * @exports
+ * - CookieBanner (default): Main React component or function
+ */
+
 import { useEffect, useState } from "react";
 import { initAnalytics } from "@/lib/analytics";
 

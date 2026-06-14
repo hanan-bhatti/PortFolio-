@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @file components/3d/ThreeErrorBoundary.tsx
+ * @description React component for ThreeErrorBoundary.tsx under the 3d category.
+ */
+
 import { Component, type ReactNode } from "react";
 
 interface Props {

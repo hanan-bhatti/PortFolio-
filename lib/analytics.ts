@@ -1,3 +1,14 @@
+/**
+ * @file lib/analytics.ts
+ * @description Client-side analytics helper tracking visitor identification, page views with UTM parameters/referrals, and site visit durations.
+ * 
+ * @exports
+ * - initAnalytics(): Asynchronously fetches and initializes the unique visitor ID, caching it locally
+ * - trackPageView(path, referrerInput): Reports page view events, parses traffic sources, and tracks UTM campaign parameters
+ * - trackDuration(path, seconds): Reports active page visit duration increments to update session statistics
+ * - getVisitorId(): Accesses the cached visitor ID from memory or session storage
+ */
+
 let visitorId: string | null = null;
 
 export async function initAnalytics(): Promise<string | null> {

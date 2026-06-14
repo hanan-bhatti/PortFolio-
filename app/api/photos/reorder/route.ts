@@ -1,3 +1,11 @@
+/**
+ * @file app/api/photos/reorder/route.ts
+ * @description Next.js API route handling requests for the route.ts endpoint.
+ * 
+ * @exports
+ * - PATCH(): Function
+ */
+
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";

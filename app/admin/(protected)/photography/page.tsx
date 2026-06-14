@@ -1,3 +1,12 @@
+/**
+ * @file app/admin/(protected)/photography/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - AdminPhotographyPage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import PageHeader from "@/components/admin/PageHeader";

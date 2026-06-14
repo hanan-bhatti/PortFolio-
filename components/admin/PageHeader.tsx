@@ -1,3 +1,12 @@
+/**
+ * @file components/admin/PageHeader.tsx
+ * @description React component for PageHeader.tsx under the admin category.
+ * 
+ * @exports
+ * - Crumb: Type/Interface definition
+ * - PageHeader (default): Main React component or function
+ */
+
 import Link from "next/link";
 import { Fragment } from "react";
 

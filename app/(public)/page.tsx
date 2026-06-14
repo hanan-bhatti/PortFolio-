@@ -1,3 +1,12 @@
+/**
+ * @file app/(public)/page.tsx
+ * @description Next.js route view page or layout component for page.tsx.
+ * 
+ * @exports
+ * - HomePage (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 // placeholder to satisfy UX audit regex check for <SelectedWork
 import { getSiteSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";

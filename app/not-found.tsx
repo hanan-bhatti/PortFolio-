@@ -1,3 +1,12 @@
+/**
+ * @file app/not-found.tsx
+ * @description Next.js route view page or layout component for not-found.tsx.
+ * 
+ * @exports
+ * - NotFound (default): Main React component or function
+ * - dynamic: Constant / Helper
+ */
+
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";

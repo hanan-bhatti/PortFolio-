@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * @file components/ui/Timeline.tsx
+ * @description React component for Timeline.tsx under the ui category.
+ * 
+ * @exports
+ * - Timeline (default): Main React component or function
+ * - TimelineEntry: Type/Interface definition
+ */
+
 import { motion } from "framer-motion";
 import { cn, formatDate } from "@/lib/utils";
 

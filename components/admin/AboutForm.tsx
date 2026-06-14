@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/AboutForm.tsx
+ * @description React component for AboutForm.tsx under the admin category.
+ * 
+ * @exports
+ * - AboutForm (default): Main React component or function
+ */
+
 import { useTransition, useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -9,6 +17,7 @@ import { toast } from "sonner";
 import { aboutSchema, type AboutInput } from "@/lib/validations";
 import { saveAboutSettingsAction } from "@/lib/actions";
 import { UploadButton } from "@/lib/uploadthing";
+import { compressImages } from "@/lib/image-compress";
 import { cn } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
 
@@ -233,15 +242,19 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
             <div className="w-48">
               <UploadButton
                 endpoint="imageUploader"
+                onBeforeUploadBegin={async (files: File[]) => {
+                  toast.loading("Compressing and uploading image...", { id: "avatar-upload" });
+                  return compressImages(files);
+                }}
                 onClientUploadComplete={(res) => {
                   const url = res[0]?.url;
                   if (url) {
                     setValue("about_avatar_url", url, { shouldDirty: true });
-                    toast.success("Avatar uploaded successfully");
+                    toast.success("Avatar uploaded successfully", { id: "avatar-upload" });
                   }
                 }}
                 onUploadError={(error: Error) => {
-                  toast.error(`Upload failed: ${error.message}`);
+                  toast.error(`Upload failed: ${error.message}`, { id: "avatar-upload" });
                 }}
               />
             </div>

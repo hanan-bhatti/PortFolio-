@@ -1,3 +1,11 @@
+/**
+ * @file components/ui/SelectedWork.tsx
+ * @description React component for SelectedWork.tsx under the ui category.
+ * 
+ * @exports
+ * - SelectedWork (default): Main React component or function
+ */
+
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 

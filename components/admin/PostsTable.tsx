@@ -1,5 +1,14 @@
 "use client";
 
+/**
+ * @file components/admin/PostsTable.tsx
+ * @description React component for PostsTable.tsx under the admin category.
+ * 
+ * @exports
+ * - AdminPostRow: Type/Interface definition
+ * - PostsTable (default): Main React component or function
+ */
+
 import Link from "next/link";
 import { useState, useTransition, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";

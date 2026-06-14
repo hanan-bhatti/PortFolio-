@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/ui/PhotoLightbox.tsx
+ * @description React component for PhotoLightbox.tsx under the ui category.
+ * 
+ * @exports
+ * - PhotoLightbox (default): Main React component or function
+ */
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
 

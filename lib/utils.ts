@@ -1,5 +1,18 @@
+/**
+ * @file lib/utils.ts
+ * @description Core utility functions for Tailwind class merging, string transformations, formatting, reading time calculation, and social handle normalisation.
+ * 
+ * @exports
+ * - cn(...inputs): Merges Tailwind CSS class names safely using clsx and tailwind-merge
+ * - slugify(text): Standardises text strings into URL-friendly slugs
+ * - formatDate(date): Formats Date objects or ISO strings into "Month Day, Year" strings
+ * - readingTime(tiptapJson): Estimates average reading time for Tiptap JSON document/content
+ * - extractTwitterUsername(urlOrHandle): Cleans and formats raw inputs into structured Twitter handles
+ */
+
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));

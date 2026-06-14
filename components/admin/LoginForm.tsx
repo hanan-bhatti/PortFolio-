@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * @file components/admin/LoginForm.tsx
+ * @description React component for LoginForm.tsx under the admin category.
+ * 
+ * @exports
+ * - LoginForm (default): Main React component or function
+ */
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { loginAction, requestPasswordResetAction, resetPasswordAction } from "@/lib/actions";
