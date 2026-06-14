@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import SkillIcon from "@/components/ui/SkillIcon";
 import { FiMail, FiPhone, FiMapPin, FiDownload, FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
@@ -73,21 +73,48 @@ export default function ResumePageClient({
 
   useEffect(() => {
     if (activeDownloadId) {
-      let frame2Id: number;
-      const frame1Id = requestAnimationFrame(() => {
-        frame2Id = requestAnimationFrame(() => {
-          window.print();
+      const generatePDF = async () => {
+        const element = document.getElementById("resume-root");
+        if (!element) {
+          window.dispatchEvent(new CustomEvent("resume-download-success"));
           setActiveDownloadId(null);
-        });
-      });
-      return () => {
-        cancelAnimationFrame(frame1Id);
-        if (frame2Id) cancelAnimationFrame(frame2Id);
-      };
-    }
-  }, [activeDownloadId]);
+          return;
+        }
 
-  const handleDownload = async () => {
+        // Add class to apply print styles for html2pdf rendering
+        document.body.classList.add("html2pdf-printing");
+
+        const options = {
+          margin: [0.3, 0.3, 0.3, 0.3] as [number, number, number, number], // 0.3 inch margins for perfect fit
+          filename: `Resume_${settings.resume_name?.replace(/\s+/g, "_") || "Abdul_Hannan_Bhatti"}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { 
+            scale: 2.5, // Crisp resolution
+            useCORS: true,
+            letterRendering: true,
+          },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+          pagebreak: { mode: ["css", "legacy"] }
+        };
+
+        try {
+          const html2pdf = (await import("html2pdf.js")).default;
+          await html2pdf().from(element).set(options as any).save();
+          window.dispatchEvent(new CustomEvent("resume-download-success"));
+        } catch (err) {
+          console.error("html2pdf generation failed:", err);
+          window.dispatchEvent(new CustomEvent("resume-download-error"));
+        } finally {
+          document.body.classList.remove("html2pdf-printing");
+          setActiveDownloadId(null);
+        }
+      };
+
+      generatePDF();
+    }
+  }, [activeDownloadId, settings.resume_name]);
+
+  const handleDownload = useCallback(async () => {
     setDownloading(true);
     let downloadId: string | null = null;
     try {
@@ -112,9 +139,26 @@ export default function ResumePageClient({
         setActiveDownloadId(downloadId);
       } else {
         window.print();
+        window.dispatchEvent(new CustomEvent("resume-download-success"));
       }
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleTrigger = async () => {
+      try {
+        await handleDownload();
+      } catch (err) {
+        console.error("Error handling print trigger:", err);
+        window.dispatchEvent(new CustomEvent("resume-download-error"));
+      }
+    };
+
+    window.addEventListener("trigger-resume-download", handleTrigger);
+    return () => {
+      window.removeEventListener("trigger-resume-download", handleTrigger);
+    };
+  }, [handleDownload]);
 
   return (
     <>
@@ -475,6 +519,9 @@ export default function ResumePageClient({
         .print-only {
           display: none;
         }
+        .html2pdf-printing .print-only {
+          display: block !important;
+        }
         .resume-columns {
           display: grid;
           grid-template-columns: 1.65fr 1fr;
@@ -507,6 +554,13 @@ export default function ResumePageClient({
             width: 100% !important;
           }
 
+          .print-only {
+            display: block !important;
+          }
+        }
+
+        /* Styles applied during print media OR during HTML2PDF compilation */
+        @media print, .html2pdf-printing {
           /* Ensure wrapping containers don't add fixed heights, background, or spacing */
           .w-full.min-h-screen,
           div[style*="linear-gradient"],
@@ -570,10 +624,6 @@ export default function ResumePageClient({
             margin-bottom: 0 !important;
             padding-bottom: 0 !important;
             border-bottom: none !important;
-          }
-
-          .print-only {
-            display: block !important;
           }
         }
       `}</style>

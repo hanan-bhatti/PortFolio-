@@ -21,19 +21,29 @@ export default function ResumeDownloadButton() {
     fetchCount();
   }, []);
 
-  const handleDownload = async () => {
-    setDownloading(true);
-    try {
-      await fetch("/api/resume/download", { method: "POST" });
+  useEffect(() => {
+    const handleSuccess = () => {
+      setDownloading(false);
       if (count !== null) {
         setCount(count + 1);
       }
-    } catch (err) {
-      console.error("Failed to track download", err);
-    } finally {
+    };
+    const handleError = () => {
       setDownloading(false);
-      window.print();
-    }
+    };
+
+    window.addEventListener("resume-download-success", handleSuccess);
+    window.addEventListener("resume-download-error", handleError);
+
+    return () => {
+      window.removeEventListener("resume-download-success", handleSuccess);
+      window.removeEventListener("resume-download-error", handleError);
+    };
+  }, [count]);
+
+  const handleDownload = () => {
+    setDownloading(true);
+    window.dispatchEvent(new CustomEvent("trigger-resume-download"));
   };
 
   return (
