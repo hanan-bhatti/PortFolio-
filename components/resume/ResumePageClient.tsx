@@ -70,11 +70,17 @@ export default function ResumePageClient({
 
   useEffect(() => {
     if (activeDownloadId) {
-      const printTimer = setTimeout(() => {
-        window.print();
-        setActiveDownloadId(null);
-      }, 150);
-      return () => clearTimeout(printTimer);
+      let frame2Id: number;
+      const frame1Id = requestAnimationFrame(() => {
+        frame2Id = requestAnimationFrame(() => {
+          window.print();
+          setActiveDownloadId(null);
+        });
+      });
+      return () => {
+        cancelAnimationFrame(frame1Id);
+        if (frame2Id) cancelAnimationFrame(frame2Id);
+      };
     }
   }, [activeDownloadId]);
 
