@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const twitterHandle = extractTwitterUsername(settings.socialTwitter);
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
   const canonicalUrl = `${siteUrl}/blog/${slug}`;
-  const title = `${post.title} | ${settings.siteName}`;
+  const title = post.title;
   
   // Truncate description dynamically to fit within 150-160 characters
   let description = post.excerpt;
