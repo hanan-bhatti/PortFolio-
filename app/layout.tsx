@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "en_US",
       images: [
         {
-          url: "/og-image.png",
+          url: `${siteUrl}/_next/image?url=${encodeURIComponent("/og-image.png")}&w=1200&q=75`,
           width: 1200,
           height: 630,
           alt: `${settings.siteName} — Portfolio`,
@@ -58,7 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
       creator: twitterHandle,
       site: twitterHandle,
-      images: ["/og-image.png"],
+      images: [`${siteUrl}/_next/image?url=${encodeURIComponent("/og-image.png")}&w=1200&q=75`],
     },
     icons: {
       icon: [
