@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!project) return { title: "Project not found" };
 
   const twitterHandle = extractTwitterUsername(settings.socialTwitter);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
   const canonicalUrl = `${siteUrl}/projects/${slug}`;
   const title = `${project.title} — Open Source Project`;
   const description = project.description;

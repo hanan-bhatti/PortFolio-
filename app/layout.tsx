@@ -27,7 +27,7 @@ export const viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
   const twitterHandle = extractTwitterUsername(settings.socialTwitter);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
 
   return {
     metadataBase: new URL(siteUrl),

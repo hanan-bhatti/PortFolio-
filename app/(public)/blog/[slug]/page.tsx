@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post || !post.published) return { title: "Post not found" };
 
   const twitterHandle = extractTwitterUsername(settings.socialTwitter);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site";
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
   const canonicalUrl = `${siteUrl}/blog/${slug}`;
   const title = `${post.title} | ${settings.siteName}`;
   
