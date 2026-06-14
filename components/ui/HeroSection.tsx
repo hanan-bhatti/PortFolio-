@@ -22,7 +22,7 @@ export default function HeroSection({
   socialTwitter = "",
 }: HeroSectionProps) {
   const solidH1Ref = useRef<HTMLHeadingElement>(null);
-  const strokeH1Ref = useRef<HTMLHeadingElement>(null);
+  const strokeH1Ref = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLHeadingElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -229,7 +229,7 @@ export default function HeroSection({
             >
               <div className="absolute left-[-81.82%] top-0 w-[181.82%] h-full">
                 <div className="w-[45%] flex flex-col justify-center py-12 md:py-0 text-left h-full" style={{ minHeight: "auto" }}>
-                  <h1 
+                  <div 
                     ref={strokeH1Ref}
                     className="font-syne font-extrabold text-[clamp(2.2rem,9.2vw,4rem)] md:text-[clamp(3.5rem,8vw,7rem)] leading-[0.95] tracking-tight uppercase flex flex-col relative w-full"
                     style={{
@@ -277,7 +277,7 @@ export default function HeroSection({
                         <span className="md:inline block">OBSESSION.</span>
                       </span>
                     </span>
-                  </h1>
+                  </div>
 
                   {/* Replicated other elements with invisible/opacity-0 to match flex spacing exactly */}
                   <div className="mt-8 pl-3 border-l-[3px] border-transparent invisible" aria-hidden="true">

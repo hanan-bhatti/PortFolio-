@@ -18,17 +18,76 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+export const viewport = {
+  themeColor: "#0a0a0a",
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site"),
   title: { default: "Hanan Bhatti — Portfolio", template: "%s | Hanan Bhatti" },
-  description: "Full-Stack Developer, Open Source Builder, CS Student at UET.",
-  openGraph: { type: "website", siteName: "Hanan Bhatti" },
+  description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
+  alternates: {
+    canonical: "https://hanan-bhatti.site",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Hanan Bhatti",
+    url: "https://hanan-bhatti.site",
+    title: "Hanan Bhatti — Portfolio",
+    description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Hanan Bhatti — Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hanan Bhatti — Portfolio",
+    description: "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools.",
+    creator: "@hananbhatti_",
+    site: "@hananbhatti_",
+    images: ["/og-image.png"],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${syne.variable} ${inter.variable}`} data-scroll-behavior="smooth">
       <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              "name": "Hanan Bhatti",
+              "url": "https://hanan-bhatti.site",
+              "sameAs": [
+                "https://github.com/hanan-bhatti",
+                "https://linkedin.com/in/hanan-bhatti"
+              ],
+              "jobTitle": "Full-Stack Developer",
+              "alumniOf": {
+                "@type": "EducationalOrganization",
+                "name": "University of Engineering and Technology (UET)"
+              },
+              "description": "Full-Stack Developer, Open Source Builder, and Computer Science Student at UET. Building premium, high-performance web applications and open-source tools."
+            }),
+          }}
+        />
         {children}
         <Toaster theme="dark" position="bottom-right" richColors />
       </body>
