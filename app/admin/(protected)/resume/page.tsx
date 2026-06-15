@@ -59,7 +59,11 @@ export default async function AdminResumePage() {
           endDate: e.endDate?.toISOString() ?? null,
         }))}
         skills={skills}
-        downloads={downloads.map((d) => ({ ...d, downloadedAt: d.downloadedAt.toISOString() }))}
+        downloads={downloads.map((d) => ({
+          ...d,
+          downloadedAt: d.downloadedAt.toISOString(),
+          verifiedAt: d.verifiedAt?.toISOString() ?? null,
+        }))}
       />
     </div>
   );

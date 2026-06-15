@@ -1,18 +1,22 @@
 /**
  * @file lib/analytics.ts
- * @description Client-side analytics helper tracking visitor identification, page views with UTM parameters/referrals, and site visit durations.
- * 
- * @exports
- * - initAnalytics(): Asynchronously fetches and initializes the unique visitor ID, caching it locally
- * - trackPageView(path, referrerInput): Reports page view events, parses traffic sources, and tracks UTM campaign parameters
- * - trackDuration(path, seconds): Reports active page visit duration increments to update session statistics
- * - getVisitorId(): Accesses the cached visitor ID from memory or session storage
+ * @description Client-side analytics. Sends raw referrer to server — all
+ * classification is done server-side via lib/classify-referrer.ts.
+ * Filters internal paths (admin, api, etc.) from being tracked.
  */
 
 let visitorId: string | null = null;
 
+// Paths that should never be tracked
+const SKIP_PATH_PREFIXES = ["/admin", "/api", "/_next", "/favicon"];
+
+function shouldSkipPath(path: string): boolean {
+  return SKIP_PATH_PREFIXES.some((p) => path.startsWith(p));
+}
+
 export async function initAnalytics(): Promise<string | null> {
   if (typeof window === "undefined") return null;
+  if (shouldSkipPath(window.location.pathname)) return null;
 
   if (visitorId) return visitorId;
   const cached = sessionStorage.getItem("visitorId");
@@ -22,44 +26,43 @@ export async function initAnalytics(): Promise<string | null> {
   }
 
   try {
-    const res = await fetch("/api/analytics/identify", {
-      method: "POST",
-    });
-
-    if (!res.ok) {
-      throw new Error(`Identify failed with status ${res.status}`);
-    }
-
+    const res = await fetch("/api/analytics/identify", { method: "POST" });
+    if (!res.ok) throw new Error(`Identify failed: ${res.status}`);
     const data = await res.json();
+
+    // Server returns { skip: true } for bots / internal IPs
+    if (data.skip) return null;
+
     if (data.visitorId) {
       visitorId = data.visitorId as string;
       sessionStorage.setItem("visitorId", data.visitorId as string);
       return visitorId;
     }
-  } catch (e) {
+  } catch {
     // fail silently
-    console.warn("Analytics initialization failed:", e);
   }
   return null;
 }
 
-export async function trackPageView(path: string, referrerInput?: string): Promise<void> {
+export async function trackPageView(path: string): Promise<void> {
   if (typeof window === "undefined") return;
+  if (shouldSkipPath(path)) return;
 
   const vid = getVisitorId();
   if (!vid) return;
 
-  const referrer = referrerInput || document.referrer || "";
+  // Raw referrer — classification happens server-side
+  const referrer = document.referrer || null;
 
-  // 1. Parse URL search params
+  // UTM params — read from URL, persist in session
   const params = new URLSearchParams(window.location.search);
-  const utmSource = params.get("utm_source");
-  const utmMedium = params.get("utm_medium");
+  const utmSource   = params.get("utm_source");
+  const utmMedium   = params.get("utm_medium");
   const utmCampaign = params.get("utm_campaign");
-  const utmContent = params.get("utm_content");
-  const utmTerm = params.get("utm_term");
+  const utmContent  = params.get("utm_content");
+  const utmTerm     = params.get("utm_term");
 
-  const hasAnyUtm = Boolean(utmSource || utmMedium || utmCampaign || utmContent || utmTerm);
+  const hasUtm = Boolean(utmSource || utmMedium || utmCampaign || utmContent || utmTerm);
 
   let sessionUtm = {
     source: null as string | null,
@@ -69,61 +72,17 @@ export async function trackPageView(path: string, referrerInput?: string): Promi
     term: null as string | null,
   };
 
-  if (hasAnyUtm) {
-    // On first page load with UTM params: store in sessionStorage
-    sessionUtm = {
-      source: utmSource,
-      medium: utmMedium,
-      campaign: utmCampaign,
-      content: utmContent,
-      term: utmTerm,
-    };
+  if (hasUtm) {
+    sessionUtm = { source: utmSource, medium: utmMedium, campaign: utmCampaign, content: utmContent, term: utmTerm };
     sessionStorage.setItem("utm_attribution", JSON.stringify(sessionUtm));
   } else {
-    // On subsequent pages: read from sessionStorage if current page has no UTM params
-    const cached = sessionStorage.getItem("utm_attribution");
-    if (cached) {
-      try {
-        sessionUtm = JSON.parse(cached);
-      } catch (e) {
-        // fail silently
-      }
-    }
-  }
-
-  // Final UTM params to send
-  const finalUtmSource = utmSource || sessionUtm.source || null;
-  const finalUtmMedium = utmMedium || sessionUtm.medium || null;
-  const finalUtmCampaign = utmCampaign || sessionUtm.campaign || null;
-  const finalUtmContent = utmContent || sessionUtm.content || null;
-  const finalUtmTerm = utmTerm || sessionUtm.term || null;
-
-  // 2. Parse referrer into traffic source
-  function parseTrafficSource(ref: string): string {
-    if (!ref) return "direct";
     try {
-      const url = new URL(ref);
-      const host = url.hostname.replace("www.", "");
-      
-      if (/google\./i.test(host)) return "google";
-      if (/bing\./i.test(host)) return "bing";
-      if (/yahoo\./i.test(host)) return "yahoo";
-      if (/linkedin\.com/i.test(host)) return "linkedin";
-      if (/github\.com/i.test(host)) return "github";
-      if (/twitter\.com|x\.com/i.test(host)) return "twitter";
-      if (/facebook\.com/i.test(host)) return "facebook";
-      if (/instagram\.com/i.test(host)) return "instagram";
-      if (/reddit\.com/i.test(host)) return "reddit";
-      if (/whatsapp\.com/i.test(host)) return "whatsapp";
-      if (/t\.co/i.test(host)) return "twitter";
-      
-      return host; // return the domain if unknown
-    } catch (e) {
-      return "direct";
+      const cached = sessionStorage.getItem("utm_attribution");
+      if (cached) sessionUtm = JSON.parse(cached);
+    } catch {
+      // ignore
     }
   }
-
-  const trafficSource = finalUtmSource || parseTrafficSource(referrer);
 
   try {
     await fetch("/api/analytics/pageview", {
@@ -132,22 +91,22 @@ export async function trackPageView(path: string, referrerInput?: string): Promi
       body: JSON.stringify({
         visitorId: vid,
         path,
-        referrer: referrer || null,
-        trafficSource,
-        utmSource: finalUtmSource,
-        utmMedium: finalUtmMedium,
-        utmCampaign: finalUtmCampaign,
-        utmContent: finalUtmContent,
-        utmTerm: finalUtmTerm,
+        referrer,           // raw — server classifies this
+        utmSource:    utmSource    ?? sessionUtm.source,
+        utmMedium:    utmMedium    ?? sessionUtm.medium,
+        utmCampaign:  utmCampaign  ?? sessionUtm.campaign,
+        utmContent:   utmContent   ?? sessionUtm.content,
+        utmTerm:      utmTerm      ?? sessionUtm.term,
       }),
     });
-  } catch (e) {
+  } catch {
     // fail silently
   }
 }
 
 export async function trackDuration(path: string, seconds: number): Promise<void> {
   if (typeof window === "undefined") return;
+  if (shouldSkipPath(path)) return;
 
   const vid = getVisitorId();
   if (!vid) return;
@@ -156,13 +115,9 @@ export async function trackDuration(path: string, seconds: number): Promise<void
     await fetch("/api/analytics/pageview", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        visitorId: vid,
-        path,
-        duration: seconds,
-      }),
+      body: JSON.stringify({ visitorId: vid, path, duration: seconds }),
     });
-  } catch (e) {
+  } catch {
     // fail silently
   }
 }

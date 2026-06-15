@@ -1,23 +1,22 @@
 /**
  * @file app/api/analytics/pageview/route.ts
- * @description Next.js API route handling requests for the route.ts endpoint.
- * 
- * @exports
- * - PATCH(): Function
- * - POST(): Function
+ * @description Records page views. Classifies referrer server-side using
+ * lib/classify-referrer (tldts + JSON database). Client sends raw referrer only.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { classifyReferrer } from "@/lib/classify-referrer";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if site-wide analytics is enabled
-    const settings = await prisma.siteSettings.findMany({
+    // Check if analytics is enabled
+    const setting = await prisma.siteSettings.findFirst({
       where: { key: "analytics_enabled" },
     });
-    const analyticsEnabledSetting = settings[0]?.value ?? "true";
-    if (analyticsEnabledSetting === "false") {
+    if (setting?.value === "false") {
       return NextResponse.json({ success: true, message: "Analytics disabled" });
     }
 
@@ -25,8 +24,7 @@ export async function POST(request: NextRequest) {
     const {
       visitorId,
       path,
-      referrer,
-      trafficSource,
+      referrer,     // raw referrer URL from client
       utmSource,
       utmMedium,
       utmCampaign,
@@ -38,32 +36,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Double check that visitor exists
-    const visitorExists = await prisma.visitor.findUnique({
-      where: { id: visitorId },
-    });
-
+    // Verify visitor exists
+    const visitorExists = await prisma.visitor.findUnique({ where: { id: visitorId } });
     if (!visitorExists) {
       return NextResponse.json({ error: "Visitor not found" }, { status: 404 });
     }
+
+    // ── Classify referrer server-side using the library ─────────────────────
+    const classified = classifyReferrer(referrer);
+    // UTM source takes priority over referrer-derived source
+    const trafficSource = utmSource ? String(utmSource).toLowerCase() : classified.source;
 
     await prisma.pageView.create({
       data: {
         visitorId,
         path,
-        referrer: referrer || null,
-        trafficSource: trafficSource || null,
-        utmSource: utmSource || null,
-        utmMedium: utmMedium || null,
-        utmCampaign: utmCampaign || null,
-        utmContent: utmContent || null,
-        utmTerm: utmTerm || null,
+        referrer: classified.cleanReferrer,   // store cleaned referrer (no tracking params)
+        trafficSource,
+        utmSource:    utmSource    || null,
+        utmMedium:    utmMedium    || null,
+        utmCampaign:  utmCampaign  || null,
+        utmContent:   utmContent   || null,
+        utmTerm:      utmTerm      || null,
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("PageView POST failed silently:", error);
+    console.error("PageView POST failed:", error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
@@ -77,29 +77,21 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Find the last pageview for this visitor and path
     const lastPageView = await prisma.pageView.findFirst({
-      where: {
-        visitorId,
-        path,
-      },
-      orderBy: {
-        timestamp: "desc",
-      },
+      where: { visitorId, path },
+      orderBy: { timestamp: "desc" },
     });
 
     if (lastPageView) {
       await prisma.pageView.update({
         where: { id: lastPageView.id },
-        data: {
-          duration: Math.round(duration),
-        },
+        data: { duration: Math.round(duration) },
       });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("PageView PATCH failed silently:", error);
+    console.error("PageView PATCH failed:", error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }

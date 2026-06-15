@@ -140,12 +140,31 @@ model Certification {
 }
 
 model ResumeDownload {
-  id          String   @id @default(cuid())
-  visitorIp   String?
-  country     String?
-  city        String?
-  userAgent   String?
-  downloadedAt DateTime @default(now())
+  id             String    @id @default(cuid())
+  visitorIp      String?
+  // ── Geo (enriched) ──────────────────────────────────
+  country        String?
+  city           String?
+  region         String?   // state / province
+  timezone       String?   // e.g. "Asia/Karachi"
+  isp            String?   // ISP / Org name
+  lat            Float?
+  lng            Float?
+  // ── Raw UA string ────────────────────────────────────
+  userAgent      String?
+  // ── Parsed UA (stored at write-time) ─────────────────
+  deviceType     String?   // "mobile" | "tablet" | "desktop"
+  deviceVendor   String?   // "Apple" | "Samsung" etc.
+  deviceModel    String?   // "iPhone" | "SM-G991B" etc.
+  browserName    String?
+  browserVersion String?
+  osName         String?
+  osVersion      String?
+  cpuArch        String?   // "amd64" | "arm64" etc.
+  // ── Verify tracking ──────────────────────────────────
+  downloadedAt   DateTime  @default(now())
+  verifiedAt     DateTime?
+  verifyCount    Int       @default(0)
 }
 
 model Photo {

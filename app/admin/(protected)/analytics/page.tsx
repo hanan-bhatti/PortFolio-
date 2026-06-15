@@ -117,64 +117,72 @@ export default async function AnalyticsDashboardPage() {
     count: p._count.id,
   }));
 
-  const topReferrers = topReferrersRaw.map((r) => ({
-    referrer: r.referrer || "Direct / Unknown",
-    count: r._count.id,
-  }));
+  // Filter referrers: drop null (direct), own domain, admin paths, localhost
+  const OWN_DOMAINS = new Set(["hanan-bhatti.site", "www.hanan-bhatti.site", "localhost", "127.0.0.1"]);
+  const topReferrers = topReferrersRaw
+    .filter((r) => {
+      if (!r.referrer) return false; // direct traffic — not a referrer
+      // Drop android-app: scheme (already counted in linkedin traffic source)
+      if (r.referrer.startsWith("android-app://")) return false;
+      try {
+        const u = new URL(r.referrer);
+        const host = u.hostname.replace(/^www\./, "");
+        if (OWN_DOMAINS.has(host)) return false; // own domain
+        if (u.pathname.startsWith("/admin")) return false; // admin referrer
+      } catch {
+        return false;
+      }
+      return true;
+    })
+    .map((r) => ({ referrer: r.referrer as string, count: r._count.id }))
+    .slice(0, 10);
 
-  const byCountry = byCountryRaw.map((c) => ({
-    country: c.country || "Unknown",
-    count: c._count.id,
-  }));
+  const byCountry = byCountryRaw
+    .filter((c) => c.country !== null)
+    .map((c) => ({ country: c.country as string, count: c._count.id }));
 
-  const byDevice = byDeviceRaw.map((d) => ({
-    device: d.device || "Unknown",
-    count: d._count.id,
-  }));
+  const byDevice = byDeviceRaw
+    .filter((d) => d.device !== null)
+    .map((d) => ({ device: d.device as string, count: d._count.id }));
 
-  const byBrowser = byBrowserRaw.map((b) => ({
-    browser: b.browser || "Unknown",
-    count: b._count.id,
-  }));
+  const byBrowser = byBrowserRaw
+    .filter((b) => b.browser !== null)
+    .map((b) => ({ browser: b.browser as string, count: b._count.id }));
 
-  // Map traffic sources
-  const trafficMap: {
-    direct: number;
-    google: number;
-    linkedin: number;
-    github: number;
-    twitter: number;
-    other: number;
-  } = {
-    direct: 0,
-    google: 0,
-    linkedin: 0,
-    github: 0,
-    twitter: 0,
-    other: 0,
+  // Aggregate traffic sources — covers all known sources
+  const KNOWN_SOURCES: Record<string, string> = {
+    direct: "Direct",
+    google: "Google",
+    bing: "Bing",
+    yahoo: "Yahoo",
+    duckduckgo: "DuckDuckGo",
+    linkedin: "LinkedIn",
+    github: "GitHub",
+    twitter: "Twitter / X",
+    facebook: "Facebook",
+    instagram: "Instagram",
+    reddit: "Reddit",
+    whatsapp: "WhatsApp",
+    medium: "Medium",
+    devto: "Dev.to",
   };
 
+  const trafficAgg = new Map<string, number>();
+  let otherCount = 0;
+
   trafficSourcesRaw.forEach((ts) => {
-    const source = ts.trafficSource || "direct";
-    if (source === "direct") {
-      trafficMap.direct += ts._count.id;
-    } else if (source === "google") {
-      trafficMap.google += ts._count.id;
-    } else if (source === "linkedin") {
-      trafficMap.linkedin += ts._count.id;
-    } else if (source === "github") {
-      trafficMap.github += ts._count.id;
-    } else if (source === "twitter") {
-      trafficMap.twitter += ts._count.id;
+    const source = (ts.trafficSource || "direct").toLowerCase();
+    if (KNOWN_SOURCES[source] !== undefined) {
+      trafficAgg.set(source, (trafficAgg.get(source) ?? 0) + ts._count.id);
     } else {
-      trafficMap.other += ts._count.id;
+      otherCount += ts._count.id;
     }
   });
+  if (otherCount > 0) trafficAgg.set("other", otherCount);
 
-  const trafficSources = Object.entries(trafficMap).map(([name, count]) => ({
-    name,
-    count,
-  }));
+  const trafficSources = Array.from(trafficAgg.entries())
+    .map(([key, count]) => ({ name: KNOWN_SOURCES[key] ?? key, key, count }))
+    .sort((a, b) => b.count - a.count);
 
   const totalTraffic = trafficSources.reduce((acc, t) => acc + t.count, 0);
 
@@ -347,12 +355,12 @@ export default async function AnalyticsDashboardPage() {
         <div className="rounded-2xl border border-[#262626] bg-[#1a1a1a] p-6 space-y-6">
           <h3 className="font-syne text-lg font-bold text-white">Traffic Sources</h3>
           <div className="space-y-4">
-            {trafficSources.map((source) => {
+            {trafficSources.filter((s) => s.count > 0).map((source) => {
               const percent = totalTraffic > 0 ? Math.round((source.count / totalTraffic) * 100) : 0;
               return (
-                <div key={source.name} className="space-y-1.5">
+                <div key={source.key ?? source.name} className="space-y-1.5">
                   <div className="flex justify-between text-xs font-mono">
-                    <span className="text-zinc-300 capitalize">{source.name}</span>
+                    <span className="text-zinc-300">{source.name}</span>
                     <span className="text-zinc-500">{source.count} ({percent}%)</span>
                   </div>
                   <div className="w-full bg-[#262626] h-2.5 rounded-full overflow-hidden">

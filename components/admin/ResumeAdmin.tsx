@@ -629,35 +629,211 @@ function CertificationsTab({ initial }: { initial: CertItem[] }) {
 }
 
 // ─── Downloads Tab ───────────────────────────────────────────────────────────
-type Download = { id: string; visitorIp: string | null; country: string | null; city: string | null; userAgent: string | null; downloadedAt: string };
+type Download = {
+  id: string;
+  visitorIp: string | null;
+  // enriched geo
+  country: string | null;
+  city: string | null;
+  region: string | null;
+  timezone: string | null;
+  isp: string | null;
+  lat: number | null;
+  lng: number | null;
+  // raw UA
+  userAgent: string | null;
+  // parsed UA (from DB)
+  deviceType: string | null;
+  deviceVendor: string | null;
+  deviceModel: string | null;
+  browserName: string | null;
+  browserVersion: string | null;
+  osName: string | null;
+  osVersion: string | null;
+  cpuArch: string | null;
+  // timestamps
+  downloadedAt: string;
+  verifiedAt: string | null;
+  verifyCount: number;
+};
 
 function DownloadsTab({ initial }: { initial: Download[] }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const fmt = (d: string | null) => d ? new Date(d).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : null;
+
+  const deviceColor = (t: string | null) =>
+    t === "mobile" ? "#F59E0B" : t === "tablet" ? "#6ee7b7" : "#6b7280";
+  const deviceLabel = (t: string | null) =>
+    t === "mobile" ? "📱 MOBILE" : t === "tablet" ? "⬛ TABLET" : "🖥️ DESKTOP";
+
   return (
     <div>
-      <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 16 }}>
-        {initial.length} download{initial.length !== 1 ? "s" : ""} tracked
-      </p>
-      {initial.length === 0 && <p style={{ color: "var(--text-muted)", fontSize: 14 }}>No downloads yet.</p>}
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)" }}>
-              {["Date", "IP", "Location", "Browser / OS"].map((h) => (
-                <th key={h} style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-muted)", fontWeight: 600, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {initial.map((d) => (
-              <tr key={d.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: "10px 12px", color: "var(--text-muted)" }}>{new Date(d.downloadedAt).toLocaleString()}</td>
-                <td style={{ padding: "10px 12px", color: "#fff" }}>{d.visitorIp ?? "—"}</td>
-                <td style={{ padding: "10px 12px", color: "var(--text-muted)" }}>{[d.city, d.country].filter(Boolean).join(", ") || "—"}</td>
-                <td style={{ padding: "10px 12px", color: "var(--text-muted)", maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={d.userAgent ?? ""}>{d.userAgent ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <p style={{ color: "var(--text-muted)", fontSize: 13 }}>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>{initial.length}</span>{" "}
+          download{initial.length !== 1 ? "s" : ""} tracked
+        </p>
+        <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em" }}>
+          Click any row to expand
+        </span>
+      </div>
+
+      {initial.length === 0 && (
+        <p style={{ color: "var(--text-muted)", fontSize: 14 }}>No downloads yet.</p>
+      )}
+
+      {/* Cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {initial.map((d) => {
+          const isOpen = expanded === d.id;
+          const verifyFirst = fmt(d.verifiedAt);
+          const dt = d.deviceType ?? "desktop";
+
+          return (
+            <div key={d.id} style={{ border: "1px solid var(--border)", background: isOpen ? "var(--bg-elevated)" : "transparent", transition: "background 0.15s" }}>
+
+              {/* ── Summary Row (always visible) ── */}
+              <button
+                onClick={() => setExpanded(isOpen ? null : d.id)}
+                style={{ width: "100%", display: "grid", gridTemplateColumns: "160px 130px 1fr 110px 90px", gap: 12, padding: "12px 16px", background: "transparent", border: "none", cursor: "pointer", textAlign: "left", alignItems: "center" }}
+              >
+                {/* Date */}
+                <span style={{ color: "var(--text-muted)", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                  {new Date(d.downloadedAt).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                </span>
+
+                {/* IP */}
+                <span style={{ color: "#fff", fontFamily: "monospace", fontSize: 11 }}>
+                  {d.visitorIp ?? "—"}
+                </span>
+
+                {/* Location */}
+                <span style={{ color: "var(--text-muted)", fontSize: 12, fontFamily: "Inter, sans-serif" }}>
+                  {[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}
+                </span>
+
+                {/* Device badge */}
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", padding: "3px 8px", border: `1px solid ${deviceColor(dt)}`, color: deviceColor(dt), whiteSpace: "nowrap", fontFamily: "Inter, sans-serif" }}>
+                  {deviceLabel(dt)}
+                </span>
+
+                {/* Verify status */}
+                {verifyFirst ? (
+                  <span style={{ color: "var(--green)", fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", fontFamily: "Inter, sans-serif" }}>
+                    ✓ VERIFIED
+                  </span>
+                ) : (
+                  <span style={{ color: "#4b5563", fontSize: 10, fontFamily: "Inter, sans-serif" }}>
+                    Not opened
+                  </span>
+                )}
+              </button>
+
+              {/* ── Expanded Detail Panel ── */}
+              {isOpen && (
+                <div style={{ padding: "0 16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, borderTop: "1px solid var(--border)" }}>
+
+                  {/* GEO BLOCK */}
+                  <div style={{ paddingTop: 16 }}>
+                    <p style={{ color: "var(--amber)", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>
+                      🌍 GEO INTELLIGENCE
+                    </p>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inter, sans-serif" }}>
+                      <tbody>
+                        {[
+                          ["IP", <span style={{ fontFamily: "monospace", fontSize: 12, color: "#fff" }}>{d.visitorIp ?? "—"}</span>],
+                          ["City", d.city ?? "—"],
+                          ["Region", d.region ?? "—"],
+                          ["Country", d.country ?? "—"],
+                          ["Timezone", d.timezone ?? "—"],
+                          ["ISP / Org", d.isp ?? "—"],
+                          ["Coordinates", d.lat && d.lng
+                            ? <a href={`https://www.google.com/maps?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 11, textDecoration: "none" }}>
+                                {d.lat.toFixed(4)}, {d.lng.toFixed(4)} ↗
+                              </a>
+                            : "—"
+                          ],
+                        ].map(([label, value]) => (
+                          <tr key={String(label)} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <td style={{ padding: "5px 0", color: "var(--text-muted)", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", width: "38%", verticalAlign: "top" }}>
+                              {label}
+                            </td>
+                            <td style={{ padding: "5px 0 5px 12px", color: "var(--text-muted)", fontSize: 12 }}>
+                              {value}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* DEVICE BLOCK */}
+                  <div style={{ paddingTop: 16 }}>
+                    <p style={{ color: "var(--green)", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>
+                      💻 DEVICE INTELLIGENCE
+                    </p>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inter, sans-serif" }}>
+                      <tbody>
+                        {[
+                          ["Type", <span style={{ color: deviceColor(dt), fontWeight: 700, fontSize: 12 }}>{(d.deviceType ?? "desktop").toUpperCase()}</span>],
+                          ["Vendor", d.deviceVendor ?? "—"],
+                          ["Model", d.deviceModel ?? "—"],
+                          ["Browser", d.browserName && d.browserVersion ? `${d.browserName} ${d.browserVersion}` : d.browserName ?? "—"],
+                          ["OS", d.osName && d.osVersion ? `${d.osName} ${d.osVersion}` : d.osName ?? "—"],
+                          ["CPU Arch", d.cpuArch ?? "—"],
+                          ["Raw UA", <span title={d.userAgent ?? ""} style={{ fontSize: 10, color: "#4b5563", wordBreak: "break-all", display: "block", maxWidth: 260 }}>{d.userAgent ? d.userAgent.slice(0, 80) + (d.userAgent.length > 80 ? "…" : "") : "—"}</span>],
+                        ].map(([label, value]) => (
+                          <tr key={String(label)} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <td style={{ padding: "5px 0", color: "var(--text-muted)", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", width: "38%", verticalAlign: "top" }}>
+                              {label}
+                            </td>
+                            <td style={{ padding: "5px 0 5px 12px", color: "var(--text-muted)", fontSize: 12 }}>
+                              {value}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* VERIFY BLOCK (full width) */}
+                  <div style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                    <p style={{ color: "#6b7280", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 10, fontFamily: "Inter, sans-serif" }}>
+                      🔗 VERIFY LINK ACTIVITY
+                    </p>
+                    {verifyFirst ? (
+                      <div style={{ display: "flex", gap: 32, flexWrap: "wrap", fontFamily: "Inter, sans-serif" }}>
+                        <div>
+                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>Status</p>
+                          <p style={{ color: "var(--green)", fontSize: 12, fontWeight: 700 }}>✓ Link Opened</p>
+                        </div>
+                        <div>
+                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>First Opened</p>
+                          <p style={{ color: "#fff", fontSize: 12 }}>{verifyFirst}</p>
+                        </div>
+                        <div>
+                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>Total Visits</p>
+                          <p style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>{d.verifyCount}</p>
+                        </div>
+                        <div>
+                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>Download ID</p>
+                          <p style={{ color: "#4b5563", fontSize: 11, fontFamily: "monospace" }}>{d.id}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p style={{ color: "#4b5563", fontSize: 12, fontStyle: "italic", fontFamily: "Inter, sans-serif" }}>
+                        Recipient has not opened the verify link yet.
+                      </p>
+                    )}
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+          );
+        })}
       </div>
     </div>
   );

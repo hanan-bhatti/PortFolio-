@@ -28,6 +28,15 @@ export default async function VerifyPage({ params }: { params: Promise<{ downloa
   const record = await prisma.resumeDownload.findUnique({ where: { id: downloadId } });
   if (!record) notFound();
 
+  // Track verify link visits: set verifiedAt on first open, always bump verifyCount
+  await prisma.resumeDownload.update({
+    where: { id: downloadId },
+    data: {
+      verifiedAt: record.verifiedAt ?? new Date(),
+      verifyCount: { increment: 1 },
+    },
+  });
+
   const [rs, latestEdu, latestCert, latestProject] = await Promise.all([
     getResumeSettings(),
     prisma.education.findFirst({ orderBy: { createdAt: "desc" } }),
