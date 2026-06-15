@@ -82,8 +82,10 @@ export default function HeroPhoto({ src, alt }: HeroPhotoProps) {
     const isMobile = w < 768;
 
     // Draw clean image to offscreen canvas
+    // Always right-align: on mobile the portrait acts as atmospheric background
+    // with face peeking from right side, matching desktop language
     octx.clearRect(0, 0, w, h);
-    const rect = getContainBottomRect(w, h, img.width, img.height, !isMobile);
+    const rect = getContainBottomRect(w, h, img.width, img.height, true);
     octx.drawImage(img, rect.dx, rect.dy, rect.dw, rect.dh);
 
     const currentStrength = strength.current;

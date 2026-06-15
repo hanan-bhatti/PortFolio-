@@ -64,9 +64,9 @@ export default function HeroSection({
       <div className="absolute inset-0 bg-grid opacity-[0.2] pointer-events-none -z-10" />
 
       {/* Main Container */}
-      <div className="flex-1 max-w-6xl w-full mx-auto flex flex-col-reverse md:flex-row items-center md:items-stretch px-4 md:px-0 relative">
+      <div className="flex-1 max-w-6xl w-full mx-auto flex flex-row items-stretch px-4 md:px-0 relative">
         
-        {/* LEFT SIDE (45% width) */}
+        {/* LEFT SIDE / FULL-WIDTH on mobile */}
         <div className="w-full md:w-[45%] flex flex-col justify-center py-12 md:py-0 text-left relative z-[1] overflow-visible" style={{ minHeight: "auto" }}>
 
           {/* Main Heading */}
@@ -196,28 +196,46 @@ export default function HeroSection({
 
         </div>
 
-        {/* RIGHT SIDE (55% width) */}
-        <div className="w-full md:w-[55%] h-[40vh] md:h-auto md:min-h-[600px] lg:min-h-[750px] relative flex items-end justify-center overflow-hidden z-[2]">
+        {/* RIGHT SIDE (55% width on desktop, absolute portrait layer on mobile) */}
+        <div className="hidden md:flex md:w-[55%] md:h-auto md:min-h-[600px] lg:min-h-[750px] relative items-end justify-center overflow-hidden z-[2]">
           
           {/* Large decorative logo */}
           <div className="absolute top-[-2rem] right-[-2rem] z-0 select-none pointer-events-none opacity-[0.02] w-[20vw] h-[20vw]">
             <img src="/logo.svg" alt="" className="w-full h-full object-contain" />
           </div>
 
-          {/* Hero Photo */}
+          {/* Hero Photo - desktop */}
           {heroPhotoUrl && (
-            <div className="relative md:absolute md:right-0 md:bottom-0 w-full h-[40vh] md:h-full z-[2]">
+            <div className="absolute right-0 bottom-0 w-full h-full z-[2]">
               <HeroPhoto src={heroPhotoUrl} alt={siteName || "Hanan Bhatti"} />
             </div>
           )}
 
           {/* Amber Rectangle Accent */}
-          <div className="absolute bottom-[15%] right-[8%] w-[6px] h-[80px] bg-amber z-20 hidden md:block" />
+          <div className="absolute bottom-[15%] right-[8%] w-[6px] h-[80px] bg-amber z-20" />
 
           {/* Green Rectangle Accent */}
-          <div className="absolute top-[20%] right-[15%] w-[6px] h-[40px] bg-green z-20 hidden md:block" />
+          <div className="absolute top-[20%] right-[15%] w-[6px] h-[40px] bg-green z-20" />
 
         </div>
+
+        {/* Mobile-only: Portrait as right-anchored atmospheric layer within the text zone */}
+        {heroPhotoUrl && (
+          <div
+            className="md:hidden absolute top-0 right-0 z-0 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              width: "65%",
+              height: "78vh",
+              /* Left-to-right fade: left edge dissolves so text has breathing room,
+                 right edge stays crisp — portrait as depth, not competition */
+              maskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, rgba(0,0,0,0.85) 100%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 30%, rgba(0,0,0,0.85) 100%)",
+            }}
+          >
+            <HeroPhoto src={heroPhotoUrl} alt={siteName || "Hanan Bhatti"} />
+          </div>
+        )}
 
         {/* Dynamic Stroke Text Overlay for perfect masking effect */}
         {heroPhotoUrl && (
