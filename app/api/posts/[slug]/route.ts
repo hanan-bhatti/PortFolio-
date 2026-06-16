@@ -19,10 +19,5 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const updated = await prisma.post.update({
-    where: { id: post.id },
-    data: { views: { increment: 1 } },
-  });
-
-  return NextResponse.json({ post: updated });
+  return NextResponse.json({ post });
 }

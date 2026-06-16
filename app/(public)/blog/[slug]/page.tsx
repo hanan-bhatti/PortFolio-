@@ -90,7 +90,6 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await prisma.post.findUnique({ where: { slug } });
   if (!post || !post.published) notFound();
 
-  await prisma.post.update({ where: { id: post.id }, data: { views: { increment: 1 } } });
 
   const { html, toc } = renderPostContent(post.content);
 

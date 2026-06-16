@@ -742,14 +742,14 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                     <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inter, sans-serif" }}>
                       <tbody>
                         {[
-                          ["IP", <span style={{ fontFamily: "monospace", fontSize: 12, color: "#fff" }}>{d.visitorIp ?? "—"}</span>],
+                          ["IP", <span key="ip" style={{ fontFamily: "monospace", fontSize: 12, color: "#fff" }}>{d.visitorIp ?? "—"}</span>],
                           ["City", d.city ?? "—"],
                           ["Region", d.region ?? "—"],
                           ["Country", d.country ?? "—"],
                           ["Timezone", d.timezone ?? "—"],
                           ["ISP / Org", d.isp ?? "—"],
                           ["Coordinates", d.lat && d.lng
-                            ? <a href={`https://www.google.com/maps?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 11, textDecoration: "none" }}>
+                            ? <a key="coords" href={`https://www.google.com/maps?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 11, textDecoration: "none" }}>
                                 {d.lat.toFixed(4)}, {d.lng.toFixed(4)} ↗
                               </a>
                             : "—"
@@ -776,13 +776,13 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                     <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inter, sans-serif" }}>
                       <tbody>
                         {[
-                          ["Type", <span style={{ color: deviceColor(dt), fontWeight: 700, fontSize: 12 }}>{(d.deviceType ?? "desktop").toUpperCase()}</span>],
+                          ["Type", <span key="type" style={{ color: deviceColor(dt), fontWeight: 700, fontSize: 12 }}>{(d.deviceType ?? "desktop").toUpperCase()}</span>],
                           ["Vendor", d.deviceVendor ?? "—"],
                           ["Model", d.deviceModel ?? "—"],
                           ["Browser", d.browserName && d.browserVersion ? `${d.browserName} ${d.browserVersion}` : d.browserName ?? "—"],
                           ["OS", d.osName && d.osVersion ? `${d.osName} ${d.osVersion}` : d.osName ?? "—"],
                           ["CPU Arch", d.cpuArch ?? "—"],
-                          ["Raw UA", <span title={d.userAgent ?? ""} style={{ fontSize: 10, color: "#4b5563", wordBreak: "break-all", display: "block", maxWidth: 260 }}>{d.userAgent ? d.userAgent.slice(0, 80) + (d.userAgent.length > 80 ? "…" : "") : "—"}</span>],
+                          ["Raw UA", <span key="ua" title={d.userAgent ?? ""} style={{ fontSize: 10, color: "#4b5563", wordBreak: "break-all", display: "block", maxWidth: 260 }}>{d.userAgent ? d.userAgent.slice(0, 80) + (d.userAgent.length > 80 ? "…" : "") : "—"}</span>],
                         ].map(([label, value]) => (
                           <tr key={String(label)} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                             <td style={{ padding: "5px 0", color: "var(--text-muted)", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", width: "38%", verticalAlign: "top" }}>
