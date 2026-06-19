@@ -8,6 +8,7 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { SiGithub, SiX, SiGmail } from "react-icons/si";
 
@@ -99,10 +100,13 @@ export default async function Footer() {
             className="transition-transform hover:scale-102 active:scale-98 mb-3 flex items-center"
             style={{ marginBottom: "0.75rem" }}
           >
-            <img
+            <Image
               src="/logo.svg"
-              alt="Logo"
-              className="w-10 h-10 object-contain rounded-[5px]"
+              alt="Hanan Bhatti Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain"
+              style={{ borderRadius: "5px" }}
             />
           </Link>
           

@@ -51,16 +51,14 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
               {/* To make it work with CSS columns and preserve aspect ratios perfectly, we can use a standard img tag or standard CSS. Let's use standard HTML img with Next.js styling or Image component with appropriate heights. */}
               {/* A standard <img> tag is optimal for pure CSS masonry columns because it automatically scales the height proportionally based on the source image, making column layouts perfect without predefined heights! */}
               {/* Let's use a standard img tag with tailwind and lazy loading! */}
-              <img
-                src={
-                  process.env.NODE_ENV !== "development" &&
-                  (photo.imageUrl.startsWith("http") || (photo.imageUrl.startsWith("/") && !photo.imageUrl.startsWith("/_next")))
-                    ? `/_next/image?url=${encodeURIComponent(photo.imageUrl)}&w=640&q=75`
-                    : photo.imageUrl
-                }
+              <Image
+                src={photo.imageUrl}
                 alt={photo.title ?? "Photograph"}
-                loading="lazy"
+                width={640}
+                height={480}
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                priority={index < 3}
               />
               
               {/* Overlay on hover */}

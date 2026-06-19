@@ -17,7 +17,7 @@
 
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { auth, signIn, signOut } from "@/lib/auth";
@@ -213,6 +213,7 @@ export async function saveSettingsAction(input: SettingsInput): Promise<ActionRe
     )
   );
   revalidatePath("/", "layout");
+  revalidateTag("settings", "max");
   return {};
 }
 
@@ -228,6 +229,7 @@ export async function saveAboutSettingsAction(input: AboutInput): Promise<Action
   );
   revalidatePath("/", "layout");
   revalidatePath("/about");
+  revalidateTag("settings", "max");
   return {};
 }
 

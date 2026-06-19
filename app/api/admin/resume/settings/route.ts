@@ -9,6 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
       );
 
     await Promise.all(upserts);
+    revalidateTag("resume", "max");
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("POST /api/admin/resume/settings failed:", error);

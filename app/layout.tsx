@@ -15,6 +15,7 @@ import { Syne, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { getSiteSettings } from "@/lib/settings";
 import { extractTwitterUsername } from "@/lib/utils";
+import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 import "./bones/registry";
 
@@ -85,6 +86,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${syne.variable} ${inter.variable}`} data-scroll-behavior="smooth">
       <body className="antialiased">
+        <NextTopLoader
+          color="#F59E0B"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #F59E0B,0 0 5px #F59E0B"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

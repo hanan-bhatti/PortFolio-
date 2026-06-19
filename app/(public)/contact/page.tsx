@@ -9,6 +9,7 @@
  */
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getSiteSettings } from "@/lib/settings";
 import ContactForm from "@/components/forms/ContactForm";
 import { SocialRow, type SocialItem } from "@/components/ui/SocialRow";
@@ -292,9 +293,11 @@ export default async function ContactPage() {
                 zIndex: 0,
               }}
             >
-              <img
+              <Image
                 src="/logo.svg"
                 alt="Hanan Bhatti Logo"
+                width={200}
+                height={200}
                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />
             </div>

@@ -10,6 +10,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import HeroPhoto from "./HeroPhoto";
 
 interface HeroSectionProps {
@@ -201,7 +202,13 @@ export default function HeroSection({
           
           {/* Large decorative logo */}
           <div className="absolute top-[-2rem] right-[-2rem] z-0 select-none pointer-events-none opacity-[0.02] w-[20vw] h-[20vw]">
-            <img src="/logo.svg" alt="" className="w-full h-full object-contain" />
+            <Image
+              src="/logo.svg"
+              alt="Hanan Bhatti Logo decoration"
+              width={200}
+              height={200}
+              className="w-full h-full object-contain"
+            />
           </div>
 
           {/* Hero Photo - desktop */}

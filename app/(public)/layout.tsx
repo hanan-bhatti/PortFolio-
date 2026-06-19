@@ -89,7 +89,7 @@ export default async function PublicLayout({ children }: { children: React.React
         photographyEnabled={settings.photography_enabled === "true"}
         resumeEnabled={resumeRow?.value !== "false"}
       />
-      <main className="relative z-10 min-h-screen">{children}</main>
+      <main className="relative min-h-screen">{children}</main>
       <Footer />
       {analyticsEnabled && <AnalyticsProvider />}
       {analyticsEnabled && <CookieBanner text={settings.cookie_consent_text} />}
