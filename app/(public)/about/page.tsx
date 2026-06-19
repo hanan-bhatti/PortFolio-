@@ -166,8 +166,33 @@ export default async function AboutPage() {
     stackList = [];
   }
 
+  const skillsArray = stackList.flatMap((block) => block.skills);
+  const socialLinks = [
+    settings.socialGithub,
+    settings.socialLinkedin,
+    settings.socialTwitter,
+  ].filter(Boolean);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Person",
+      "name": siteName,
+      "description": about.about_hero_tagline || settings.tagline,
+      "image": about.about_avatar_url || settings.profilePhotoUrl || undefined,
+      "email": settings.socialEmail || undefined,
+      "knowsAbout": skillsArray,
+      "sameAs": socialLinks,
+    },
+  };
+
   return (
     <div className="bg-bg min-h-screen text-left" style={{ background: "#0a0a0a" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       
       {/* SECTION 1: Hero */}
       <section className="relative min-h-[70vh] flex items-center pt-24 pb-12 w-full max-w-6xl mx-auto px-4 md:px-0">

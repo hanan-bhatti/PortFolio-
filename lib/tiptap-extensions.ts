@@ -21,8 +21,6 @@ import TableCell from "@tiptap/extension-table-cell";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { Node, mergeAttributes, type Extensions } from "@tiptap/core";
-import { ReactNodeViewRenderer } from "@tiptap/react";
-import ImageGalleryBlock from "@/components/admin/ImageGalleryBlock";
 
 export const lowlight = createLowlight(common);
 
@@ -83,7 +81,7 @@ const CustomTable = Table.extend({
   },
 });
 
-const ImageGalleryNode = Node.create({
+export const ImageGalleryNode = Node.create({
   name: "imageGallery",
   group: "block",
   atom: true,
@@ -130,10 +128,6 @@ const ImageGalleryNode = Node.create({
       HTMLAttributes,
       ...imageElements,
     ];
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(ImageGalleryBlock);
   },
 });
 

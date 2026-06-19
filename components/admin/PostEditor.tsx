@@ -18,7 +18,9 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { generateHTML } from "@tiptap/html";
 import Image from "next/image";
 import { toast } from "sonner";
-import { baseExtensions } from "@/lib/tiptap-extensions";
+import { baseExtensions, ImageGalleryNode } from "@/lib/tiptap-extensions";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import ImageGalleryBlock from "@/components/admin/ImageGalleryBlock";
 import { slugify, cn } from "@/lib/utils";
 import { UploadButton, useUploadThing } from "@/lib/uploadthing";
 import { compressImage, compressImages } from "@/lib/image-compress";
@@ -78,7 +80,12 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
 
   const editor = useEditor({
     extensions: [
-      ...baseExtensions(),
+      ...baseExtensions().filter((ext) => ext.name !== "imageGallery"),
+      ImageGalleryNode.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(ImageGalleryBlock);
+        },
+      }),
       CharacterCount,
       Placeholder.configure({ placeholder: "Write your post..." }),
     ],
