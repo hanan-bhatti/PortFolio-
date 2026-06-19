@@ -234,7 +234,7 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
             return compressImages(files);
           }}
           onClientUploadComplete={(res) => {
-            const url = res?.[0]?.url;
+            const url = res?.[0]?.ufsUrl ?? res?.[0]?.url;
             if (url) {
               setForm((p) => ({ ...p, [key]: url }));
               toast.success("Image uploaded successfully", { id: `resume-upload-${key}` });

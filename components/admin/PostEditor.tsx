@@ -392,7 +392,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
               return compressImages(files);
             }}
             onClientUploadComplete={(res) => {
-              const url = res[0]?.url;
+              const url = res[0]?.ufsUrl ?? res[0]?.url;
               if (url) {
                 setCoverImage(url);
                 toast.success("Cover image uploaded successfully!", { id: "cover-upload" });

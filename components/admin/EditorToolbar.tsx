@@ -220,7 +220,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
             return compressImages(files);
           }}
           onClientUploadComplete={(res) => {
-            const url = res[0]?.url;
+            const url = res[0]?.ufsUrl ?? res[0]?.url;
             if (url) {
               editor.chain().focus().setImage({ src: url }).run();
               toast.success("Image uploaded successfully", { id: "editor-upload" });

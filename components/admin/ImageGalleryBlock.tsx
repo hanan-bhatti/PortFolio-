@@ -158,7 +158,7 @@ export default function ImageGalleryBlock({ node, updateAttributes, deleteNode }
             return compressImages(files);
           }}
           onClientUploadComplete={(res) => {
-            const urls = res.map((item) => item.url).filter(Boolean);
+            const urls = res.map((item) => item.ufsUrl ?? item.url).filter(Boolean);
             if (urls.length > 0) {
               updateAttributes({ images: [...images, ...urls] });
               toast.success("Images added to gallery successfully!", { id: "gallery-upload" });

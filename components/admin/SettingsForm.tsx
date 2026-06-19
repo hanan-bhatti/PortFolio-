@@ -387,7 +387,7 @@ export default function SettingsForm({
                     return compressImages(files);
                   }}
                   onClientUploadComplete={(res) => {
-                    const url = res[0]?.url;
+                    const url = res[0]?.ufsUrl ?? res[0]?.url;
                     if (url) {
                       setValue("heroPhotoUrl", url, { shouldDirty: true });
                       toast.success("Hero photo uploaded", { id: "settings-photo-upload" });

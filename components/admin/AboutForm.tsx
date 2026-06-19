@@ -252,7 +252,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
                   return compressImages(files);
                 }}
                 onClientUploadComplete={(res) => {
-                  const url = res[0]?.url;
+                  const url = res[0]?.ufsUrl ?? res[0]?.url;
                   if (url) {
                     setValue("about_avatar_url", url, { shouldDirty: true });
                     toast.success("Avatar uploaded successfully", { id: "avatar-upload" });

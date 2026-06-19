@@ -181,7 +181,7 @@ export default function ProjectForm({ project }: { project: ProjectFormData | nu
             return compressImages(files);
           }}
           onClientUploadComplete={(res) => {
-            const url = res[0]?.url;
+            const url = res[0]?.ufsUrl ?? res[0]?.url;
             if (url) {
               setValue("coverImage", url);
               toast.success("Cover image uploaded successfully", { id: "project-upload" });
