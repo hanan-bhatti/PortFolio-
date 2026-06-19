@@ -140,85 +140,86 @@ export default async function DashboardPage() {
       <PageHeader
         title="Dashboard"
         crumbs={[{ label: "Admin" }, { label: "Dashboard" }]}
+        inlineAction={true}
         action={
           <Link
             href="/"
             target="_blank"
-            className="border border-zinc-700 bg-zinc-800/40 px-4 py-2 font-mono text-xs font-bold text-zinc-300 uppercase tracking-wider transition-colors hover:bg-zinc-800"
+            className="border border-[#262626] bg-black/40 px-2.5 py-1 font-mono text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:border-[#10B981] hover:text-[#10B981] transition-all rounded-none"
           >
-            Open Live Site ↗
+            Live Site ↗
           </Link>
         }
       />
 
       {/* Quick Actions Bar */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6">
+      <div className="border border-[#262626] bg-[#0c0c0c] p-4 sm:p-6">
         <h2 className="font-mono text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Quick Actions</h2>
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        <div className="flex flex-row overflow-x-auto gap-2 pb-2 min-w-0 md:grid md:grid-cols-6 md:gap-3 md:pb-0 scrollbar-none">
           <Link
             href="/admin/posts/new"
-            className="flex items-center justify-center gap-2 border border-[#262626] bg-black/40 px-4 py-3 font-mono text-[11px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#10B981] hover:text-[#10B981] transition-all"
+            className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/40 px-3 py-2 font-mono text-[10px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#10B981] hover:text-[#10B981] transition-all whitespace-nowrap shrink-0 rounded-none min-w-[90px] md:min-w-0"
           >
-            <FiPlus className="h-3.5 w-3.5" /> Post
+            <FiPlus className="h-3 w-3 shrink-0" /> Post
           </Link>
           <Link
             href="/admin/projects/new"
-            className="flex items-center justify-center gap-2 border border-[#262626] bg-black/40 px-4 py-3 font-mono text-[11px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all"
+            className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/40 px-3 py-2 font-mono text-[10px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all whitespace-nowrap shrink-0 rounded-none min-w-[90px] md:min-w-0"
           >
-            <FiPlus className="h-3.5 w-3.5" /> Project
+            <FiPlus className="h-3 w-3 shrink-0" /> Project
           </Link>
           <Link
             href="/admin/photography"
-            className="flex items-center justify-center gap-2 border border-[#262626] bg-black/40 px-4 py-3 font-mono text-[11px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#10B981] hover:text-[#10B981] transition-all"
+            className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/40 px-3 py-2 font-mono text-[10px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#10B981] hover:text-[#10B981] transition-all whitespace-nowrap shrink-0 rounded-none min-w-[90px] md:min-w-0"
           >
-            <FiCamera className="h-3.5 w-3.5" /> Photo
+            <FiCamera className="h-3 w-3 shrink-0" /> Photo
           </Link>
           <Link
             href="/admin/about"
-            className="flex items-center justify-center gap-2 border border-[#262626] bg-black/40 px-4 py-3 font-mono text-[11px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all"
+            className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/40 px-3 py-2 font-mono text-[10px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all whitespace-nowrap shrink-0 rounded-none min-w-[90px] md:min-w-0"
           >
-            <FiUser className="h-3.5 w-3.5" /> About
+            <FiUser className="h-3 w-3 shrink-0" /> About
           </Link>
           <Link
             href="/admin/resume"
-            className="flex items-center justify-center gap-2 border border-[#262626] bg-black/40 px-4 py-3 font-mono text-[11px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#10B981] hover:text-[#10B981] transition-all"
+            className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/40 px-3 py-2 font-mono text-[10px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#10B981] hover:text-[#10B981] transition-all whitespace-nowrap shrink-0 rounded-none min-w-[90px] md:min-w-0"
           >
-            <FiFileText className="h-3.5 w-3.5" /> Resume
+            <FiFileText className="h-3 w-3 shrink-0" /> Resume
           </Link>
           <Link
             href="/admin/settings"
-            className="flex items-center justify-center gap-2 border border-[#262626] bg-black/40 px-4 py-3 font-mono text-[11px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all"
+            className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/40 px-3 py-2 font-mono text-[10px] font-bold text-zinc-300 uppercase tracking-wider hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all whitespace-nowrap shrink-0 rounded-none min-w-[90px] md:min-w-0"
           >
-            <FiSettings className="h-3.5 w-3.5" /> Settings
+            <FiSettings className="h-3 w-3 shrink-0" /> Settings
           </Link>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="border border-[#262626] bg-[#0c0c0c] p-6 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <p className="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{stat.label}</p>
-              <stat.icon className={cn("h-4 w-4", stat.iconColor)} />
+          <div key={stat.label} className="border border-[#262626] bg-[#0c0c0c] p-4 flex flex-col justify-between h-[115px] rounded-none">
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-mono text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-snug">{stat.label}</p>
+              <stat.icon className={cn("h-4 w-4 shrink-0 mt-0.5", stat.iconColor)} />
             </div>
-            <div className="mt-4">
-              <p className="text-3xl font-bold font-mono text-white tracking-tight">{stat.value}</p>
+            <div className="mt-2">
+              <p className="text-2xl sm:text-3xl font-bold font-mono text-white tracking-tight leading-none">{stat.value}</p>
               {stat.subtext ? (
-                <p className="mt-1 font-mono text-[9px] text-zinc-500 uppercase tracking-wide">{stat.subtext}</p>
+                <p className="mt-1 font-mono text-[8px] sm:text-[9px] text-zinc-500 uppercase tracking-wide leading-none">{stat.subtext}</p>
               ) : null}
             </div>
           </div>
         ))}
 
         {/* 30-Day Activity Sparkline Card */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <p className="font-mono text-[10px] font-bold text-zinc-500 uppercase tracking-widest">30-Day Activity</p>
-            <FiActivity className="h-4 w-4 text-[#10B981]" />
+        <div className="border border-[#262626] bg-[#0c0c0c] p-4 flex flex-col justify-between col-span-1 md:col-span-2 lg:col-span-1 h-[115px] rounded-none">
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-mono text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-snug">30-Day Activity</p>
+            <FiActivity className="h-4 w-4 text-[#10B981] shrink-0 mt-0.5" />
           </div>
-          <div className="mt-4 flex-1 flex flex-col justify-end">
-            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-10 overflow-visible">
+          <div className="mt-2 flex-1 flex flex-col justify-end">
+            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-8 overflow-visible">
               <defs>
                 <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
@@ -233,7 +234,7 @@ export default async function DashboardPage() {
                 points={points}
               />
             </svg>
-            <div className="mt-1.5 flex justify-between text-[8px] font-mono text-zinc-600 uppercase tracking-wide">
+            <div className="mt-1 flex justify-between text-[8px] font-mono text-zinc-650 uppercase tracking-wide leading-none">
               <span>30d ago</span>
               <span>Today</span>
             </div>
@@ -241,10 +242,11 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+
       {/* Panels Grid */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 min-w-0">
         {/* Top Pages This Week */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6">
+        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
           <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
             <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Top Pages (This Week)</h2>
             <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
@@ -254,11 +256,11 @@ export default async function DashboardPage() {
           <div className="space-y-4">
             {topPages.map((page) => (
               <div key={page.path} className="space-y-1">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="truncate text-zinc-300" title={page.path}>
+                <div className="flex justify-between items-center text-xs font-mono gap-4 min-w-0">
+                  <span className="truncate text-zinc-300 flex-1" title={page.path}>
                     {page.path}
                   </span>
-                  <span className="text-zinc-500">{page._count.path} views</span>
+                  <span className="text-zinc-500 shrink-0">{page._count.path} views</span>
                 </div>
                 {/* Visual bar */}
                 <div className="h-1 bg-zinc-900">
@@ -278,7 +280,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Recent Visitors */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6">
+        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
           <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
             <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Recent Visitors</h2>
             <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
@@ -287,20 +289,20 @@ export default async function DashboardPage() {
           </div>
           <ul className="divide-y divide-[#262626]">
             {recentVisitors.map((visitor) => (
-              <li key={visitor.id} className="py-3 flex items-center justify-between text-xs font-mono">
-                <div className="flex flex-col">
-                  <span className="text-zinc-200 font-medium">
+              <li key={visitor.id} className="py-3 flex items-start justify-between gap-4 text-xs font-mono">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-zinc-200 font-medium truncate">
                     {visitor.country || "Unknown Location"}
                   </span>
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide mt-0.5">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide mt-0.5 truncate">
                     {visitor.device || "desktop"} • {visitor.browser || "unknown"}
                   </span>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <span className="text-zinc-400">
                     {formatDate(visitor.lastSeen)}
                   </span>
-                  <span className="block text-[10px] text-zinc-600 mt-0.5">
+                  <span className="block text-[10px] text-zinc-500 mt-0.5">
                     {visitor.visits} visits
                   </span>
                 </div>
@@ -313,7 +315,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Recent Messages */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6">
+        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
           <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
             <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Recent Messages</h2>
             <Link href="/admin/messages" className="font-mono text-[10px] text-[#F59E0B] uppercase tracking-wider hover:underline">
@@ -323,14 +325,14 @@ export default async function DashboardPage() {
           <ul className="divide-y divide-[#262626]">
             {recentMessages.map((msg) => (
               <li key={msg.id} className="py-3">
-                <div className="flex items-center justify-between font-mono text-xs">
-                  <p className="font-medium text-zinc-200 flex items-center gap-2">
+                <div className="flex items-center justify-between gap-4 font-mono text-xs min-w-0">
+                  <p className="font-medium text-zinc-200 flex items-center gap-2 truncate min-w-0 flex-1">
                     {!msg.read ? (
-                      <span className="inline-block h-1.5 w-1.5 bg-[#10B981]" />
+                      <span className="inline-block h-1.5 w-1.5 bg-[#10B981] shrink-0" />
                     ) : null}
-                    {msg.name}
+                    <span className="truncate">{msg.name}</span>
                   </p>
-                  <span className="text-[10px] text-zinc-500">{formatDate(msg.createdAt)}</span>
+                  <span className="text-[10px] text-zinc-500 shrink-0">{formatDate(msg.createdAt)}</span>
                 </div>
                 <p className="mt-1 truncate font-mono text-[11px] text-zinc-400">{msg.subject}</p>
               </li>
@@ -342,7 +344,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Recent Posts */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6">
+        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
           <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
             <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Recent Posts</h2>
             <Link href="/admin/posts" className="font-mono text-[10px] text-[#F59E0B] uppercase tracking-wider hover:underline">

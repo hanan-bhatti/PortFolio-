@@ -20,7 +20,9 @@ import TableHeader from "@tiptap/extension-table-header";
 import TableCell from "@tiptap/extension-table-cell";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
-import { mergeAttributes, type Extensions } from "@tiptap/core";
+import { Node, mergeAttributes, type Extensions } from "@tiptap/core";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import ImageGalleryBlock from "@/components/admin/ImageGalleryBlock";
 
 export const lowlight = createLowlight(common);
 
@@ -65,6 +67,76 @@ const CustomImage = Image.extend({
   }
 });
 
+const CustomTable = Table.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      class: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("class"),
+        renderHTML: (attributes) => {
+          if (!attributes.class) return {};
+          return { class: attributes.class };
+        },
+      },
+    };
+  },
+});
+
+const ImageGalleryNode = Node.create({
+  name: "imageGallery",
+  group: "block",
+  atom: true,
+
+  addAttributes() {
+    return {
+      images: {
+        default: [],
+        parseHTML: (element) => {
+          const imgs = element.querySelectorAll("img");
+          return Array.from(imgs).map((img) => img.getAttribute("src") || "");
+        },
+        renderHTML: (attributes) => ({}),
+      },
+      columns: {
+        default: 3,
+        parseHTML: (element) => {
+          const className = element.getAttribute("class") || "";
+          const match = className.match(/gallery-cols-(\d+)/);
+          return (match && match[1]) ? parseInt(match[1], 10) : 3;
+        },
+        renderHTML: (attributes) => ({ class: `image-gallery-block gallery-cols-${attributes.columns}` }),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "div.image-gallery-block",
+      },
+    ];
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    const images = node.attrs.images || [];
+    const imageElements = images.map((src: string) => [
+      "div",
+      { class: "gallery-item" },
+      ["img", { src, class: "gallery-image" }]
+    ]);
+    return [
+      "div",
+      HTMLAttributes,
+      ...imageElements,
+    ];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageGalleryBlock);
+  },
+});
+
 export function baseExtensions(): Extensions {
   return [
     StarterKit.configure({ codeBlock: false }),
@@ -74,11 +146,12 @@ export function baseExtensions(): Extensions {
     Highlight,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     Youtube.configure({ nocookie: true, width: 640, height: 360 }),
-    Table.configure({ resizable: true }),
+    CustomTable.configure({ resizable: true }),
     TableRow,
     TableHeader,
     TableCell,
     CodeBlockLowlight.configure({ lowlight }),
+    ImageGalleryNode,
   ];
 }
 

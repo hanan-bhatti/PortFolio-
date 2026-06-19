@@ -177,7 +177,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
     "w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-4 py-2.5 font-mono text-xs text-white placeholder-zinc-600 outline-none focus:border-amber transition-colors";
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
+    <div className="grid gap-6 xl:grid-cols-[1fr_320px] pb-24 xl:pb-0">
       <div className="min-w-0 space-y-4">
         <input
           value={title}
@@ -231,57 +231,139 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
               </button>
             </div>
           </div>
-          {showPreview ? (
-            <div className="prose-blog min-h-[420px] px-4 py-3 text-zinc-300" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-          ) : (
-            <>
-              {editor ? <EditorToolbar editor={editor} /> : null}
-              <EditorContent editor={editor} />
-              {editor && (
-                <BubbleMenu
-                  editor={editor}
-                  tippyOptions={{ duration: 100 }}
-                  shouldShow={({ editor }) => editor.isActive("image")}
-                >
-                  <div className="flex items-center gap-1 border border-[#262626] bg-[#0c0c0c] p-1 font-mono text-xs shadow-lg">
-                    <span className="px-2 text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Size:</span>
-                    {(["25%", "50%", "75%", "100%"] as const).map((sz) => (
-                      <button
-                        key={sz}
-                        type="button"
-                        onClick={() => editor.chain().focus().updateAttributes("image", { width: sz }).run()}
-                        className={cn(
-                          "px-2 py-0.5 hover:bg-white/5 transition-colors cursor-pointer text-[10px]",
-                          editor.getAttributes("image").width === sz || (!editor.getAttributes("image").width && sz === "100%")
-                            ? "bg-amber text-black font-bold"
-                            : "text-zinc-300"
-                        )}
-                      >
-                        {sz}
-                      </button>
-                    ))}
-                    <span className="mx-1 h-4 w-px bg-[#262626]" />
-                    <span className="px-2 text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Align:</span>
-                    {(["left", "center", "right"] as const).map((al) => (
-                      <button
-                        key={al}
-                        type="button"
-                        onClick={() => editor.chain().focus().updateAttributes("image", { alignment: al }).run()}
-                        className={cn(
-                          "px-2 py-0.5 hover:bg-white/5 transition-colors cursor-pointer text-[10px] capitalize",
-                          editor.getAttributes("image").alignment === al || (!editor.getAttributes("image").alignment && al === "center")
-                            ? "bg-amber text-black font-bold"
-                            : "text-zinc-300"
-                        )}
-                      >
-                        {al}
-                      </button>
-                    ))}
-                  </div>
-                </BubbleMenu>
-              )}
-            </>
-          )}
+          <div className={cn("prose-blog min-h-[420px] px-4 py-3 text-zinc-300", showPreview ? "block" : "hidden")} dangerouslySetInnerHTML={{ __html: previewHtml }} />
+          <div className={!showPreview ? "block" : "hidden"}>
+            {editor ? <EditorToolbar editor={editor} /> : null}
+            <EditorContent editor={editor} />
+            {editor && (
+              <BubbleMenu
+                editor={editor}
+                tippyOptions={{ duration: 100 }}
+                shouldShow={({ editor }) => editor.isActive("image")}
+              >
+                <div className="flex items-center gap-1 border border-[#262626] bg-[#0c0c0c] p-1 font-mono text-xs shadow-lg">
+                  <span className="px-2 text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Size:</span>
+                  {(["25%", "50%", "75%", "100%"] as const).map((sz) => (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => editor.chain().focus().updateAttributes("image", { width: sz }).run()}
+                      className={cn(
+                        "px-2 py-0.5 hover:bg-white/5 transition-colors cursor-pointer text-[10px]",
+                        editor.getAttributes("image").width === sz || (!editor.getAttributes("image").width && sz === "100%")
+                          ? "bg-amber text-black font-bold"
+                          : "text-zinc-300"
+                      )}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                  <span className="mx-1 h-4 w-px bg-[#262626]" />
+                  <span className="px-2 text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Align:</span>
+                  {(["left", "center", "right"] as const).map((al) => (
+                    <button
+                      key={al}
+                      type="button"
+                      onClick={() => editor.chain().focus().updateAttributes("image", { alignment: al }).run()}
+                      className={cn(
+                        "px-2 py-0.5 hover:bg-white/5 transition-colors cursor-pointer text-[10px] capitalize",
+                        editor.getAttributes("image").alignment === al || (!editor.getAttributes("image").alignment && al === "center")
+                          ? "bg-amber text-black font-bold"
+                          : "text-zinc-300"
+                      )}
+                    >
+                      {al}
+                    </button>
+                  ))}
+                </div>
+              </BubbleMenu>
+            )}
+            {editor && (
+              <BubbleMenu
+                editor={editor}
+                tippyOptions={{ duration: 100 }}
+                shouldShow={({ editor }) => editor.isActive("table")}
+              >
+                <div className="flex flex-wrap items-center gap-1 border border-[#262626] bg-[#0c0c0c] p-1 font-mono text-xs shadow-lg max-w-sm sm:max-w-md">
+                  <button
+                    type="button"
+                    title="Add Row Above"
+                    onClick={() => editor.chain().focus().addRowBefore().run()}
+                    className="rounded-none px-2 py-1 text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    +Row Above
+                  </button>
+                  <button
+                    type="button"
+                    title="Add Row Below"
+                    onClick={() => editor.chain().focus().addRowAfter().run()}
+                    className="rounded-none px-2 py-1 text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    +Row Below
+                  </button>
+                  <span className="mx-0.5 h-4 w-px bg-[#262626]" />
+                  <button
+                    type="button"
+                    title="Add Column Left"
+                    onClick={() => editor.chain().focus().addColumnBefore().run()}
+                    className="rounded-none px-2 py-1 text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    +Col Left
+                  </button>
+                  <button
+                    type="button"
+                    title="Add Column Right"
+                    onClick={() => editor.chain().focus().addColumnAfter().run()}
+                    className="rounded-none px-2 py-1 text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    +Col Right
+                  </button>
+                  <span className="mx-0.5 h-4 w-px bg-[#262626]" />
+                  <button
+                    type="button"
+                    title="Merge Cells"
+                    onClick={() => editor.chain().focus().mergeCells().run()}
+                    className="rounded-none px-2 py-1 text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Merge
+                  </button>
+                  <button
+                    type="button"
+                    title="Split Cell"
+                    onClick={() => editor.chain().focus().splitCell().run()}
+                    className="rounded-none px-2 py-1 text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Split
+                  </button>
+                  <span className="mx-0.5 h-4 w-px bg-[#262626]" />
+                  <button
+                    type="button"
+                    title="Delete Row"
+                    onClick={() => editor.chain().focus().deleteRow().run()}
+                    className="rounded-none px-2 py-1 text-red-400 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Del Row
+                  </button>
+                  <button
+                    type="button"
+                    title="Delete Column"
+                    onClick={() => editor.chain().focus().deleteColumn().run()}
+                    className="rounded-none px-2 py-1 text-red-400 hover:bg-white/5 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Del Col
+                  </button>
+                  <button
+                    type="button"
+                    title="Delete Table"
+                    onClick={() => editor.chain().focus().deleteTable().run()}
+                    className="rounded-none px-2 py-1 bg-red-950/40 text-red-400 hover:bg-red-900/40 border border-red-500/20 transition-colors cursor-pointer text-[10px]"
+                  >
+                    Delete Table
+                  </button>
+                </div>
+              </BubbleMenu>
+            )}
+          </div>
           <div className="border-t border-[#262626] px-4 py-2 text-right font-mono text-[10px] text-zinc-550">
             {charCount} characters
           </div>
@@ -359,7 +441,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           />
         </div>
 
-        <div className="space-y-3 rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
+        <div className="hidden xl:block space-y-3 rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
           <button
             type="button"
             disabled={isPending}
@@ -378,6 +460,26 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           </button>
         </div>
       </aside>
+
+      {/* Sticky Bottom Actions Bar for Mobile */}
+      <div className="xl:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c0c0c] border-t border-[#262626] p-4 flex gap-3">
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => save(false)}
+          className="flex-1 rounded-none border border-[#262626] bg-black/40 py-3 font-mono text-xs font-bold uppercase tracking-widest text-zinc-300 hover:bg-zinc-900 transition-colors disabled:opacity-50 cursor-pointer text-center"
+        >
+          {isPending ? "Saving..." : "Draft"}
+        </button>
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={() => save(true)}
+          className="flex-1 rounded-none bg-amber border border-amber py-3 font-mono text-xs font-bold uppercase tracking-widest text-black hover:bg-amber/90 transition-colors disabled:opacity-50 cursor-pointer text-center"
+        >
+          {isPending ? "Saving..." : "Publish"}
+        </button>
+      </div>
     </div>
   );
 }

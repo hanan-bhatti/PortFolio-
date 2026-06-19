@@ -79,12 +79,12 @@ export default function ExperienceManager({ initialExperiences }: ExperienceMana
   return (
     <div className="space-y-6">
       {/* View Toggle and Create Row */}
-      <div className="flex items-center justify-between border-b border-[#262626] pb-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#262626] pb-4">
         {/* Toggle */}
-        <div className="flex gap-1 border border-[#262626] p-1 bg-black/40 font-mono text-[11px] font-semibold">
+        <div className="flex gap-1 border border-[#262626] p-1 bg-black/40 font-mono text-[11px] font-semibold self-start">
           <button
             onClick={() => setViewMode("grid")}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`px-3 py-1.5 transition-colors rounded-none ${
               viewMode === "grid"
                 ? "bg-[#F59E0B] text-black font-bold"
                 : "text-zinc-400 hover:text-white"
@@ -94,7 +94,7 @@ export default function ExperienceManager({ initialExperiences }: ExperienceMana
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`px-3 py-1.5 transition-colors rounded-none ${
               viewMode === "list"
                 ? "bg-[#F59E0B] text-black font-bold"
                 : "text-zinc-400 hover:text-white"
@@ -107,7 +107,7 @@ export default function ExperienceManager({ initialExperiences }: ExperienceMana
         {/* Add Experience */}
         <Link
           href="/admin/experience/new"
-          className="border border-[#10B981] bg-[#10B981]/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#10B981] hover:bg-[#10B981]/30 transition-colors"
+          className="border border-[#10B981] bg-[#10B981]/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#10B981] hover:bg-[#10B981]/30 transition-colors rounded-none text-center w-full sm:w-auto"
         >
           + Add Experience
         </Link>

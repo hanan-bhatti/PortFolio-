@@ -3,6 +3,7 @@
 /**
  * @file components/admin/MessagesTable.tsx
  * @description React component for MessagesTable.tsx under the admin category.
+ * Supports mobile layouts, custom accent colors, and sharp borders.
  * 
  * @exports
  * - AdminMessageRow: Type/Interface definition
@@ -55,15 +56,21 @@ export default function MessagesTable({ messages }: { messages: AdminMessageRow[
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-white/10">
-        <ul className="divide-y divide-white/5">
+      <div className="overflow-hidden border border-[#262626] bg-[#0c0c0c] rounded-none">
+        <ul className="divide-y divide-[#262626]">
           {messages.map((msg) => (
             <li key={msg.id}>
-              <button type="button" onClick={() => open(msg)} className="flex w-full items-center gap-4 px-4 py-3 text-left hover:bg-white/[0.03]">
-                <span className={cn("h-2 w-2 shrink-0 rounded-full", msg.read ? "bg-zinc-700" : "bg-cyan-400")} />
-                <span className="w-40 shrink-0 truncate text-sm font-medium text-zinc-200">{msg.name}</span>
-                <span className="min-w-0 flex-1 truncate text-sm text-zinc-400">{msg.subject}</span>
-                <span className="shrink-0 text-xs text-zinc-600">{formatDate(msg.createdAt)}</span>
+              <button
+                type="button"
+                onClick={() => open(msg)}
+                className="flex w-full items-start sm:items-center gap-3 sm:gap-4 px-4 py-3 text-left hover:bg-white/[0.02]"
+              >
+                <span className={cn("h-2 w-2 shrink-0 rounded-none mt-1.5 sm:mt-0", msg.read ? "bg-zinc-700" : "bg-[#F59E0B]")} />
+                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
+                  <span className="w-full sm:w-40 shrink-0 truncate text-sm font-medium text-zinc-200">{msg.name}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-zinc-400">{msg.subject}</span>
+                  <span className="shrink-0 text-[10px] sm:text-xs text-zinc-500 sm:text-zinc-600 font-mono mt-0.5 sm:mt-0">{formatDate(msg.createdAt)}</span>
+                </div>
               </button>
             </li>
           ))}
@@ -73,13 +80,13 @@ export default function MessagesTable({ messages }: { messages: AdminMessageRow[
 
       {selected ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setSelected(null)}>
-          <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#15151f] p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg border border-[#262626] bg-[#0c0c0c] p-6 rounded-none" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="font-semibold text-white">{selected.subject}</h3>
                 <p className="mt-1 text-sm text-zinc-400">
                   {selected.name} ·{" "}
-                  <a href={`mailto:${selected.email}`} className="text-cyan-400 hover:underline">
+                  <a href={`mailto:${selected.email}`} className="text-[#F59E0B] hover:underline">
                     {selected.email}
                   </a>
                 </p>
@@ -101,11 +108,16 @@ export default function MessagesTable({ messages }: { messages: AdminMessageRow[
                     router.refresh();
                   });
                 }}
-                className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-50"
+                className="border border-[#262626] px-4 py-2 text-sm text-zinc-300 hover:bg-white/5 disabled:opacity-50 rounded-none transition-colors"
               >
                 Mark as {selected.read ? "unread" : "read"}
               </button>
-              <button type="button" disabled={isPending} onClick={() => onDelete(selected.id)} className="rounded-lg bg-red-600/80 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50">
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => onDelete(selected.id)}
+                className="bg-red-950/40 border border-red-800 text-red-400 px-4 py-2 text-sm font-medium hover:bg-red-900/40 disabled:opacity-50 rounded-none transition-colors"
+              >
                 Delete
               </button>
             </div>

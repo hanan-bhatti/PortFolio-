@@ -187,32 +187,37 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6" noValidate>
       
       {/* Editorial Navigation Tabs */}
-      <div className="flex flex-wrap gap-px border-b border-[#262626] bg-[#262626]/20 font-mono text-[11px] font-bold uppercase tracking-wider">
-        {["hero", "story", "status", "cta", "stack"].map((tab) => {
-          const labels = {
-            hero: "Hero & Avatar",
-            story: "Your Story",
-            status: "Currently & Beyond",
-            cta: "CTA Settings",
-            stack: "Tech Stack",
-          };
-          const isActive = activeTab === tab;
-          return (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setTab(tab)}
-              className={cn(
-                "border-b-2 px-5 py-3 transition-colors cursor-pointer",
-                isActive
-                  ? "border-[#F59E0B] bg-[#0c0c0c] text-white"
-                  : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-[#0c0c0c]/40"
-              )}
-            >
-              {labels[tab as keyof typeof labels]}
-            </button>
-          );
-        })}
+      <div className="relative border-b border-[#262626]">
+        {/* Right Fade indicator on mobile */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none z-10 md:hidden" />
+        
+        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-none gap-px bg-[#262626]/20 font-mono text-[11px] font-bold uppercase tracking-wider min-w-0 pr-8 md:pr-0">
+          {["hero", "story", "status", "cta", "stack"].map((tab) => {
+            const labels = {
+              hero: "Hero & Avatar",
+              story: "Your Story",
+              status: "Currently & Beyond",
+              cta: "CTA Settings",
+              stack: "Tech Stack",
+            };
+            const isActive = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setTab(tab)}
+                className={cn(
+                  "border-b-2 px-5 py-3 transition-colors cursor-pointer whitespace-nowrap shrink-0",
+                  isActive
+                    ? "border-[#F59E0B] bg-[#0c0c0c] text-white"
+                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-[#0c0c0c]/40"
+                )}
+              >
+                {labels[tab as keyof typeof labels]}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* HERO SECTION */}

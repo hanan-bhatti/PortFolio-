@@ -45,36 +45,38 @@ function SortableRow({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn(
-        "flex items-center gap-3 border-b border-[#262626] bg-[#0c0c0c] px-4 py-3 font-mono text-xs",
+        "flex flex-col sm:flex-row sm:items-center gap-3 border-b border-[#262626] bg-[#0c0c0c] px-4 py-3 font-mono text-xs",
         isDragging && "z-10 opacity-70 border-[#F59E0B]"
       )}
     >
-      <button
-        type="button"
-        {...attributes}
-        {...listeners}
-        className="cursor-grab text-zinc-650 hover:text-zinc-300 p-1"
-        title="Drag to reorder"
-      >
-        <FiMove className="h-3.5 w-3.5" />
-      </button>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-white">
-          {project.title}
-          {project.featured ? (
-            <span className="ml-2 border border-[#F59E0B] bg-[#F59E0B]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#F59E0B] uppercase">
-              Featured
-            </span>
-          ) : null}
-        </p>
-        <p className="truncate text-[10px] text-zinc-500 mt-0.5">
-          /{project.slug} • {project.techStack.join(", ")}
-        </p>
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab text-zinc-500 hover:text-zinc-300 p-1 shrink-0"
+          title="Drag to reorder"
+        >
+          <FiMove className="h-3.5 w-3.5" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium text-white">
+            {project.title}
+            {project.featured ? (
+              <span className="ml-2 border border-[#F59E0B] bg-[#F59E0B]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#F59E0B] uppercase">
+                Featured
+              </span>
+            ) : null}
+          </p>
+          <p className="truncate text-[10px] text-zinc-500 mt-0.5">
+            /{project.slug} • {project.techStack.join(", ")}
+          </p>
+        </div>
       </div>
-      <div className="flex gap-2 font-bold uppercase tracking-wider text-[10px]">
+      <div className="flex gap-2 font-bold uppercase tracking-wider text-[10px] pl-9 sm:pl-0 self-end sm:self-auto">
         <Link
           href={`/admin/projects/${project.id}/edit`}
-          className="border border-[#262626] bg-black/30 px-2.5 py-1 text-zinc-350 hover:border-[#F59E0B] hover:text-[#F59E0B] transition-colors"
+          className="border border-[#262626] bg-black/30 px-2.5 py-1 text-zinc-300 hover:border-[#F59E0B] hover:text-[#F59E0B] transition-colors rounded-none"
         >
           Edit
         </Link>
@@ -82,7 +84,7 @@ function SortableRow({
           type="button"
           disabled={disabled}
           onClick={() => onDeleteRequest(project.id, project.title)}
-          className="border border-red-500/30 bg-red-500/5 px-2.5 py-1 text-red-400 hover:border-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-30"
+          className="border border-red-500/30 bg-red-500/5 px-2.5 py-1 text-red-400 hover:border-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-30 rounded-none"
         >
           Delete
         </button>
@@ -167,7 +169,7 @@ export default function ProjectsManager({ initial }: { initial: AdminProjectRow[
     <div className="space-y-4">
       {/* Layout Toggle Bar */}
       <div className="flex justify-between items-center bg-[#0c0c0c] border border-[#262626] p-4 font-mono text-[10px] font-bold uppercase tracking-wider">
-        <span className="text-zinc-555">
+        <span className="text-zinc-500 hidden sm:inline">
           {activeLayout === "list" ? "Drag rows to reorder portfolio" : "Grid overview of projects"}
         </span>
         <div className="flex gap-px bg-[#262626]">

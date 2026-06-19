@@ -9,6 +9,7 @@
  */
 
 import { useState, useTransition, useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SkillIcon from "@/components/ui/SkillIcon";
 import EditorialModal from "./EditorialModal";
@@ -850,34 +851,45 @@ interface Props {
 }
 
 export default function ResumeAdmin({ settings, education, certifications, experience, skills, downloads }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>("Personal");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const activeTab = (searchParams.get("tab") as Tab) || "Personal";
   const [currentSettings, setCurrentSettings] = useState(settings);
+
+  const setActiveTab = (tab: Tab) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <div>
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--border)", marginBottom: 28, overflowX: "auto" }}>
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: "10px 20px",
-              border: "none",
-              borderBottom: activeTab === tab ? "2px solid var(--amber)" : "2px solid transparent",
-              background: "transparent",
-              color: activeTab === tab ? "var(--amber)" : "var(--text-muted)",
-              fontFamily: "Inter, sans-serif",
-              fontSize: 13,
-              fontWeight: activeTab === tab ? 700 : 400,
-              cursor: "pointer",
-              transition: "color 0.15s ease",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="relative border-b border-[#262626] mb-7">
+        {/* Right Fade indicator on mobile */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none z-10 md:hidden" />
+        
+        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-none gap-px bg-[#262626]/20 font-mono text-[11px] font-bold uppercase tracking-wider min-w-0 pr-8 md:pr-0">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`border-b-2 px-5 py-3 transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
+                  isActive
+                    ? "border-[#F59E0B] bg-[#0c0c0c] text-white"
+                    : "border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-[#0c0c0c]/40"
+                }`}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Tab content */}

@@ -334,6 +334,57 @@ body {
 }
 .prose-blog th { background: rgba(255, 255, 255, 0.03); }
 
+/* Editorial Image Grid overrides for Tiptap Table */
+.prose-blog table.image-grid {
+  border-collapse: separate;
+  border-spacing: 6px;
+  border: none !important;
+  margin: 1.2em 0;
+}
+.prose-blog table.image-grid tr {
+  border: none !important;
+}
+.prose-blog table.image-grid th,
+.prose-blog table.image-grid td {
+  border: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+.prose-blog table.image-grid td img {
+  margin: 0 !important;
+  width: 100% !important;
+  display: block;
+  border-radius: 0px !important;
+}
+
+/* Public & Editor Image Gallery Block Grid Layout */
+.prose-blog .image-gallery-block {
+  display: grid;
+  gap: 12px;
+  margin: 1.6em 0;
+}
+.prose-blog .image-gallery-block.gallery-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.prose-blog .image-gallery-block.gallery-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.prose-blog .image-gallery-block.gallery-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.prose-blog .image-gallery-block .gallery-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+.prose-blog .image-gallery-block .gallery-item img.gallery-image {
+  margin: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0px !important;
+}
+
 /* Tiptap Table Column Resize & Cell Selection */
 .prose-blog .column-resize-handle {
   position: absolute;
@@ -411,6 +462,15 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: #262626 #0a0a0a;
+}
+
+/* Utility to hide scrollbars */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom Selection Highlights */

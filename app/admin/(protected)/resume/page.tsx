@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { getResumeSettings } from "@/lib/resume";
 import PageHeader from "@/components/admin/PageHeader";
 import ResumeAdmin from "@/components/admin/ResumeAdmin";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -49,22 +50,24 @@ export default async function AdminResumePage() {
           </a>
         }
       />
-      <ResumeAdmin
-        settings={settings}
-        education={education}
-        certifications={certifications}
-        experience={experience.map((e) => ({
-          ...e,
-          startDate: e.startDate.toISOString(),
-          endDate: e.endDate?.toISOString() ?? null,
-        }))}
-        skills={skills}
-        downloads={downloads.map((d) => ({
-          ...d,
-          downloadedAt: d.downloadedAt.toISOString(),
-          verifiedAt: d.verifiedAt?.toISOString() ?? null,
-        }))}
-      />
+      <Suspense fallback={<div className="h-40 bg-[#0c0c0c] border border-[#262626] animate-pulse" />}>
+        <ResumeAdmin
+          settings={settings}
+          education={education}
+          certifications={certifications}
+          experience={experience.map((e) => ({
+            ...e,
+            startDate: e.startDate.toISOString(),
+            endDate: e.endDate?.toISOString() ?? null,
+          }))}
+          skills={skills}
+          downloads={downloads.map((d) => ({
+            ...d,
+            downloadedAt: d.downloadedAt.toISOString(),
+            verifiedAt: d.verifiedAt?.toISOString() ?? null,
+          }))}
+        />
+      </Suspense>
     </div>
   );
 }

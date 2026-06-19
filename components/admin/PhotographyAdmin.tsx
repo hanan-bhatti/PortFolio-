@@ -215,7 +215,7 @@ export default function PhotographyAdmin({
         <h2 className="mb-6 font-syne text-sm font-bold text-white uppercase tracking-wider">Page Settings</h2>
 
         {/* Enabled toggle */}
-        <div className="mb-5 flex items-center justify-between border-b border-[#262626] pb-4">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#262626] pb-4">
           <div>
             <h3 className="font-bold text-white uppercase tracking-wider">Enable Photography Section</h3>
             <p className="text-[10px] text-zinc-550">Show or hide the photography link and page on your website.</p>
@@ -223,7 +223,7 @@ export default function PhotographyAdmin({
           <button
             type="button"
             onClick={() => setEnabled(!enabled)}
-            className={`border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition-all ${
+            className={`border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider transition-all self-start sm:self-auto rounded-none ${
               enabled
                 ? "border-[#10B981] bg-[#10B981]/10 text-[#10B981]"
                 : "border-[#262626] bg-black text-zinc-500 hover:border-zinc-500"

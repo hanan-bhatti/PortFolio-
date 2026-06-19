@@ -23,9 +23,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const unreadCount = await prisma.contactMessage.count({ where: { read: false } });
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a] text-zinc-200">
+    <div className="flex min-h-screen flex-col md:flex-row bg-[#0a0a0a] text-zinc-200">
       <Sidebar unreadCount={unreadCount} userEmail={session.user.email ?? "admin"} />
-      <div className="min-w-0 flex-1 p-8">{children}</div>
+      <main className="min-w-0 flex-1 p-4 sm:p-6 md:p-8">{children}</main>
     </div>
   );
 }

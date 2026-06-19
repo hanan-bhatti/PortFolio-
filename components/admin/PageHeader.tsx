@@ -15,9 +15,19 @@ export interface Crumb {
   href?: string;
 }
 
-export default function PageHeader({ title, crumbs, action }: { title: string; crumbs: Crumb[]; action?: React.ReactNode }) {
+export default function PageHeader({
+  title,
+  crumbs,
+  action,
+  inlineAction = false,
+}: {
+  title: string;
+  crumbs: Crumb[];
+  action?: React.ReactNode;
+  inlineAction?: boolean;
+}) {
   return (
-    <div className="mb-8 flex items-end justify-between">
+    <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div>
         <nav className="mb-1 flex items-center gap-1.5 text-xs text-zinc-500">
           {crumbs.map((crumb, i) => (
@@ -33,9 +43,14 @@ export default function PageHeader({ title, crumbs, action }: { title: string; c
             </Fragment>
           ))}
         </nav>
-        <h1 className="text-2xl font-bold text-white">{title}</h1>
+        <div className="flex items-center gap-3 flex-nowrap">
+          <h1 className="text-2xl font-bold text-white shrink-0">{title}</h1>
+          {inlineAction && action ? (
+            <div className="shrink-0">{action}</div>
+          ) : null}
+        </div>
       </div>
-      {action ?? null}
+      {!inlineAction && action ? action : null}
     </div>
   );
 }
