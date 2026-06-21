@@ -1,9 +1,9 @@
 /**
  * @file app/admin/(protected)/analytics/clicks/page.tsx
- * @description Admin page for viewing tracked links, share button clicks, and code copy statistics.
+ * @description Admin page for post-wise grouped interaction metrics, link clicks, shares, and code copy statistics.
  * 
  * @exports
- * - AnalyticsInteractionsPage (default): Main React component or function
+ * - AnalyticsInteractionsPage (default): Main React component
  * - dynamic: Constant / Helper
  */
 
@@ -15,34 +15,80 @@ import { formatDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function AnalyticsInteractionsPage() {
-  const [shortLinks, copyEvents, totalCopies] = await Promise.all([
-    prisma.shortLink.findMany({
-      include: {
-        post: { select: { title: true } },
-        clicks: {
-          select: { id: true },
+  const [posts, totalCopies, totalLinkClicks, totalShareClicks] = await Promise.all([
+    prisma.post.findMany({
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        createdAt: true,
+        shortLinks: {
+          select: {
+            id: true,
+            type: true,
+            clicks: { select: { createdAt: true } },
+          },
+        },
+        codeCopyEvents: {
+          select: {
+            id: true,
+            createdAt: true,
+          },
         },
       },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.codeCopyEvent.findMany({
-      include: {
-        post: { select: { title: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    }),
     prisma.codeCopyEvent.count(),
+    prisma.shortLinkClick.count({ where: { shortLink: { type: "link" } } }),
+    prisma.shortLinkClick.count({ where: { shortLink: { type: "share" } } }),
   ]);
 
-  // Aggregate metrics
-  const totalLinkClicks = shortLinks
-    .filter((l) => l.type === "link")
-    .reduce((sum, l) => sum + l.clicks.length, 0);
+  // Aggregate stats per post
+  const postsWithStats = posts.map((post) => {
+    const linkClicks = post.shortLinks
+      .filter((l) => l.type === "link")
+      .reduce((sum, l) => sum + l.clicks.length, 0);
 
-  const totalShareClicks = shortLinks
-    .filter((l) => l.type === "share")
-    .reduce((sum, l) => sum + l.clicks.length, 0);
+    const shareClicks = post.shortLinks
+      .filter((l) => l.type === "share")
+      .reduce((sum, l) => sum + l.clicks.length, 0);
+
+    const codeCopies = post.codeCopyEvents.length;
+    const totalInteractions = linkClicks + shareClicks + codeCopies;
+
+    // Find last activity date
+    const clickTimes = post.shortLinks.flatMap((l) => l.clicks.map((c) => c.createdAt.getTime()));
+    const copyTimes = post.codeCopyEvents.map((e) => e.createdAt.getTime());
+    const allTimes = [...clickTimes, ...copyTimes];
+    const lastActivity = allTimes.length > 0 ? new Date(Math.max(...allTimes)) : null;
+
+    return {
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      linkClicks,
+      shareClicks,
+      codeCopies,
+      totalInteractions,
+      lastActivity,
+    };
+  });
+
+  // Global short links not associated with a specific post (if any exist)
+  const orphanShortLinks = await prisma.shortLink.findMany({
+    where: { postId: null },
+    include: { clicks: true },
+  });
+
+  const orphanClicks = orphanShortLinks.reduce((sum, l) => sum + l.clicks.length, 0);
+
+  // Sorting for top performing posts chart (max 5)
+  const topPosts = [...postsWithStats]
+    .filter((p) => p.totalInteractions > 0)
+    .sort((a, b) => b.totalInteractions - a.totalInteractions)
+    .slice(0, 5);
+
+  const peakInteractions = topPosts.length > 0 ? Math.max(...topPosts.map((p) => p.totalInteractions)) : 0;
 
   return (
     <div className="space-y-8 pb-12">
@@ -93,124 +139,97 @@ export default async function AnalyticsInteractionsPage() {
         </div>
       </div>
 
-      {/* Grid Layout for Tables */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Tracked Short Links Table */}
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
-          <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
-            Tracked Short Links
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs">
-              <thead>
-                <tr className="border-b border-[#262626] text-zinc-500">
-                  <th className="pb-2 font-bold uppercase tracking-wider">Code</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Post Context</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Clicks</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Type</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1e1e1e]">
-                {shortLinks.length > 0 ? (
-                  shortLinks.map((link) => (
-                    <tr key={link.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                      <td className="py-2.5 font-bold text-amber">
-                        <a
-                          href={`/s/${link.code}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="hover:underline"
-                        >
-                          /s/{link.code}
-                        </a>
-                      </td>
-                      <td className="py-2.5 max-w-[200px] truncate text-zinc-400" title={link.post?.title || "Global"}>
-                        {link.post?.title || "Global"}
-                      </td>
-                      <td className="py-2.5 font-bold text-white">{link.clicks.length}</td>
-                      <td className="py-2.5">
-                        <span
-                          className={`inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                            link.type === "share"
-                              ? "bg-amber/10 text-amber border border-amber/20"
-                              : "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20"
-                          }`}
-                        >
-                          {link.type}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-4 text-center text-zinc-650">
-                      No tracked links generated yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      {/* CSS Chart: Top Posts by Interactions */}
+      {topPosts.length > 0 && (
+        <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+          <h3 className="font-syne text-sm font-bold uppercase tracking-wider text-white">
+            Top Posts by Interactions (Clicks & Copies)
+          </h3>
+          <div className="space-y-4 pt-2">
+            {topPosts.map((post) => {
+              const percent = peakInteractions > 0 ? Math.round((post.totalInteractions / peakInteractions) * 100) : 0;
+              return (
+                <div key={post.id} className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-mono">
+                    <Link
+                      href={`/admin/analytics/clicks/${post.id}`}
+                      className="text-zinc-300 hover:text-amber hover:underline truncate max-w-[70%]"
+                    >
+                      {post.title}
+                    </Link>
+                    <span className="text-zinc-500 font-bold shrink-0 ml-2">
+                      {post.totalInteractions} interactions
+                    </span>
+                  </div>
+                  <div className="w-full bg-[#181818] h-3 rounded-none overflow-hidden border border-[#262626]/40">
+                    <div
+                      className="bg-amber h-full rounded-none transition-all duration-500"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+      )}
 
-        {/* Code Copies Log Table */}
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
-          <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
-            Recent Code Copies Log
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs">
-              <thead>
-                <tr className="border-b border-[#262626] text-zinc-500">
-                  <th className="pb-2 font-bold uppercase tracking-wider">Post</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Block ID</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Type</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Preview</th>
-                  <th className="pb-2 font-bold uppercase tracking-wider">Date</th>
+      {/* Post-wise Grouped Table */}
+      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+        <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
+          Post Interactions Summary
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left font-mono text-xs">
+            <thead>
+              <tr className="border-b border-[#262626] text-zinc-500">
+                <th className="pb-3 font-bold uppercase tracking-wider">Post Title</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Link Clicks</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Share Clicks</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Code Copies</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Total</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Last Activity</th>
+                <th className="pb-3 text-right font-bold uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1e1e1e]">
+              {postsWithStats.map((post) => (
+                <tr key={post.id} className="text-zinc-300 hover:bg-white/[0.01]">
+                  <td className="py-3.5 max-w-[280px] truncate font-bold text-white">
+                    <Link href={`/admin/analytics/clicks/${post.id}`} className="hover:text-amber hover:underline">
+                      {post.title}
+                    </Link>
+                  </td>
+                  <td className="py-3.5 text-zinc-400">{post.linkClicks}</td>
+                  <td className="py-3.5 text-zinc-400">{post.shareClicks}</td>
+                  <td className="py-3.5 text-zinc-400">{post.codeCopies}</td>
+                  <td className="py-3.5 font-bold text-amber">{post.totalInteractions}</td>
+                  <td className="py-3.5 text-zinc-500">
+                    {post.lastActivity ? formatDate(post.lastActivity) : "—"}
+                  </td>
+                  <td className="py-3.5 text-right">
+                    <Link
+                      href={`/admin/analytics/clicks/${post.id}`}
+                      className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer"
+                    >
+                      VIEW DETAILS →
+                    </Link>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1e1e1e]">
-                {copyEvents.length > 0 ? (
-                  copyEvents.map((event) => (
-                    <tr key={event.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                      <td className="py-2.5 max-w-[150px] truncate text-zinc-400" title={event.post?.title || "Unknown"}>
-                        {event.post?.title || "Unknown"}
-                      </td>
-                      <td className="py-2.5 font-mono text-[10px] text-amber">
-                        {event.codeBlockId || "—"}
-                      </td>
-                      <td className="py-2.5">
-                        <span
-                          className={`inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                            event.isMultiline
-                              ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                              : "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                          }`}
-                        >
-                          {event.isMultiline ? "multiline" : "inline"}
-                        </span>
-                      </td>
-                      <td className="py-2.5 max-w-[200px] truncate">
-                        <code className="text-zinc-400 bg-black/40 px-1 py-0.5 text-[10px]">
-                          {event.codeBlock.trim().slice(0, 40)}
-                          {event.codeBlock.length > 40 && "..."}
-                        </code>
-                      </td>
-                      <td className="py-2.5 text-zinc-500 text-[10px]">
-                        {formatDate(event.createdAt)}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-4 text-center text-zinc-650">
-                      No code copies recorded yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+              {orphanClicks > 0 && (
+                <tr className="text-zinc-300 hover:bg-white/[0.01] bg-black/10">
+                  <td className="py-3.5 font-bold text-zinc-450 italic">Global / Short links (Not tied to post)</td>
+                  <td className="py-3.5 text-zinc-400">{orphanClicks}</td>
+                  <td className="py-3.5 text-zinc-400">0</td>
+                  <td className="py-3.5 text-zinc-400">0</td>
+                  <td className="py-3.5 font-bold text-amber">{orphanClicks}</td>
+                  <td className="py-3.5 text-zinc-500">—</td>
+                  <td className="py-3.5 text-right">—</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
