@@ -30,7 +30,8 @@ Implement click tracking for external links, copies tracking for code blocks, a 
 ## Phase 4: Client Integration
 - [x] Create `components/blog/BlogContentClient.tsx` Client Component:
   - Renders raw post content HTML.
-  - Client-side hook detects `<pre>` (multiline) and `<code>` (inline) elements, injects copy buttons, and copies text.
+  - Client-side hook detects `<pre>` (multiline) and `<code>` (inline) elements, injects copy buttons with unique HTML IDs (e.g., `copy-btn-pre-block-0`), and copies text.
+  - Passes unique `codeBlockId` (e.g. `pre-block-0`, `inline-block-1`) to identify which block was copied.
   - Intercepts clicks on `/s/[code]` links to append local visitor ID parameter (`?v=...`) before redirecting.
 - [x] Create `components/blog/ShareButton.tsx` Client Component:
   - Copies the tracked share URL to clipboard and logs share event.

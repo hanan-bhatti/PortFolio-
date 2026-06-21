@@ -12,7 +12,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { postId, codeBlock, isMultiline, visitorId } = body;
+    const { postId, codeBlockId, codeBlock, isMultiline, visitorId } = body;
 
     if (!postId) {
       return NextResponse.json({ error: "Missing postId" }, { status: 400 });
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     await prisma.codeCopyEvent.create({
       data: {
         postId,
+        codeBlockId: codeBlockId || null,
         codeBlock: codeBlock || "",
         isMultiline: Boolean(isMultiline),
         visitorId: validVisitorId,

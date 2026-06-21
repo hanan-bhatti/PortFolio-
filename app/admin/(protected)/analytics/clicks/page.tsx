@@ -163,6 +163,7 @@ export default async function AnalyticsInteractionsPage() {
               <thead>
                 <tr className="border-b border-[#262626] text-zinc-500">
                   <th className="pb-2 font-bold uppercase tracking-wider">Post</th>
+                  <th className="pb-2 font-bold uppercase tracking-wider">Block ID</th>
                   <th className="pb-2 font-bold uppercase tracking-wider">Type</th>
                   <th className="pb-2 font-bold uppercase tracking-wider">Preview</th>
                   <th className="pb-2 font-bold uppercase tracking-wider">Date</th>
@@ -174,6 +175,9 @@ export default async function AnalyticsInteractionsPage() {
                     <tr key={event.id} className="text-zinc-300 hover:bg-white/[0.01]">
                       <td className="py-2.5 max-w-[150px] truncate text-zinc-400" title={event.post?.title || "Unknown"}>
                         {event.post?.title || "Unknown"}
+                      </td>
+                      <td className="py-2.5 font-mono text-[10px] text-amber">
+                        {event.codeBlockId || "—"}
                       </td>
                       <td className="py-2.5">
                         <span
@@ -199,7 +203,7 @@ export default async function AnalyticsInteractionsPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="py-4 text-center text-zinc-650">
+                    <td colSpan={5} className="py-4 text-center text-zinc-650">
                       No code copies recorded yet.
                     </td>
                   </tr>

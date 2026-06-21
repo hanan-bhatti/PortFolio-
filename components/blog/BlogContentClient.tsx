@@ -25,14 +25,16 @@ export default function BlogContentClient({ html, postId }: Props) {
 
     // 1. Handle Multiline Code Blocks (<pre>)
     const preElements = container.querySelectorAll("pre");
-    preElements.forEach((pre) => {
+    preElements.forEach((pre, idx) => {
       pre.style.position = "relative";
       pre.classList.add("group");
 
       if (pre.querySelector(".copy-code-btn")) return;
 
+      const codeBlockId = `pre-block-${idx}`;
       const button = document.createElement("button");
       button.type = "button";
+      button.id = `copy-btn-${codeBlockId}`;
       button.className =
         "copy-code-btn absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-[#0c0c0c]/80 border border-[#262626] hover:border-amber px-2 py-1 font-mono text-[10px] text-zinc-400 hover:text-amber rounded-none cursor-pointer z-10 select-none";
       button.innerText = "COPY";
@@ -51,7 +53,7 @@ export default function BlogContentClient({ html, postId }: Props) {
               button.innerText = "COPY";
             }, 2000);
 
-            trackCopy(codeText, true);
+            trackCopy(codeText, true, codeBlockId);
           })
           .catch(() => {
             toast.error("Failed to copy code");
@@ -63,9 +65,11 @@ export default function BlogContentClient({ html, postId }: Props) {
 
     // 2. Handle Inline Code Blocks (<code> that do NOT have a <pre> ancestor)
     const codeElements = container.querySelectorAll("code");
-    codeElements.forEach((code) => {
+    codeElements.forEach((code, idx) => {
       if (code.parentElement?.tagName === "PRE") return;
 
+      const codeBlockId = `inline-block-${idx}`;
+      code.id = `code-${codeBlockId}`;
       code.style.cursor = "pointer";
       code.title = "Click to copy";
 
@@ -76,7 +80,7 @@ export default function BlogContentClient({ html, postId }: Props) {
           .writeText(text)
           .then(() => {
             toast.success("Code copied");
-            trackCopy(text, false);
+            trackCopy(text, false, codeBlockId);
           })
           .catch(() => {
             toast.error("Failed to copy");
@@ -106,7 +110,7 @@ export default function BlogContentClient({ html, postId }: Props) {
       (link as any)._onLinkClick = onLinkClick;
     });
 
-    async function trackCopy(codeText: string, isMultiline: boolean) {
+    async function trackCopy(codeText: string, isMultiline: boolean, codeBlockId: string) {
       try {
         const visitorId = localStorage.getItem("visitorId") || undefined;
 
@@ -117,6 +121,7 @@ export default function BlogContentClient({ html, postId }: Props) {
           },
           body: JSON.stringify({
             postId,
+            codeBlockId,
             codeBlock: codeText.slice(0, 1000),
             isMultiline,
             visitorId,

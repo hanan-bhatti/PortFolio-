@@ -241,6 +241,7 @@ model CodeCopyEvent {
   id          String   @id @default(cuid())
   postId      String?
   post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  codeBlockId String?
   codeBlock   String   @db.Text
   isMultiline Boolean
   visitorId   String?
