@@ -8,6 +8,7 @@
  * - formatDate(date): Formats Date objects or ISO strings into "Month Day, Year" strings
  * - readingTime(tiptapJson): Estimates average reading time for Tiptap JSON document/content
  * - extractTwitterUsername(urlOrHandle): Cleans and formats raw inputs into structured Twitter handles
+ * - generateShortCode(length): Generates a random alphanumeric short code for URLs
  */
 
 import { clsx, type ClassValue } from "clsx";
@@ -77,4 +78,13 @@ export function extractTwitterUsername(urlOrHandle: string): string {
   }
 
   return `@${clean}`;
+}
+
+export function generateShortCode(length = 6): string {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 }

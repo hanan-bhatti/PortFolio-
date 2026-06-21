@@ -14,6 +14,9 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatDate, readingTime, extractTwitterUsername } from "@/lib/utils";
 import { renderPostContent } from "@/lib/tiptap-html";
+import { shortenPostHtml, getOrCreateShortLink } from "@/lib/shortener";
+import BlogContentClient from "@/components/blog/BlogContentClient";
+import ShareButton from "@/components/blog/ShareButton";
 import ParallaxCover from "@/components/blog/ParallaxCover";
 import Toc from "@/components/blog/Toc";
 import PostCard from "@/components/blog/PostCard";
@@ -91,7 +94,11 @@ export default async function BlogPostPage({ params }: Props) {
   if (!post || !post.published) notFound();
 
 
-  const { html, toc } = renderPostContent(post.content);
+  const { html: rawHtml, toc } = renderPostContent(post.content);
+  const html = await shortenPostHtml(rawHtml, post.id);
+
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
+  const shareCode = await getOrCreateShortLink(`${siteUrl}/blog/${post.slug}`, "share", post.id);
 
   // Fetch all published posts to determine prev/next navigation
   const allPosts = await prisma.post.findMany({
@@ -188,6 +195,8 @@ export default async function BlogPostPage({ params }: Props) {
                   <span>{readingTime(post.content)} min read</span>
                   <span>·</span>
                   <span>{post.views + 1} views</span>
+                  <span className="mx-1 h-3 w-px bg-zinc-800 hidden sm:inline" />
+                  <ShareButton postId={post.id} shareCode={shareCode} />
                 </div>
                 
                 {/* Tags - restyled per user request */}
@@ -203,10 +212,7 @@ export default async function BlogPostPage({ params }: Props) {
                 </div>
               </header>
 
-              <div
-                className="prose-blog w-full max-w-full"
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
+              <BlogContentClient html={html} postId={post.id} />
             </div>
 
             <aside className="hidden lg:block w-60 shrink-0">

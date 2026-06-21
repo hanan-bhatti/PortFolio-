@@ -20,6 +20,9 @@ model Post {
   views      Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  shortLinks     ShortLink[]
+  codeCopyEvents CodeCopyEvent[]
 }
 
 model Project {
@@ -93,6 +96,8 @@ model Visitor {
   
   pageViews   PageView[]
   formSubmissions ContactMessage[]
+  shortLinkClicks ShortLinkClick[]
+  codeCopyEvents CodeCopyEvent[]
 }
 
 model PageView {
@@ -206,5 +211,39 @@ model AdminSession {
   city        String?
   active      Boolean  @default(true)
   lastUsedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model ShortLink {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  targetUrl String
+  type      String   // "link" | "share"
+  postId    String?
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  clicks    ShortLinkClick[]
+}
+
+model ShortLinkClick {
+  id          String   @id @default(cuid())
+  shortLinkId String
+  shortLink   ShortLink @relation(fields: [shortLinkId], references: [id], onDelete: Cascade)
+  visitorId   String?
+  visitor     Visitor?  @relation(fields: [visitorId], references: [id], onDelete: SetNull)
+  userAgent   String?
+  referer     String?
+  createdAt   DateTime @default(now())
+}
+
+model CodeCopyEvent {
+  id          String   @id @default(cuid())
+  postId      String?
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  codeBlock   String   @db.Text
+  isMultiline Boolean
+  visitorId   String?
+  visitor     Visitor?  @relation(fields: [visitorId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
 }

@@ -17,6 +17,7 @@ import { logoutAction } from "@/lib/actions";
 import {
   FiGrid,
   FiBarChart2,
+  FiActivity,
   FiEdit3,
   FiFolder,
   FiCamera,
@@ -48,6 +49,7 @@ const SECTIONS: SidebarSection[] = [
     items: [
       { href: "/admin/dashboard", label: "Dashboard", icon: FiGrid },
       { href: "/admin/analytics", label: "Analytics", icon: FiBarChart2 },
+      { href: "/admin/analytics/clicks", label: "Interactions", icon: FiActivity },
     ],
   },
   {
@@ -144,7 +146,10 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
                 {section.title}
               </p>
               {section.items.map((item) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive =
+                  item.href === "/admin/analytics"
+                    ? pathname === "/admin/analytics"
+                    : pathname.startsWith(item.href);
                 const Icon = item.icon;
                 return (
                   <Link
