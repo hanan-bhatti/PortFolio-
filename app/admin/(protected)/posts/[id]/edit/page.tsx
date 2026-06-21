@@ -33,6 +33,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
         post={{
           id: post.id,
           title: post.title,
+          subtitle: post.subtitle,
           slug: post.slug,
           excerpt: post.excerpt,
           content: post.content,

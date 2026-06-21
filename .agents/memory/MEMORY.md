@@ -11,4 +11,6 @@
 - [project] Standardize file JSDoc headers under lib/, components/, and app/ → project-conventions.md
 - [project] Relocate root spec/task markdown files to .agents/memory/ → tech-decisions.md
 - [project] Maintain llms.txt and CHANGELOG.md at the root → tech-decisions.md
+- [project] Post subtitle support: optional subtitle field added to posts schema, admin forms, and public post page → post-subtitle-support.md
+
 

@@ -171,36 +171,44 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
 
         <div className="mx-auto px-5 md:px-4 w-full max-w-full md:max-w-6xl break-words [overflow-wrap:anywhere] [word-break:break-word]">
-          <header className="mx-auto max-w-3xl pt-10 w-full">
-            <h1 className="mt-4 text-[clamp(1.8rem,6vw,3rem)] md:text-[clamp(2.5rem,5vw,4.5rem)] font-bold text-white leading-tight w-full max-w-full">
-              {post.title}
-            </h1>
-            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
-              <span>{formatDate(post.createdAt)}</span>
-              <span>·</span>
-              <span>{readingTime(post.content)} min read</span>
-              <span>·</span>
-              <span>{post.views + 1} views</span>
-            </div>
-            
-            {/* Tags - restyled per user request */}
-            <div className="mt-4 flex flex-wrap gap-2 justify-start">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="font-inter font-semibold text-[11px] text-green border border-green-dim px-[10px] py-[3px] tracking-[0.08em] whitespace-nowrap bg-transparent uppercase"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </header>
-
           <div className="mt-10 grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-10 w-full max-w-full">
-            <div
-              className="prose-blog w-full max-w-full lg:max-w-3xl min-w-0"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            <div className="min-w-0 w-full max-w-full lg:max-w-3xl">
+              <header className="w-full pb-8 border-b border-border/10 mb-8">
+                <h1 className="text-[clamp(1.8rem,6vw,3rem)] md:text-[clamp(2.5rem,5vw,4.5rem)] font-bold text-white leading-tight w-full max-w-full">
+                  {post.title}
+                </h1>
+                {post.subtitle && (
+                  <h2 className="mt-2 text-[clamp(1.1rem,3.5vw,1.6rem)] font-medium text-amber leading-snug w-full max-w-full">
+                    {post.subtitle}
+                  </h2>
+                )}
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
+                  <span>{formatDate(post.createdAt)}</span>
+                  <span>·</span>
+                  <span>{readingTime(post.content)} min read</span>
+                  <span>·</span>
+                  <span>{post.views + 1} views</span>
+                </div>
+                
+                {/* Tags - restyled per user request */}
+                <div className="mt-4 flex flex-wrap gap-2 justify-start">
+                  {post.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="font-inter font-semibold text-[11px] text-green border border-green-dim px-[10px] py-[3px] tracking-[0.08em] whitespace-nowrap bg-transparent uppercase"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </header>
+
+              <div
+                className="prose-blog w-full max-w-full"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            </div>
+
             <aside className="hidden lg:block w-60 shrink-0">
               <Toc items={toc} />
             </aside>

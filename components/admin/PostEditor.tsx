@@ -30,6 +30,7 @@ import EditorToolbar from "@/components/admin/EditorToolbar";
 export interface PostEditorData {
   id: string;
   title: string;
+  subtitle?: string | null;
   slug: string;
   excerpt: string;
   content: string;
@@ -51,6 +52,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
   const [isPending, startTransition] = useTransition();
 
   const [title, setTitle] = useState(post?.title ?? "");
+  const [subtitle, setSubtitle] = useState(post?.subtitle ?? "");
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(post));
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
@@ -158,6 +160,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
     }
     const payload = {
       title: title.trim(),
+      subtitle: subtitle.trim() || null,
       slug: slug.trim(),
       excerpt: excerpt.trim(),
       content: JSON.stringify(editor.getJSON()),
@@ -191,6 +194,12 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Post title"
           className={cn(inputClass, "text-sm font-bold tracking-wide")}
+        />
+        <input
+          value={subtitle}
+          onChange={(e) => setSubtitle(e.target.value)}
+          placeholder="Post subtitle (optional)"
+          className={cn(inputClass, "text-xs tracking-wide")}
         />
         <input
           value={slug}

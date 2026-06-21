@@ -10,6 +10,7 @@ datasource db {
 model Post {
   id         String   @id @default(cuid())
   title      String
+  subtitle   String?
   slug       String   @unique
   excerpt    String
   content    String   @db.Text

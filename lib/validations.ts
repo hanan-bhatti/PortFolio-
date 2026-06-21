@@ -24,6 +24,7 @@ export type ContactInput = z.infer<typeof contactSchema>;
 
 export const postSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must not exceed 200 characters"),
+  subtitle: z.string().max(200, "Subtitle must not exceed 200 characters").nullable().optional().or(z.literal("").transform(() => null)),
   slug: z
     .string()
     .min(3, "Slug must be at least 3 characters")
