@@ -12,39 +12,65 @@ import { useEffect, useState } from "react";
 import type { TocItem } from "@/lib/tiptap-html";
 
 export default function Toc({ items }: { items: TocItem[] }) {
-  const [activeId, setActiveId] = useState<string>("");
+  const [activeId, setActiveId] = useState<string>(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      return window.location.hash.replace("#", "");
+    }
+    return "";
+  });
 
   useEffect(() => {
     if (items.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find visible entries
-        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
-        if (visibleEntries.length > 0) {
-          // Sort by their bounding client rect to find the one closest to the top of the viewport
-          const topVisible = visibleEntries.reduce((prev, curr) => {
-            return curr.boundingClientRect.top < prev.boundingClientRect.top ? curr : prev;
-          });
-          setActiveId(topVisible.target.id);
-        }
-      },
-      {
-        rootMargin: "-100px 0px -70% 0px",
-        threshold: 0.1,
-      }
-    );
+    const handleScroll = () => {
+      // Find the current scroll position with an offset for the sticky header
+      const scrollPosition = window.scrollY + 140;
 
-    items.forEach((item) => {
-      const el = document.getElementById(item.id);
-      if (el) observer.observe(el);
-    });
+      let currentActiveId = "";
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item) continue;
+        const el = document.getElementById(item.id);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          if (scrollPosition >= top) {
+            currentActiveId = item.id;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Fallback: If we are at the very bottom of the page, highlight the last section
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50;
+      const lastItem = items[items.length - 1];
+      if (isAtBottom && lastItem) {
+        currentActiveId = lastItem.id;
+      }
+
+      // Fallback: Highlight the first item if we haven't scrolled past any section yet
+      const firstItem = items[0];
+      if (!currentActiveId && firstItem) {
+        currentActiveId = firstItem.id;
+      }
+
+      setActiveId(currentActiveId);
+    };
+
+    // Initialize immediately
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("hashchange", handleScroll);
+
+    // Run again after a short delay to account for layout shifts/image loads
+    const timer = setTimeout(handleScroll, 100);
 
     return () => {
-      items.forEach((item) => {
-        const el = document.getElementById(item.id);
-        if (el) observer.unobserve(el);
-      });
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("hashchange", handleScroll);
+      clearTimeout(timer);
     };
   }, [items]);
 
