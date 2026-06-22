@@ -38,11 +38,35 @@ export async function POST(
       return NextResponse.json({ error: "Notifications are disabled for this post." }, { status: 403 });
     }
 
+    const cleanedEmail = email.toLowerCase().trim();
+    const cleanedTopic = topic ? topic.trim() : null;
+
+    const existing = await prisma.postNotifyRequest.findFirst({
+      where: {
+        postId,
+        email: cleanedEmail,
+      },
+    });
+
+    if (existing) {
+      if (cleanedTopic && existing.topic !== cleanedTopic) {
+        const updated = await prisma.postNotifyRequest.update({
+          where: { id: existing.id },
+          data: {
+            topic: cleanedTopic,
+            createdAt: new Date(),
+          },
+        });
+        return NextResponse.json(updated, { status: 200 });
+      }
+      return NextResponse.json(existing, { status: 200 });
+    }
+
     const notifyRequest = await prisma.postNotifyRequest.create({
       data: {
         postId,
-        email: email.toLowerCase().trim(),
-        topic: topic ? topic.trim() : null,
+        email: cleanedEmail,
+        topic: cleanedTopic,
         confirmed: false,
       },
     });
