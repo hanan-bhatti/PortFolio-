@@ -9,7 +9,7 @@
  * - PostEditorData: Type/Interface definition
  */
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
@@ -26,6 +26,7 @@ import { UploadButton, useUploadThing } from "@/lib/uploadthing";
 import { compressImage, compressImages } from "@/lib/image-compress";
 import { createPostAction, updatePostAction } from "@/lib/actions";
 import EditorToolbar from "@/components/admin/EditorToolbar";
+import BlogContentClient from "@/components/blog/BlogContentClient";
 
 export interface PostEditorData {
   id: string;
@@ -60,6 +61,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
   const [tags, setTags] = useState<string[]>(post?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   const [engagementExpanded, setEngagementExpanded] = useState(false);
   const [emojiReactionsOn, setEmojiReactionsOn] = useState(false);
@@ -318,7 +320,14 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
               </button>
             </div>
           </div>
-          <div className={cn("prose-blog min-h-[420px] px-4 py-3 text-zinc-300", showPreview ? "block" : "hidden")} dangerouslySetInnerHTML={{ __html: previewHtml }} />
+          <div className={cn("min-h-[420px] px-4 py-3 text-zinc-350", showPreview ? "block" : "hidden")}>
+            <BlogContentClient
+              html={previewHtml}
+              postId="preview"
+              containerRef={previewContainerRef}
+              sectionReactionsOn={false}
+            />
+          </div>
           <div className={!showPreview ? "block" : "hidden"}>
             {editor ? <EditorToolbar editor={editor} /> : null}
             <EditorContent editor={editor} />

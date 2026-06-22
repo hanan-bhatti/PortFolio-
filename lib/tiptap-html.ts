@@ -11,6 +11,7 @@ import { generateHTML } from "@tiptap/html";
 import type { JSONContent } from "@tiptap/core";
 import { baseExtensions, lowlight } from "@/lib/tiptap-extensions";
 import { slugify } from "@/lib/utils";
+import { getCachedMermaidSvg } from "./mermaid-cache";
 
 export interface TocItem {
   id: string;
@@ -111,7 +112,7 @@ export function renderPostContent(content: string): { html: string; toc: TocItem
     return `<img ${before} src="${optimizedSrc}" ${after}${extraAttrs}>`;
   });
 
-  // Apply server-side syntax highlighting to code blocks
+  // Apply server-side syntax highlighting to code blocks (intercepting Mermaid)
   html = html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, attrs: string, codeContent: string) => {
     const classMatch = attrs.match(/class=["']([^"']*)["']/);
     const classes = classMatch && classMatch[1] ? classMatch[1].split(/\s+/) : [];
@@ -119,6 +120,15 @@ export function renderPostContent(content: string): { html: string; toc: TocItem
     const lang = langClass ? langClass.replace("language-", "") : "";
 
     const decodedCode = decodeHtmlEntities(codeContent);
+
+    if (lang === "mermaid") {
+      const cachedSvg = getCachedMermaidSvg(decodedCode);
+      if (cachedSvg) {
+        return `<div class="mermaid-svg-container select-none my-6 text-center" data-mermaid-code="${encodeURIComponent(decodedCode)}">${cachedSvg}</div>`;
+      }
+      return `<pre class="language-mermaid"><code class="language-mermaid" data-mermaid-pending="true">${codeContent}</code></pre>`;
+    }
+
     const highlighted = highlightCode(decodedCode, lang);
     return `<pre><code${attrs}>${highlighted}</code></pre>`;
   });

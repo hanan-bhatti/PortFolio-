@@ -38,6 +38,7 @@ import {
   LuYoutube,
   LuImage,
   LuLayoutGrid,
+  LuGithub,
 } from "react-icons/lu";
 
 const LANGS = ["plaintext", "typescript", "javascript", "python", "bash", "json", "css", "xml", "sql", "go", "rust"] as const;
@@ -119,6 +120,17 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       editor.chain().focus().insertTable({ rows: tableRows, cols: tableCols, withHeaderRow: tableHeader }).run();
     }
     setTableOpen(false);
+  };
+
+  const insertGithubEmbed = (): void => {
+    const repo = window.prompt("GitHub Repository (format: owner/repo)", "");
+    if (!repo) return;
+    const trimmed = repo.trim();
+    if (!trimmed.includes("/")) {
+      toast.error("Invalid format. Must be owner/repo");
+      return;
+    }
+    editor.chain().focus().insertContent(`<div data-github-embed="${trimmed}">[GITHUB EMBED: ${trimmed}]</div>`).run();
   };
 
   const currentLang = (editor.getAttributes("codeBlock").language as string | undefined) ?? "plaintext";
@@ -211,6 +223,9 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
       </Btn>
       <Btn title="YouTube embed" onClick={() => setYtOpen(true)}>
         <LuYoutube className="h-3.5 w-3.5" />
+      </Btn>
+      <Btn title="GitHub embed" onClick={insertGithubEmbed}>
+        <LuGithub className="h-3.5 w-3.5" />
       </Btn>
       <div className="text-xs">
         <UploadButton

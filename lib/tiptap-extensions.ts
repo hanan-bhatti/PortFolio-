@@ -169,6 +169,44 @@ export const EngagementWidgetNode = Node.create({
   },
 });
 
+export const GithubEmbedNode = Node.create({
+  name: "githubEmbed",
+  group: "block",
+  atom: true,
+
+  addAttributes() {
+    return {
+      repo: {
+        default: "",
+        parseHTML: (element) => element.getAttribute("data-github-embed"),
+        renderHTML: (attributes) => ({
+          "data-github-embed": attributes.repo,
+          class: "github-embed-placeholder",
+        }),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "div[data-github-embed]",
+      },
+    ];
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    const repoPath = node.attrs.repo || "";
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, {
+        style: "border: 1px dashed #262626; background: rgba(12, 12, 12, 0.4); padding: 1rem; text-align: center; font-family: monospace; font-size: 11px; color: #71717a; user-select: none; margin: 1rem 0;"
+      }),
+      `[GITHUB EMBED: ${repoPath}]`
+    ];
+  },
+});
+
 export function baseExtensions(): Extensions {
   return [
     StarterKit.configure({ codeBlock: false }),
@@ -185,6 +223,7 @@ export function baseExtensions(): Extensions {
     CodeBlockLowlight.configure({ lowlight }),
     ImageGalleryNode,
     EngagementWidgetNode,
+    GithubEmbedNode,
   ];
 }
 

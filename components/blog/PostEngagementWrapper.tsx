@@ -44,6 +44,7 @@ interface Props {
   html: string;
   config: EngagementConfig;
   initialSummary: EngagementSummary;
+  githubRepos?: Record<string, any>;
 }
 
 export default function PostEngagementWrapper({
@@ -51,6 +52,7 @@ export default function PostEngagementWrapper({
   html,
   config,
   initialSummary,
+  githubRepos = {},
 }: Props) {
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [summary, setSummary] = useState<EngagementSummary>(initialSummary);
@@ -958,6 +960,7 @@ export default function PostEngagementWrapper({
         onSectionReact={handleSectionReact}
         onCopyEvent={handleCopyEvent}
         widgets={widgetsMap}
+        githubRepos={githubRepos}
       />
 
       {/* Floating Section Reactions Popover */}

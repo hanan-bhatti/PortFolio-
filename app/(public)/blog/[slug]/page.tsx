@@ -16,6 +16,7 @@ import { formatDate, readingTime, extractTwitterUsername } from "@/lib/utils";
 import { renderPostContent } from "@/lib/tiptap-html";
 import { shortenPostHtml, getOrCreateShortLink } from "@/lib/shortener";
 import PostEngagementWrapper from "@/components/blog/PostEngagementWrapper";
+import { getGithubRepoData } from "@/lib/github-cache";
 import ShareButton from "@/components/blog/ShareButton";
 import ParallaxCover from "@/components/blog/ParallaxCover";
 import Toc from "@/components/blog/Toc";
@@ -172,6 +173,19 @@ export default async function BlogPostPage({ params }: Props) {
   const { html: rawHtml, toc } = renderPostContent(post.content);
   const html = await shortenPostHtml(rawHtml, post.id);
 
+  // Extract all data-github-embed attributes to fetch repo details on the server
+  const repoMatches = Array.from(html.matchAll(/data-github-embed="([^"]+)"/g));
+  const repos = Array.from(new Set(repoMatches.map((m) => m[1]).filter(Boolean) as string[]));
+  const githubRepos: Record<string, any> = {};
+  await Promise.all(
+    repos.map(async (repo) => {
+      const data = await getGithubRepoData(repo);
+      if (data) {
+        githubRepos[repo] = data;
+      }
+    })
+  );
+
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
   const shareCode = await getOrCreateShortLink(`${siteUrl}/blog/${post.slug}`, "share", post.id);
 
@@ -292,6 +306,7 @@ export default async function BlogPostPage({ params }: Props) {
                 html={html}
                 config={engagementConfig}
                 initialSummary={initialSummary}
+                githubRepos={githubRepos}
               />
             </div>
 
