@@ -21,12 +21,36 @@ function shouldSkipPath(path: string): boolean {
   return SKIP_PATH_PREFIXES.some((p) => path.startsWith(p));
 }
 
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
+  return null;
+}
+
+function setCookie(name: string, value: string, days = 365) {
+  if (typeof document === "undefined") return;
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = `; expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${value || ""}${expires}; path=/; SameSite=Lax`;
+}
+
 export async function initAnalytics(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   if (shouldSkipPath(window.location.pathname)) return null;
 
   if (visitorId) return visitorId;
-  const cached = localStorage.getItem("visitorId");
+
+  // Migration cleanup of legacy localStorage visitorId
+  try {
+    localStorage.removeItem("visitorId");
+  } catch {
+    // ignore
+  }
+
+  const cached = getCookie("visitorId");
   if (cached) {
     visitorId = cached;
     return visitorId;
@@ -42,7 +66,7 @@ export async function initAnalytics(): Promise<string | null> {
 
     if (data.visitorId) {
       visitorId = data.visitorId as string;
-      localStorage.setItem("visitorId", data.visitorId as string);
+      setCookie("visitorId", data.visitorId as string);
       return visitorId;
     }
   } catch {
@@ -163,5 +187,5 @@ export async function trackDuration(path: string, seconds: number): Promise<void
 
 export function getVisitorId(): string | null {
   if (typeof window === "undefined") return null;
-  return visitorId || localStorage.getItem("visitorId");
+  return visitorId || getCookie("visitorId");
 }

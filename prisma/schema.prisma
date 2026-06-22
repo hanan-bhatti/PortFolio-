@@ -23,6 +23,14 @@ model Post {
 
   shortLinks     ShortLink[]
   codeCopyEvents CodeCopyEvent[]
+  engagementConfig    PostEngagementConfig?
+  emojiReactions      PostEmojiReaction[]
+  helpfulVotes        PostHelpfulVote[]
+  starRatings         PostStarRating[]
+  sectionReactions    PostSectionReaction[]
+  endSurveyResponses  PostEndSurveyResponse[]
+  notifyRequests      PostNotifyRequest[]
+  analyticsEvents     PostAnalyticsEvent[]
 }
 
 model Project {
@@ -247,4 +255,118 @@ model CodeCopyEvent {
   visitorId   String?
   visitor     Visitor?  @relation(fields: [visitorId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
+}
+
+model PostEngagementConfig {
+  id                  String   @id @default(cuid())
+  postId              String   @unique
+  post                Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  emojiReactionsOn     Boolean  @default(false)
+  helpfulVoteOn        Boolean  @default(false)
+  starRatingOn         Boolean  @default(false)
+  sectionReactionsOn   Boolean  @default(false)
+  endSurveyOn          Boolean  @default(false)
+  difficultyToggleOn   Boolean  @default(false)
+  exitIntentOn         Boolean  @default(false)
+  notifyMeOn           Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model PostEmojiReaction {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  visitorId String
+  emoji     String   // one of: 👍 🔥 🤯 ❤️ 😂 — validate server-side against fixed enum list
+  createdAt DateTime @default(now())
+
+  @@unique([postId, visitorId, emoji]) // one of each emoji per visitor per post; visitor can pick multiple distinct emojis but not duplicate the same one
+  @@index([postId])
+}
+
+model PostHelpfulVote {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  visitorId String
+  helpful   Boolean
+  createdAt DateTime @default(now())
+
+  @@unique([postId, visitorId]) // one vote per visitor per post, last write wins on update
+  @@index([postId])
+}
+
+model PostStarRating {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  visitorId String
+  rating    Int      // 1-5, validate server-side
+  createdAt DateTime @default(now())
+
+  @@unique([postId, visitorId])
+  @@index([postId])
+}
+
+model PostSectionReaction {
+  id         String   @id @default(cuid())
+  postId     String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  visitorId  String
+  sectionId  String   // maps to a stable anchor/heading-id generated at publish time from the TipTap content
+  emoji      String
+  createdAt  DateTime @default(now())
+
+  @@index([postId, sectionId])
+}
+
+model PostEndSurveyResponse {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  visitorId   String
+  responseText String? // free text "what should I cover next"
+  difficulty  String?  // "too_basic" | "just_right" | "too_advanced"
+  createdAt   DateTime @default(now())
+
+  @@index([postId])
+}
+
+model PostNotifyRequest {
+  id        String   @id @default(cuid())
+  postId    String   // post they were reading when they signed up
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  email     String
+  topic     String?  // optional free text on what topic they want notified about
+  confirmed Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model PostAnalyticsEvent {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  visitorId   String
+  eventType   String   // "scroll_depth" | "time_on_page" | "copy_event" | "bounce" | "explored" | "exit_intent_shown" | "exit_intent_converted"
+  value       String?  // e.g. scroll_depth: "80", time_on_page: seconds as string, copy_event: code-block id
+  referrer    String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  createdAt   DateTime @default(now())
+
+  @@index([postId, eventType])
+}
+
+model SiteSearchQuery {
+  id        String   @id @default(cuid())
+  query     String
+  visitorId String?
+  resultsCount Int
+  createdAt DateTime @default(now())
+
+  @@index([query])
 }

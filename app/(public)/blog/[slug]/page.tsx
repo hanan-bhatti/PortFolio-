@@ -15,7 +15,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDate, readingTime, extractTwitterUsername } from "@/lib/utils";
 import { renderPostContent } from "@/lib/tiptap-html";
 import { shortenPostHtml, getOrCreateShortLink } from "@/lib/shortener";
-import BlogContentClient from "@/components/blog/BlogContentClient";
+import PostEngagementWrapper from "@/components/blog/PostEngagementWrapper";
 import ShareButton from "@/components/blog/ShareButton";
 import ParallaxCover from "@/components/blog/ParallaxCover";
 import Toc from "@/components/blog/Toc";
@@ -93,6 +93,81 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await prisma.post.findUnique({ where: { slug } });
   if (!post || !post.published) notFound();
 
+  // Fetch post-engagement config from DB, default to false (opt-in only)
+  const config = await prisma.postEngagementConfig.findUnique({
+    where: { postId: post.id },
+  });
+
+  const engagementConfig = config || {
+    id: "",
+    postId: post.id,
+    emojiReactionsOn: false,
+    helpfulVoteOn: false,
+    starRatingOn: false,
+    sectionReactionsOn: false,
+    endSurveyOn: false,
+    difficultyToggleOn: false,
+    exitIntentOn: false,
+    notifyMeOn: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  // Fetch aggregate summary statistics directly on server
+  const emojisGroup = await prisma.postEmojiReaction.groupBy({
+    by: ["emoji"],
+    where: { postId: post.id },
+    _count: { id: true },
+  });
+  const emojiSummary: Record<string, number> = {};
+  emojisGroup.forEach((g) => {
+    emojiSummary[g.emoji] = g._count.id;
+  });
+
+  const helpfulGroup = await prisma.postHelpfulVote.groupBy({
+    by: ["helpful"],
+    where: { postId: post.id },
+    _count: { id: true },
+  });
+  let helpfulYes = 0;
+  let helpfulNo = 0;
+  helpfulGroup.forEach((g) => {
+    if (g.helpful) helpfulYes = g._count.id;
+    else helpfulNo = g._count.id;
+  });
+
+  const starStats = await prisma.postStarRating.aggregate({
+    where: { postId: post.id },
+    _avg: { rating: true },
+    _count: { rating: true },
+  });
+  const avgRating = starStats._avg.rating || 0;
+  const totalRatings = starStats._count.rating || 0;
+
+  const sectionReactions = await prisma.postSectionReaction.findMany({
+    where: { postId: post.id },
+    select: {
+      sectionId: true,
+      emoji: true,
+    },
+  });
+  const sectionSummary: Record<string, Record<string, number>> = {};
+  sectionReactions.forEach((sr) => {
+    if (!sectionSummary[sr.sectionId]) {
+      sectionSummary[sr.sectionId] = {};
+    }
+    const sectionMap = sectionSummary[sr.sectionId];
+    if (sectionMap) {
+      sectionMap[sr.emoji] = (sectionMap[sr.emoji] || 0) + 1;
+    }
+  });
+
+  const initialSummary = {
+    emojiSummary,
+    helpful: { yes: helpfulYes, no: helpfulNo },
+    rating: { average: parseFloat(avgRating.toFixed(1)), total: totalRatings },
+    sectionSummary,
+  };
 
   const { html: rawHtml, toc } = renderPostContent(post.content);
   const html = await shortenPostHtml(rawHtml, post.id);
@@ -212,7 +287,12 @@ export default async function BlogPostPage({ params }: Props) {
                 </div>
               </header>
 
-              <BlogContentClient html={html} postId={post.id} />
+              <PostEngagementWrapper
+                postId={post.id}
+                html={html}
+                config={engagementConfig}
+                initialSummary={initialSummary}
+              />
             </div>
 
             <aside className="hidden lg:block w-60 shrink-0">

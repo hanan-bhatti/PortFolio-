@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ skip: true });
     }
 
-    // ── Silently ignore internal / dev traffic ───────────────────────────────
-    if (isInternalIp(ip)) {
+    // ── Silently ignore internal / dev traffic (only in production) ──────────
+    if (process.env.NODE_ENV === "production" && isInternalIp(ip)) {
       return NextResponse.json({ skip: true });
     }
 
@@ -170,7 +170,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ visitorId: visitor.id });
+    const response = NextResponse.json({ visitorId: visitor.id });
+    response.cookies.set("visitorId", visitor.id, {
+      path: "/",
+      maxAge: 31536000, // 1 year
+      sameSite: "lax",
+      httpOnly: false, // Must be readable by client JS for UTM tracking and code copy events
+      secure: process.env.NODE_ENV === "production",
+    });
+    return response;
   } catch (error) {
     console.error("Identify failed:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

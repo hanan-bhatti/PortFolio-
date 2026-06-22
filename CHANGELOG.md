@@ -5,12 +5,28 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Blog Post Engagement & Reader-Intent System:
+  - Added new models to `prisma/schema.prisma` (`PostEngagementConfig`, `PostEmojiReaction`, `PostHelpfulVote`, `PostStarRating`, `PostSectionReaction`, `PostEndSurveyResponse`, `PostNotifyRequest`, `PostAnalyticsEvent`, `SiteSearchQuery`).
+  - Implemented client-side unified `PostEngagementWrapper.tsx` containing emoji reactions bar, helpful votes pill pairs, 5-star rating selectors, post suggestions survey form, notify subscription form, exit intent popup modal, and passive analytics tracking.
+  - Refactored `components/blog/BlogContentClient.tsx` to dynamically inject hover section reaction triggers next to headings and code blocks.
+  - Modified heading ID generation in `lib/tiptap-html.ts` to use deduplicated slug strings instead of absolute array indices, preventing ID drift across post content edits.
+  - Added server-side initial aggregation query pre-fetch block in `app/(public)/blog/[slug]/page.tsx` to pass initial summary data to client components and avoid layout shifts.
+- Engagement Analytics Admin UI:
+  - Added new navigation link in the admin sidebar pointing to the Overview dashboard (`/admin/engagement`).
+  - Implemented the `EngagementOverviewClient` overview dashboard supporting custom table listings, engagement feature badges, and zero-result search content gaps logs.
+  - Implemented `PostEngagementDrilldownClient` and server routing for per-post statistics deep-dives (emoji splits, rating histograms, section heatmaps, copy counters, UTM breakdowns, difficulty splits, and subscriber notifications).
+  - Configured custom positioning rules on `html` and `body` in `app/globals.css` to prevent Framer Motion scroll calculations layout warnings.
+- Security & Session Identification Migration:
+  - Migrated first-party `visitorId` session tracking from insecure `localStorage` storage to secure, cookie-backed storage.
+  - Refactored `BlogContentClient.tsx`, `ShareButton.tsx`, and `lib/analytics.ts` to retrieve visitor session identifier from cookies.
+  - Configured response headers in POST `/api/analytics/identify` route to set 1-year expiration cookie.
 - Toggleable responsive Sidebar with backdrop overlay, mobile drawer layout, and hamburger menu.
 - Standardized JSDoc file headers to all TypeScript and TSX files in `lib/`, `components/`, and `app/` (over 100 files).
 - Created AI-friendly `llms.txt` file in the root to help crawler and agent tools index the codebase.
 - Created `CHANGELOG.md` and `docs/adr/ADR-001-codebase-cleanup.md` to trace project improvements.
 
 ### Changed
+- Consolidated conflicting dynamic routes `/api/posts/[slug]` and `/api/posts/[id]` into a single unified `/api/posts/[id]` routing tree, supporting retrievals by both slug strings and ID keys.
 - Refactored protected admin layout (`app/admin/(protected)/layout.tsx`) to support responsive flow (`flex-col md:flex-row`) and dynamic padding.
 - Made `PageHeader` responsive to prevent overflow on mobile, and forced inline action placement to prevent wrapping.
 - Refactored `MessagesTable`, `ProjectsManager`, `ExperienceManager`, and `SkillsManager` to support stacked layouts on mobile and sharp, flat-accented theme styling.

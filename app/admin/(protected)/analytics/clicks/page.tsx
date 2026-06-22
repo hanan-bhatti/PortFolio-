@@ -11,6 +11,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/admin/PageHeader";
 import { formatDate } from "@/lib/utils";
+import AnalyticsChart from "@/components/admin/AnalyticsChart";
 
 export const dynamic = "force-dynamic";
 
@@ -88,7 +89,116 @@ export default async function AnalyticsInteractionsPage() {
     .sort((a, b) => b.totalInteractions - a.totalInteractions)
     .slice(0, 5);
 
-  const peakInteractions = topPosts.length > 0 ? Math.max(...topPosts.map((p) => p.totalInteractions)) : 0;
+  // Generate global activity timeline for the last 7 days
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }).reverse();
+
+  const globalChartData = last7Days.map((day) => {
+    const nextDay = new Date(day);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    // Calculate global click count for this day
+    let clicksCount = 0;
+    posts.forEach((post) => {
+      post.shortLinks.forEach((link) => {
+        clicksCount += link.clicks.filter((click) => {
+          const time = click.createdAt.getTime();
+          return time >= day.getTime() && time < nextDay.getTime();
+        }).length;
+      });
+    });
+
+    // Add orphan clicks
+    orphanShortLinks.forEach((link) => {
+      clicksCount += link.clicks.filter((click) => {
+        const time = click.createdAt.getTime();
+        return time >= day.getTime() && time < nextDay.getTime();
+      }).length;
+    });
+
+    // Calculate global copies count for this day
+    let copiesCount = 0;
+    posts.forEach((post) => {
+      copiesCount += post.codeCopyEvents.filter((event) => {
+        const time = event.createdAt.getTime();
+        return time >= day.getTime() && time < nextDay.getTime();
+      }).length;
+    });
+
+    return {
+      label: day.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+      clicks: clicksCount,
+      copies: copiesCount,
+      total: clicksCount + copiesCount,
+    };
+  });
+
+  // Prepare chart datasets
+  const timelineChartData = {
+    labels: globalChartData.map((d) => d.label),
+    datasets: [
+      {
+        label: "Clicks",
+        data: globalChartData.map((d) => d.clicks),
+        backgroundColor: "#16A34A",
+        borderColor: "#16A34A",
+        borderWidth: 1,
+      },
+      {
+        label: "Copies",
+        data: globalChartData.map((d) => d.copies),
+        backgroundColor: "#F59E0B",
+        borderColor: "#F59E0B",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const timelineChartOptions = {
+    scales: {
+      x: { stacked: true },
+      y: { stacked: true, ticks: { precision: 0 } },
+    },
+  };
+
+  const breakdownChartData = {
+    labels: ["External Clicks", "Share Clicks", "Copies"],
+    datasets: [
+      {
+        data: [totalLinkClicks, totalShareClicks, totalCopies],
+        backgroundColor: ["#16A34A", "#F59E0B", "#71717a"],
+        borderColor: ["#0c0c0c", "#0c0c0c", "#0c0c0c"],
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const topPostsChartData = {
+    labels: topPosts.map((p) => p.title),
+    datasets: [
+      {
+        label: "Interactions",
+        data: topPosts.map((p) => p.totalInteractions),
+        backgroundColor: "#F59E0B",
+        borderColor: "#F59E0B",
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const topPostsChartOptions = {
+    indexAxis: "y" as const,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: { ticks: { precision: 0 } },
+    },
+  };
 
   return (
     <div className="space-y-8 pb-12">
@@ -139,38 +249,34 @@ export default async function AnalyticsInteractionsPage() {
         </div>
       </div>
 
-      {/* CSS Chart: Top Posts by Interactions */}
+      {/* Charts Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Timeline Chart */}
+        <div className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+          <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
+            Activity Timeline (Last 7 Days)
+          </h3>
+          <AnalyticsChart type="bar" data={timelineChartData} options={timelineChartOptions} height={200} />
+        </div>
+
+        {/* Share/Breakdown Chart */}
+        <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+          <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
+            Interactions Share
+          </h3>
+          <div className="flex items-center justify-center h-[200px]">
+            <AnalyticsChart type="doughnut" data={breakdownChartData} height={180} />
+          </div>
+        </div>
+      </div>
+
+      {/* Top Posts Chart */}
       {topPosts.length > 0 && (
         <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
-          <h3 className="font-syne text-sm font-bold uppercase tracking-wider text-white">
-            Top Posts by Interactions (Clicks & Copies)
+          <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
+            Top Posts by Interactions
           </h3>
-          <div className="space-y-4 pt-2">
-            {topPosts.map((post) => {
-              const percent = peakInteractions > 0 ? Math.round((post.totalInteractions / peakInteractions) * 100) : 0;
-              return (
-                <div key={post.id} className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-mono">
-                    <Link
-                      href={`/admin/analytics/clicks/${post.id}`}
-                      className="text-zinc-300 hover:text-amber hover:underline truncate max-w-[70%]"
-                    >
-                      {post.title}
-                    </Link>
-                    <span className="text-zinc-500 font-bold shrink-0 ml-2">
-                      {post.totalInteractions} interactions
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#181818] h-3 rounded-none overflow-hidden border border-[#262626]/40">
-                    <div
-                      className="bg-amber h-full rounded-none transition-all duration-500"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <AnalyticsChart type="bar" data={topPostsChartData} options={topPostsChartOptions} height={200} />
         </div>
       )}
 

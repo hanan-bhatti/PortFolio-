@@ -1,0 +1,381 @@
+"use client";
+
+/**
+ * @file components/admin/EngagementOverviewClient.tsx
+ * @description Interactive client-side component displaying stats overview, filter controls,
+ * comparisons table, and content gaps search log for administrative analytics review.
+ * 
+ * @exports
+ * - EngagementOverviewClient (default): Main overview display component
+ */
+
+import { useState } from "react";
+import Link from "next/link";
+import { formatDate } from "@/lib/utils";
+
+interface PostItem {
+  id: string;
+  title: string;
+  slug: string;
+  published: boolean;
+  createdAt: string;
+  views: number;
+  estReadTimeMins: number;
+  config: {
+    emojiReactionsOn: boolean;
+    helpfulVoteOn: boolean;
+    starRatingOn: boolean;
+    sectionReactionsOn: boolean;
+    endSurveyOn: boolean;
+    difficultyToggleOn: boolean;
+    exitIntentOn: boolean;
+    notifyMeOn: boolean;
+  };
+  metrics: {
+    emojiCount: number;
+    helpful: { yes: number; no: number };
+    rating: { average: number; total: number };
+    scrollCompletionRate: number;
+    avgTimeOnPageMins: number;
+  };
+}
+
+interface ContentGap {
+  query: string;
+  count: number;
+}
+
+interface Props {
+  posts: PostItem[];
+  contentGaps: ContentGap[];
+  summary: {
+    totalReactions: number;
+    totalSurveyResponses: number;
+    totalNotifySignups: number;
+  };
+}
+
+export default function EngagementOverviewClient({ posts, contentGaps, summary }: Props) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "reactions" | "helpful" | "views" | "scroll">("recent");
+  const [filterFeature, setFilterFeature] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<"all" | "7d" | "30d">("all");
+
+  // Filtering posts
+  const filteredPosts = posts.filter((post) => {
+    // 1. Search filter
+    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!matchesSearch) return false;
+
+    // 2. Feature toggle filter
+    if (filterFeature !== "all") {
+      const cfg = post.config as Record<string, boolean>;
+      if (!cfg[filterFeature]) return false;
+    }
+
+    // 3. Date range filter
+    if (dateRange !== "all") {
+      const createdDate = new Date(post.createdAt);
+      const limitDate = new Date();
+      if (dateRange === "7d") {
+        limitDate.setDate(limitDate.getDate() - 7);
+      } else {
+        limitDate.setDate(limitDate.getDate() - 30);
+      }
+      if (createdDate < limitDate) return false;
+    }
+
+    return true;
+  });
+
+  // Sorting posts
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+    if (sortBy === "recent") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    if (sortBy === "reactions") {
+      return b.metrics.emojiCount - a.metrics.emojiCount;
+    }
+    if (sortBy === "views") {
+      return b.views - a.views;
+    }
+    if (sortBy === "scroll") {
+      return a.metrics.scrollCompletionRate - b.metrics.scrollCompletionRate;
+    }
+    if (sortBy === "helpful") {
+      const aTotal = a.metrics.helpful.yes + a.metrics.helpful.no;
+      const bTotal = b.metrics.helpful.yes + b.metrics.helpful.no;
+      const aRate = aTotal > 0 ? a.metrics.helpful.yes / aTotal : 0;
+      const bRate = bTotal > 0 ? b.metrics.helpful.yes / bTotal : 0;
+      return bRate - aRate;
+    }
+    return 0;
+  });
+
+  return (
+    <div className="space-y-8 text-left">
+      {/* Overview Stat Strip */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          { label: "Total Emojis", val: summary.totalReactions, desc: "Reactions recorded across all posts" },
+          { label: "Surveys Received", val: summary.totalSurveyResponses, desc: "End-post suggestions submitted" },
+          { label: "Notification Follows", val: summary.totalNotifySignups, desc: "Email topic notifications requested" },
+        ].map((c) => (
+          <div key={c.label} className="border border-[#262626] bg-[#0c0c0c] p-5 rounded-none flex flex-col justify-between h-[115px]">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-550">{c.label}</span>
+            <div className="flex items-baseline gap-2">
+              <span className="font-syne text-3xl font-bold text-white leading-none">{c.val}</span>
+            </div>
+            <span className="font-mono text-[9px] text-zinc-500 truncate">{c.desc}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Filter and Sort controls */}
+      <div className="border border-[#262626] bg-[#0c0c0c]/40 p-4 space-y-4">
+        <div className="grid gap-3 sm:grid-cols-4 font-mono text-xs">
+          {/* Keyword Search */}
+          <div className="sm:col-span-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search posts by title..."
+              className="w-full rounded-none border border-[#262626] bg-[#0a0a0a] px-3 py-2 font-mono text-xs text-white placeholder-zinc-650 outline-none focus:border-amber transition-colors"
+            />
+          </div>
+
+          {/* Sort By */}
+          <div>
+            <select
+              value={sortBy}
+              onChange={(e: any) => setSortBy(e.target.value)}
+              className="w-full rounded-none border border-[#262626] bg-[#0a0a0a] px-3 py-2 font-mono text-xs text-zinc-300 outline-none focus:border-amber transition-colors cursor-pointer"
+            >
+              <option value="recent">Sort: Recent</option>
+              <option value="reactions">Sort: Most Reactions</option>
+              <option value="helpful">Sort: Helpful Ratio</option>
+              <option value="views">Sort: Most Views</option>
+              <option value="scroll">Sort: Lowest Scroll (Audit)</option>
+            </select>
+          </div>
+
+          {/* Date Filter */}
+          <div>
+            <select
+              value={dateRange}
+              onChange={(e: any) => setDateRange(e.target.value)}
+              className="w-full rounded-none border border-[#262626] bg-[#0a0a0a] px-3 py-2 font-mono text-xs text-zinc-300 outline-none focus:border-amber transition-colors cursor-pointer"
+            >
+              <option value="all">Date: All Time</option>
+              <option value="7d">Date: Last 7 Days</option>
+              <option value="30d">Date: Last 30 Days</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Feature toggles filters */}
+        <div className="flex flex-wrap items-center gap-2 border-t border-[#262626]/40 pt-3 text-[11px] font-mono">
+          <span className="text-zinc-500 mr-2 uppercase tracking-wide">Filter feature:</span>
+          {[
+            { label: "All Posts", value: "all" },
+            { label: "Emojis ON", value: "emojiReactionsOn" },
+            { label: "Helpful ON", value: "helpfulVoteOn" },
+            { label: "Stars ON", value: "starRatingOn" },
+            { label: "Survey ON", value: "endSurveyOn" },
+            { label: "Exit Popup ON", value: "exitIntentOn" },
+            { label: "Notify ON", value: "notifyMeOn" },
+          ].map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              onClick={() => setFilterFeature(item.value)}
+              className={`px-2.5 py-1 border rounded-none cursor-pointer transition-colors ${
+                filterFeature === item.value
+                  ? "border-amber bg-amber/10 text-amber"
+                  : "border-[#262626] bg-[#0c0c0c]/40 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Comparisons Table */}
+      <div className="border border-[#262626] bg-[#0c0c0c] overflow-x-auto min-w-0">
+        <table className="w-full min-w-[800px] border-collapse font-sans text-left text-xs">
+          <thead>
+            <tr className="border-b border-[#262626] bg-black/20 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-550">
+              <th className="px-5 py-3">Post Title</th>
+              <th className="px-4 py-3">Published</th>
+              <th className="px-4 py-3">Active Config</th>
+              <th className="px-4 py-3 text-right">Emojis</th>
+              <th className="px-4 py-3 text-right">Helpful Ratio</th>
+              <th className="px-4 py-3 text-right">Rating</th>
+              <th className="px-4 py-3 text-right">Scroll Depth</th>
+              <th className="px-5 py-3 text-right">Read Time (Avg/Est)</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#262626]/40 text-zinc-300">
+            {sortedPosts.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-5 py-8 text-center text-zinc-500 font-mono">
+                  No post engagement data matches active search/filter criteria.
+                </td>
+              </tr>
+            ) : (
+              sortedPosts.map((post) => {
+                const totalHelpful = post.metrics.helpful.yes + post.metrics.helpful.no;
+                const helpfulPercent = totalHelpful > 0 ? Math.round((post.metrics.helpful.yes / totalHelpful) * 100) : null;
+                const avgMins = post.metrics.avgTimeOnPageMins;
+                const estMins = post.estReadTimeMins;
+                // Skimming warning: average reading time is less than half of estimated read time
+                const isSkimming = avgMins > 0 && avgMins < estMins / 2;
+
+                return (
+                  <tr key={post.id} className="hover:bg-white/[0.01] transition-colors">
+                    {/* Title */}
+                    <td className="px-5 py-3.5 font-medium max-w-[240px] truncate">
+                      <Link
+                        href={`/admin/posts/${post.id}/engagement`}
+                        className="text-zinc-200 hover:text-amber font-syne font-bold leading-snug transition-colors"
+                      >
+                        {post.title}
+                      </Link>
+                    </td>
+
+                    {/* Published Date */}
+                    <td className="px-4 py-3.5 font-mono text-[10px] text-zinc-500">
+                      {formatDate(post.createdAt)}
+                    </td>
+
+                    {/* Active Config Flags */}
+                    <td className="px-4 py-3.5 font-mono text-[9px]">
+                      <div className="flex flex-wrap gap-1">
+                        {[
+                          { key: "emojiReactionsOn", symbol: "EM" },
+                          { key: "helpfulVoteOn", symbol: "HP" },
+                          { key: "starRatingOn", symbol: "ST" },
+                          { key: "sectionReactionsOn", symbol: "SE" },
+                          { key: "endSurveyOn", symbol: "SV" },
+                          { key: "exitIntentOn", symbol: "EX" },
+                          { key: "notifyMeOn", symbol: "NT" },
+                        ].map((cfg) => {
+                          const active = (post.config as any)[cfg.key];
+                          return (
+                            <span
+                              key={cfg.key}
+                              className={`px-1 border font-bold ${
+                                active
+                                  ? "border-green/20 bg-green/5 text-green"
+                                  : "border-zinc-800 bg-transparent text-zinc-650"
+                              }`}
+                              title={`${cfg.key.replace("On", "")} toggle state`}
+                            >
+                              {cfg.symbol}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+
+                    {/* Emoji Counts */}
+                    <td className="px-4 py-3.5 font-mono text-right font-medium">
+                      {post.config.emojiReactionsOn ? post.metrics.emojiCount : <span className="text-zinc-600">—</span>}
+                    </td>
+
+                    {/* Helpful Ratio */}
+                    <td className="px-4 py-3.5 font-mono text-right text-zinc-400">
+                      {post.config.helpfulVoteOn ? (
+                        totalHelpful > 0 ? (
+                          <span title={`${post.metrics.helpful.yes} of ${totalHelpful} voters found this helpful`}>
+                            {helpfulPercent}% <span className="text-[10px] text-zinc-550">({totalHelpful})</span>
+                          </span>
+                        ) : (
+                          <span className="text-zinc-550">0%</span>
+                        )
+                      ) : (
+                        <span className="text-zinc-600">—</span>
+                      )}
+                    </td>
+
+                    {/* Ratings */}
+                    <td className="px-4 py-3.5 font-mono text-right text-zinc-400">
+                      {post.config.starRatingOn ? (
+                        post.metrics.rating.total > 0 ? (
+                          <span className="text-amber">
+                            ★ {post.metrics.rating.average}{" "}
+                            <span className="text-[10px] text-zinc-550">({post.metrics.rating.total})</span>
+                          </span>
+                        ) : (
+                          <span className="text-zinc-550">Unrated</span>
+                        )
+                      ) : (
+                        <span className="text-zinc-600">—</span>
+                      )}
+                    </td>
+
+                    {/* Scroll rate */}
+                    <td className="px-4 py-3.5 font-mono text-right text-zinc-400">
+                      {post.metrics.scrollCompletionRate}%
+                    </td>
+
+                    {/* Time vs Estimate */}
+                    <td className="px-5 py-3.5 font-mono text-right">
+                      {isSkimming ? (
+                        <span
+                          className="px-1.5 py-0.5 border border-amber/30 bg-amber/5 text-amber text-[11px] font-bold"
+                          title="Reader skimming warning: Avg read time is under half the estimated read time"
+                        >
+                          {avgMins}m / {estMins}m
+                        </span>
+                      ) : (
+                        <span className="text-zinc-400">
+                          {avgMins}m / <span className="text-zinc-550">{estMins}m est.</span>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Content Gaps Site Search queries log */}
+      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+        <div className="space-y-1">
+          <h3 className="font-syne text-base font-bold text-white uppercase tracking-wider">
+            Content Gaps analyzer
+          </h3>
+          <p className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
+            Top search queries returning zero results — write articles to fill these gaps
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+          {contentGaps.length === 0 ? (
+            <div className="sm:col-span-2 md:col-span-3 border border-[#262626]/40 p-5 text-center text-zinc-500 font-mono text-xs">
+              No search gap queries recorded. All site searches returned results.
+            </div>
+          ) : (
+            contentGaps.map((cg) => (
+              <div
+                key={cg.query}
+                className="border border-[#262626] bg-[#080808] px-4 py-3.5 flex justify-between items-center rounded-none font-mono text-xs"
+              >
+                <span className="text-zinc-300 font-bold max-w-[70%] truncate" title={cg.query}>
+                  &quot;{cg.query}&quot;
+                </span>
+                <span className="px-2 py-0.5 border border-red-500/20 bg-red-950/10 text-red-400 text-[10px] font-bold">
+                  {cg.count} searches
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -9,7 +9,7 @@
  * - PostEditorData: Type/Interface definition
  */
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
@@ -60,6 +60,36 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
   const [tags, setTags] = useState<string[]>(post?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+
+  const [engagementExpanded, setEngagementExpanded] = useState(false);
+  const [emojiReactionsOn, setEmojiReactionsOn] = useState(false);
+  const [helpfulVoteOn, setHelpfulVoteOn] = useState(false);
+  const [starRatingOn, setStarRatingOn] = useState(false);
+  const [sectionReactionsOn, setSectionReactionsOn] = useState(false);
+  const [endSurveyOn, setEndSurveyOn] = useState(false);
+  const [difficultyToggleOn, setDifficultyToggleOn] = useState(false);
+  const [exitIntentOn, setExitIntentOn] = useState(false);
+  const [notifyMeOn, setNotifyMeOn] = useState(false);
+
+  useEffect(() => {
+    if (post?.id) {
+      fetch(`/api/admin/posts/${post.id}/engagement-config`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && !data.error) {
+            setEmojiReactionsOn(data.emojiReactionsOn || false);
+            setHelpfulVoteOn(data.helpfulVoteOn || false);
+            setStarRatingOn(data.starRatingOn || false);
+            setSectionReactionsOn(data.sectionReactionsOn || false);
+            setEndSurveyOn(data.endSurveyOn || false);
+            setDifficultyToggleOn(data.difficultyToggleOn || false);
+            setExitIntentOn(data.exitIntentOn || false);
+            setNotifyMeOn(data.notifyMeOn || false);
+          }
+        })
+        .catch((err) => console.error("Failed to load engagement config", err));
+    }
+  }, [post?.id]);
 
   const { startUpload } = useUploadThing("imageUploader");
 
@@ -173,6 +203,27 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
       if (res.error) {
         toast.error(res.error);
       } else {
+        const targetPostId = post?.id || res.id;
+        if (targetPostId) {
+          try {
+            await fetch(`/api/admin/posts/${targetPostId}/engagement-config`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                emojiReactionsOn,
+                helpfulVoteOn,
+                starRatingOn,
+                sectionReactionsOn,
+                endSurveyOn,
+                difficultyToggleOn,
+                exitIntentOn,
+                notifyMeOn,
+              }),
+            });
+          } catch (err) {
+            console.error("Failed to save engagement config", err);
+          }
+        }
         toast.success(published ? "Post published!" : "Draft saved");
         router.push("/admin/posts");
         router.refresh();
@@ -455,6 +506,48 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
             placeholder="Add tag, press Enter"
             className={inputClass}
           />
+        </div>
+
+        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
+          <button
+            type="button"
+            onClick={() => setEngagementExpanded(!engagementExpanded)}
+            className="flex w-full items-center justify-between font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 outline-none"
+          >
+            <span>Engagement Settings</span>
+            <span>{engagementExpanded ? "[-]" : "[+]"}</span>
+          </button>
+          
+          {engagementExpanded && (
+            <div className="mt-4 space-y-3 border-t border-[#262626]/40 pt-3">
+              {[
+                { label: "Emoji Reactions", value: emojiReactionsOn, onChange: setEmojiReactionsOn },
+                { label: "Helpful Vote", value: helpfulVoteOn, onChange: setHelpfulVoteOn },
+                { label: "Star Rating", value: starRatingOn, onChange: setStarRatingOn },
+                { label: "Section Reactions", value: sectionReactionsOn, onChange: setSectionReactionsOn },
+                { label: "End Post Survey", value: endSurveyOn, onChange: setEndSurveyOn },
+                { label: "Difficulty Rating", value: difficultyToggleOn, onChange: setDifficultyToggleOn },
+                { label: "Exit Intent Popup", value: exitIntentOn, onChange: setExitIntentOn },
+                { label: "Notify Me Form", value: notifyMeOn, onChange: setNotifyMeOn },
+              ].map((cfg) => (
+                <div key={cfg.label} className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-zinc-300">{cfg.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => cfg.onChange(!cfg.value)}
+                    className={cn(
+                      "px-2 py-0.5 border text-[10px] font-bold transition-colors uppercase rounded-none cursor-pointer",
+                      cfg.value
+                        ? "border-[#16A34A] bg-[#16A34A]/10 text-[#16A34A]"
+                        : "border-[#262626] bg-black/40 text-zinc-500 hover:text-zinc-400 hover:border-zinc-500"
+                    )}
+                  >
+                    {cfg.value ? "ON" : "OFF"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="hidden xl:block space-y-3 rounded-none border border-[#262626] bg-[#0c0c0c] p-4">

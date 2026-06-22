@@ -29,6 +29,7 @@ import {
   FiSettings,
   FiMenu,
   FiX,
+  FiTrendingUp,
 } from "react-icons/fi";
 
 interface SidebarItem {
@@ -50,6 +51,7 @@ const SECTIONS: SidebarSection[] = [
       { href: "/admin/dashboard", label: "Dashboard", icon: FiGrid },
       { href: "/admin/analytics", label: "Analytics", icon: FiBarChart2 },
       { href: "/admin/analytics/clicks", label: "Interactions", icon: FiActivity },
+      { href: "/admin/engagement", label: "Engagement", icon: FiTrendingUp },
     ],
   },
   {

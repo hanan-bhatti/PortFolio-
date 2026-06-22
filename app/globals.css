@@ -149,6 +149,7 @@
 
 html {
   scroll-behavior: smooth;
+  position: relative;
 }
 
 body {
@@ -156,6 +157,7 @@ body {
   color: #ebebe4;
   font-family: var(--font-sans);
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Glassmorphism card */

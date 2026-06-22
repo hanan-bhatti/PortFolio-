@@ -11,6 +11,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getVisitorId } from "@/lib/analytics";
 
 interface Props {
   postId: string;
@@ -31,7 +32,7 @@ export default function ShareButton({ postId, shareCode }: Props) {
       setTimeout(() => setCopied(false), 2000);
 
       // Track share action click on client
-      const vid = localStorage.getItem("visitorId") || undefined;
+      const vid = getVisitorId() || undefined;
       await fetch("/api/analytics/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

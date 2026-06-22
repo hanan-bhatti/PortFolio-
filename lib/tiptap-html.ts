@@ -130,11 +130,19 @@ export function renderPostContent(content: string): { html: string; toc: TocItem
   });
 
   const toc: TocItem[] = [];
+  const seenSlugs: Record<string, number> = {};
 
   // Parse h2 to h5 for the table of contents
   html = html.replace(/<h([2-5])([^>]*)>([\s\S]*?)<\/h\1>/g, (_match, lvl: string, attrs: string, inner: string) => {
     const text = inner.replace(/<[^>]+>/g, "").trim();
-    const id = `${slugify(text) || "section"}-${toc.length}`;
+    const baseSlug = slugify(text) || "section";
+    let id = baseSlug;
+    if (seenSlugs[baseSlug] !== undefined) {
+      seenSlugs[baseSlug]++;
+      id = `${baseSlug}-${seenSlugs[baseSlug]}`;
+    } else {
+      seenSlugs[baseSlug] = 0;
+    }
     // Adjust TOC level back by 1 so the visual indentation in the TOC component is preserved
     toc.push({ id, text, level: Number(lvl) - 1 });
     return `<h${lvl}${attrs} id="${id}">${inner}</h${lvl}>`;
