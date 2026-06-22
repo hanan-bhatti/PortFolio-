@@ -37,6 +37,7 @@
     "@tiptap/react": "^2.10.0",
     "@tiptap/starter-kit": "^2.10.0",
     "@uploadthing/react": "^7.3.3",
+    "@vercel/analytics": "^2.0.1",
     "agentation-mcp": "^1.2.0",
     "bcryptjs": "^2.4.3",
     "boneyard-js": "^1.8.1",

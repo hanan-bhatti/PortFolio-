@@ -16,6 +16,7 @@ import { Toaster } from "sonner";
 import { getSiteSettings } from "@/lib/settings";
 import { extractTwitterUsername } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import "./bones/registry";
 
@@ -119,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         {children}
+        <Analytics />
         <Toaster theme="dark" position="bottom-right" richColors />
       </body>
     </html>
