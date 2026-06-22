@@ -653,7 +653,7 @@ export default function PostEngagementWrapper({
         <h4 className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-500">
           ENGAGE / POST REACTIONS
         </h4>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex gap-1.5 sm:gap-2.5 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 scrollbar-none">
           {["👍", "🔥", "🤯", "❤️", "😂"].map((emoji) => {
             const count = summary.emojiSummary[emoji] || 0;
             const isSelected = visitor?.myEmojis.includes(emoji);
@@ -662,10 +662,10 @@ export default function PostEngagementWrapper({
                 key={emoji}
                 type="button"
                 onClick={() => handleEmojiReact(emoji)}
-                className={`flex items-center gap-2 px-4 py-2 border rounded-none text-xs font-mono transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 border rounded-none text-[10px] sm:text-xs font-mono transition-all duration-200 cursor-pointer flex-shrink-0 ${
                   isSelected
                     ? "border-[#16A34A] bg-[#16A34A]/10 text-[#16A34A] font-bold"
-                    : "border-[#262626] bg-[#0c0c0c]/40 text-zinc-400 hover:border-zinc-500 hover:text-zinc-300"
+                    : "border-[#262626] bg-[#0c0c0c]/40 text-zinc-400 hover:border-zinc-550 hover:text-zinc-300"
                 }`}
               >
                 <span className="text-sm">{emoji}</span>

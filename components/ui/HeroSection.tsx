@@ -73,7 +73,7 @@ export default function HeroSection({
           {/* Main Heading */}
           <h1 
             ref={solidH1Ref}
-            className="font-syne font-extrabold text-[clamp(2.2rem,9.2vw,4rem)] md:text-[clamp(3.5rem,8vw,7rem)] leading-[0.95] tracking-tight uppercase flex flex-col cursor-default select-none relative w-full"
+            className="font-syne font-extrabold text-[clamp(1.8rem,8.5vw,3.6rem)] md:text-[clamp(3.5rem,8vw,7rem)] leading-[0.95] tracking-tight uppercase flex flex-col cursor-default select-none relative w-full"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
@@ -264,7 +264,7 @@ export default function HeroSection({
                 <div className="w-[45%] flex flex-col justify-center py-12 md:py-0 text-left h-full" style={{ minHeight: "auto" }}>
                   <div 
                     ref={strokeH1Ref}
-                    className="font-syne font-extrabold text-[clamp(2.2rem,9.2vw,4rem)] md:text-[clamp(3.5rem,8vw,7rem)] leading-[0.95] tracking-tight uppercase flex flex-col relative w-full"
+                    className="font-syne font-extrabold text-[clamp(1.8rem,8.5vw,3.6rem)] md:text-[clamp(3.5rem,8vw,7rem)] leading-[0.95] tracking-tight uppercase flex flex-col relative w-full"
                     style={{
                       "--mouse-x": "0px",
                       "--mouse-y": "0px",
