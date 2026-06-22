@@ -44,20 +44,22 @@ export async function POST(
       return NextResponse.json({ error: "Emoji reactions are disabled for this post." }, { status: 403 });
     }
 
-    const reaction = await prisma.postEmojiReaction.upsert({
-      where: {
-        postId_visitorId_emoji: {
+    const reaction = await prisma.$transaction(async (tx) => {
+      // Enforce at most one emoji reaction per visitor per post by deleting previous ones
+      await tx.postEmojiReaction.deleteMany({
+        where: {
+          postId,
+          visitorId,
+        },
+      });
+
+      return tx.postEmojiReaction.create({
+        data: {
           postId,
           visitorId,
           emoji,
         },
-      },
-      update: {},
-      create: {
-        postId,
-        visitorId,
-        emoji,
-      },
+      });
     });
 
     return NextResponse.json(reaction, { status: 201 });

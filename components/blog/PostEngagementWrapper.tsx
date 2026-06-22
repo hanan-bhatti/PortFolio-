@@ -338,27 +338,36 @@ export default function PostEngagementWrapper({
       return;
     }
 
-    const hasReacted = visitor?.myEmojis.includes(emoji);
+    const previousEmojis = visitor?.myEmojis || [];
+    const hasReacted = previousEmojis.includes(emoji);
     
     // Optimistic UI updates
     setVisitor((prev) => {
       if (!prev) return null;
       return {
         ...prev,
-        myEmojis: hasReacted
-          ? prev.myEmojis.filter((e) => e !== emoji)
-          : [...prev.myEmojis, emoji],
+        myEmojis: hasReacted ? [] : [emoji],
       };
     });
 
     setSummary((prev) => {
-      const currentCount = prev.emojiSummary[emoji] || 0;
+      const nextEmojiSummary = { ...prev.emojiSummary };
+      
+      // 1. Decrement previously selected emojis
+      previousEmojis.forEach((prevEmoji) => {
+        if (nextEmojiSummary[prevEmoji]) {
+          nextEmojiSummary[prevEmoji] = Math.max(0, nextEmojiSummary[prevEmoji] - 1);
+        }
+      });
+
+      // 2. Increment newly selected emoji if we did not just deselect it
+      if (!hasReacted) {
+        nextEmojiSummary[emoji] = (nextEmojiSummary[emoji] || 0) + 1;
+      }
+
       return {
         ...prev,
-        emojiSummary: {
-          ...prev.emojiSummary,
-          [emoji]: hasReacted ? Math.max(0, currentCount - 1) : currentCount + 1,
-        },
+        emojiSummary: nextEmojiSummary,
       };
     });
 
@@ -381,19 +390,25 @@ export default function PostEngagementWrapper({
         if (!prev) return null;
         return {
           ...prev,
-          myEmojis: hasReacted
-            ? [...prev.myEmojis, emoji]
-            : prev.myEmojis.filter((e) => e !== emoji),
+          myEmojis: previousEmojis,
         };
       });
       setSummary((prev) => {
-        const currentCount = prev.emojiSummary[emoji] || 0;
+        const rollbackSummary = { ...prev.emojiSummary };
+        
+        // Remove current optimistic emoji
+        if (!hasReacted) {
+          rollbackSummary[emoji] = Math.max(0, (rollbackSummary[emoji] || 0) - 1);
+        }
+        
+        // Restore previous emojis
+        previousEmojis.forEach((prevEmoji) => {
+          rollbackSummary[prevEmoji] = (rollbackSummary[prevEmoji] || 0) + 1;
+        });
+
         return {
           ...prev,
-          emojiSummary: {
-            ...prev.emojiSummary,
-            [emoji]: hasReacted ? currentCount + 1 : Math.max(0, currentCount - 1),
-          },
+          emojiSummary: rollbackSummary,
         };
       });
     }
