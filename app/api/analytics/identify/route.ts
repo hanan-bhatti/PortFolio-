@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 // ── Bot / Crawler detection ───────────────────────────────────────────────────
 const BOT_PATTERN =
-  /bot|crawler|spider|scraper|headless|prerender|lighthouse|pagespeed|semrush|ahrefs|moz|dataforseo|pingdom|uptimerobot|statuspage|node-fetch|python-requests|curl|wget|axios|postman|insomnia|go-http|java\/|okhttp|dart:|cfnetwork|libwww/i;
+  /bot|crawler|spider|scraper|headless|prerender|lighthouse|pagespeed|semrush|ahrefs|\bmoz\b|dataforseo|pingdom|uptimerobot|statuspage|node-fetch|python-requests|curl|wget|axios|postman|insomnia|go-http|java\/|okhttp|dart:|cfnetwork|libwww/i;
 
 // ── Internal / dev IP ranges ─────────────────────────────────────────────────
 const INTERNAL_IPS = new Set(["127.0.0.1", "::1", "localhost", "::ffff:127.0.0.1"]);

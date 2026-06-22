@@ -25,6 +25,9 @@ All notable changes to this project will be documented in this file.
 - Created AI-friendly `llms.txt` file in the root to help crawler and agent tools index the codebase.
 - Created `CHANGELOG.md` and `docs/adr/ADR-001-codebase-cleanup.md` to trace project improvements.
 
+### Fixed
+- Fixed bot-detection regular expression (`BOT_PATTERN` in `app/api/analytics/identify/route.ts`) incorrectly matching `"Mozilla"` user agent substring (via case-insensitive `moz` keyword), which previously classified all standard browser user agents as bots and skipped visitor session identification.
+
 ### Changed
 - Consolidated conflicting dynamic routes `/api/posts/[slug]` and `/api/posts/[id]` into a single unified `/api/posts/[id]` routing tree, supporting retrievals by both slug strings and ID keys.
 - Refactored protected admin layout (`app/admin/(protected)/layout.tsx`) to support responsive flow (`flex-col md:flex-row`) and dynamic padding.
