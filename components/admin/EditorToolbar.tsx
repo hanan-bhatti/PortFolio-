@@ -41,7 +41,34 @@ import {
   LuGithub,
 } from "react-icons/lu";
 
-const LANGS = ["plaintext", "typescript", "javascript", "python", "bash", "json", "css", "xml", "sql", "go", "rust"] as const;
+const LANGS = [
+  // Diagrams
+  "mermaid",
+  // Web
+  "html", "css", "scss", "less", "javascript", "typescript",
+  // Systems / Low level
+  "c", "cpp", "rust", "go", "wasm", "glsl",
+  // JVM / CLR
+  "java", "kotlin", "scala", "csharp", "vbnet",
+  // Scripting
+  "python", "ruby", "perl", "lua", "r",
+  // Mobile
+  "swift", "objectivec", "dart",
+  // Shell
+  "bash", "shell", "powershell",
+  // Functional
+  "haskell", "elixir", "erlang", "clojure",
+  // Data / Config
+  "json", "yaml", "toml", "xml", "ini",
+  // Query
+  "sql", "graphql",
+  // Infra / DevOps
+  "dockerfile", "nginx", "http",
+  // Other
+  "markdown", "diff", "makefile", "protobuf", "nix", "arduino",
+  // Fallback
+  "plaintext",
+] as const;
 const HEADINGS = [1, 2, 3, 4] as const;
 
 function Btn({

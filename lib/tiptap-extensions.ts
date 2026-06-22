@@ -21,8 +21,36 @@ import TableCell from "@tiptap/extension-table-cell";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { Node, mergeAttributes, type Extensions } from "@tiptap/core";
+import docker from "highlight.js/lib/languages/dockerfile";
+import nginx from "highlight.js/lib/languages/nginx";
+import http from "highlight.js/lib/languages/http";
+import toml from "highlight.js/lib/languages/ini"; // TOML uses ini grammar
+import elixir from "highlight.js/lib/languages/elixir";
+import scala from "highlight.js/lib/languages/scala";
+import haskell from "highlight.js/lib/languages/haskell";
+import clojure from "highlight.js/lib/languages/clojure";
+import erlang from "highlight.js/lib/languages/erlang";
+import dart from "highlight.js/lib/languages/dart";
+import powershell from "highlight.js/lib/languages/powershell";
+import nix from "highlight.js/lib/languages/nix";
+import protobuf from "highlight.js/lib/languages/protobuf";
+import glsl from "highlight.js/lib/languages/glsl";
 
 export const lowlight = createLowlight(common);
+lowlight.register("dockerfile", docker);
+lowlight.register("nginx", nginx);
+lowlight.register("http", http);
+lowlight.register("toml", toml);
+lowlight.register("elixir", elixir);
+lowlight.register("scala", scala);
+lowlight.register("haskell", haskell);
+lowlight.register("clojure", clojure);
+lowlight.register("erlang", erlang);
+lowlight.register("dart", dart);
+lowlight.register("powershell", powershell);
+lowlight.register("nix", nix);
+lowlight.register("protobuf", protobuf);
+lowlight.register("glsl", glsl);
 
 const CustomImage = Image.extend({
   addAttributes() {
