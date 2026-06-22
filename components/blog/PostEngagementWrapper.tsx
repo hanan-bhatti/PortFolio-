@@ -52,8 +52,6 @@ export default function PostEngagementWrapper({
   config,
   initialSummary,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [placeholders, setPlaceholders] = useState<{ type: string; el: HTMLElement }[]>([]);
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [summary, setSummary] = useState<EngagementSummary>(initialSummary);
   const [visitor, setVisitor] = useState<VisitorState | null>(null);
@@ -74,24 +72,9 @@ export default function PostEngagementWrapper({
   const [surveySubmitted, setSurveySubmitted] = useState(false);
   const [notifySubmitted, setNotifySubmitted] = useState(false);
 
-  // Scan for dynamically placed widget containers in the blog post body
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  const containerRef = useRef<HTMLDivElement>(null);
 
-    const nodes = container.querySelectorAll("div[data-widget]");
-    const list: { type: string; el: HTMLElement }[] = [];
-    nodes.forEach((node) => {
-      const type = node.getAttribute("data-widget");
-      if (type) {
-        node.innerHTML = ""; // Clear default TipTap placeholder text
-        list.push({ type, el: node as HTMLElement });
-      }
-    });
-    setPlaceholders(list);
-  }, [html, visitor, summary]);
-
-  const hasPlaceholder = (type: string) => placeholders.some((p) => p.type === type);
+  const hasPlaceholder = (type: string) => new RegExp(`data-widget=["']${type}["']`).test(html);
 
   const [isPending, startTransition] = useTransition();
 
@@ -953,6 +936,14 @@ export default function PostEngagementWrapper({
     );
   };
 
+  const widgetsMap: Record<string, React.ReactNode> = {
+    "emoji-reactions": renderEmojiReactions(),
+    "helpful-vote": renderHelpfulVote(),
+    "star-rating": renderStarRating(),
+    "end-survey": renderEndSurvey(),
+    "notify-me": renderNotifyMe(),
+  };
+
   return (
     <>
       {/* Article Content Wrapper */}
@@ -966,6 +957,7 @@ export default function PostEngagementWrapper({
         onSectionTriggerClick={handleSectionTriggerClick}
         onSectionReact={handleSectionReact}
         onCopyEvent={handleCopyEvent}
+        widgets={widgetsMap}
       />
 
       {/* Floating Section Reactions Popover */}
@@ -1007,16 +999,6 @@ export default function PostEngagementWrapper({
           </div>
         </>
       )}
-
-      {/* Render Portal Widgets */}
-      {placeholders.map(({ type, el }) => {
-        if (type === "emoji-reactions") return createPortal(renderEmojiReactions(), el);
-        if (type === "helpful-vote") return createPortal(renderHelpfulVote(), el);
-        if (type === "star-rating") return createPortal(renderStarRating(), el);
-        if (type === "end-survey") return createPortal(renderEndSurvey(), el);
-        if (type === "notify-me") return createPortal(renderNotifyMe(), el);
-        return null;
-      })}
 
       {/* Reader-Intent Fallback Engagement Sections (Appended only if not placed inline) */}
       <div className="mt-16 border-t border-[#262626] pt-12 space-y-12 max-w-full lg:max-w-3xl text-left">

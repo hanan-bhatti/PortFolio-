@@ -486,4 +486,18 @@ body {
   color: #000000;
 }
 
+/* Custom styles for engagement widgets placeholders in editor / admin preview */
+.prose-blog div[data-widget] {
+  border: 1px dashed #262626;
+  background-color: rgba(12, 12, 12, 0.4);
+  padding: 1rem;
+  text-align: center;
+  margin: 1.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #71717a; /* zinc-500 */
+  user-select: none;
+}
+
+
 

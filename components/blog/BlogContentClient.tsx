@@ -22,7 +22,10 @@ interface Props {
   onSectionTriggerClick?: (sectionId: string, rect: DOMRect) => void;
   onSectionReact?: (sectionId: string, emoji: string) => void;
   onCopyEvent?: (codeBlockId: string) => void;
+  widgets?: Record<string, React.ReactNode>;
 }
+
+import { useMemo } from "react";
 
 export default function BlogContentClient({
   html,
@@ -34,7 +37,13 @@ export default function BlogContentClient({
   onSectionTriggerClick,
   onSectionReact,
   onCopyEvent,
+  widgets = {},
 }: Props) {
+
+  const parts = useMemo(() => {
+    // Matches the custom widget div and captures the data-widget attribute value
+    return html.split(/<div\s+[^>]*\bdata-widget="([^"]+)"[^>]*>[\s\S]*?<\/div>/gi);
+  }, [html]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -277,7 +286,27 @@ export default function BlogContentClient({
     <div
       ref={containerRef}
       className="prose-blog w-full max-w-full lg:max-w-3xl min-w-0"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    >
+      {parts.map((part, index) => {
+        if (index % 2 === 0) {
+          if (!part.trim()) return null;
+          return <div key={index} dangerouslySetInnerHTML={{ __html: part }} />;
+        } else {
+          const widgetKey = part;
+          if (widgets && widgets[widgetKey]) {
+            return <div key={index} className="my-6">{widgets[widgetKey]}</div>;
+          }
+          const widgetName = widgetKey.replace("-", " ").toUpperCase();
+          return (
+            <div
+              key={index}
+              className="border border-dashed border-[#262626] bg-[#0c0c0c]/40 p-4 text-center my-4 font-mono text-[11px] text-zinc-500 select-none"
+            >
+              [ENGAGEMENT WIDGET: {widgetName}]
+            </div>
+          );
+        }
+      })}
+    </div>
   );
 }
