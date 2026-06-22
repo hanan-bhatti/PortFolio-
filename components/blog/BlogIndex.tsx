@@ -8,17 +8,50 @@
  * - BlogIndex (default): Main React component or function
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import PostCard, { type PostCardData } from "@/components/blog/PostCard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "boneyard-js/react";
+import { getVisitorId } from "@/lib/analytics";
 
 const PAGE_SIZE = 10;
 
 export default function BlogIndex({ posts }: { posts: PostCardData[] }) {
   const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<PostCardData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  // Debounced fuzzy search execution
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const vid = getVisitorId() || "";
+        const url = `/api/posts/search?q=${encodeURIComponent(trimmed)}&visitorId=${encodeURIComponent(vid)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data);
+        }
+      } catch (err) {
+        console.error("Fuzzy search fetch failed:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 600); // 600ms debounce to prevent overloading the server
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [query]);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -27,14 +60,19 @@ export default function BlogIndex({ posts }: { posts: PostCardData[] }) {
   }, [posts]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return posts.filter((p) => {
-      const matchesQuery =
-        q === "" || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
-      const matchesTag = activeTag === null || p.tags.includes(activeTag);
-      return matchesQuery && matchesTag;
-    });
-  }, [posts, query, activeTag]);
+    const q = query.trim();
+    if (q !== "") {
+      // Use fuzzy search results from server, optionally filtered by tag locally
+      return activeTag === null
+        ? searchResults
+        : searchResults.filter((p) => p.tags.includes(activeTag));
+    } else {
+      // Fallback to client-side filtering on all posts
+      return activeTag === null
+        ? posts
+        : posts.filter((p) => p.tags.includes(activeTag));
+    }
+  }, [posts, query, searchResults, activeTag]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -131,15 +169,36 @@ export default function BlogIndex({ posts }: { posts: PostCardData[] }) {
           />
         </div>
 
-        {/* Posts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem]">
-          {visible.map((post) => (
-            <PostCard key={post.slug} post={post} />
-          ))}
-        </div>
+        {/* Posts Grid & Loading Skeletons */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem]">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-bg-elevated border border-border overflow-hidden rounded-none h-[280px] p-5 flex flex-col justify-between animate-pulse"
+              >
+                <div>
+                  <div className="h-3 bg-white/10 w-1/4 mb-3" />
+                  <div className="h-5 bg-white/15 w-3/4 mb-2" />
+                  <div className="h-3 bg-white/10 w-5/6" />
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-3 bg-white/10 w-12" />
+                  <div className="h-3 bg-white/10 w-12" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem]">
+            {visible.map((post) => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        )}
 
         {/* Empty State */}
-        {visible.length === 0 && (
+        {!isLoading && visible.length === 0 && (
           <div className="py-24 flex flex-col items-center justify-center text-center w-full">
             <h3 className="font-syne font-bold text-[2rem] text-border uppercase leading-none">
               Nothing here yet.
@@ -151,7 +210,7 @@ export default function BlogIndex({ posts }: { posts: PostCardData[] }) {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {!isLoading && totalPages > 1 && (
           <div className="mt-12 flex items-center justify-center gap-4">
             <button
               type="button"
@@ -178,3 +237,4 @@ export default function BlogIndex({ posts }: { posts: PostCardData[] }) {
     </Skeleton>
   );
 }
+
