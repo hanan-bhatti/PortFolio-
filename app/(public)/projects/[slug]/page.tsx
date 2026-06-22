@@ -14,6 +14,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import { extractTwitterUsername } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -181,29 +183,69 @@ export default async function ProjectDetailPage({ params }: Props) {
 
         {/* Long Description / Content */}
         {project.longDesc && (
-          <section className="font-inter font-normal text-[15px] leading-[1.8] text-text-primary text-left space-y-6">
-            {project.longDesc.split(/\n{2,}/).map((para, i) => {
-              const cleanPara = para.trim();
-              if (cleanPara.startsWith("### ")) {
-                return (
-                  <h3 key={i} className="font-syne font-bold text-lg text-amber mt-6 mb-2 uppercase">
-                    {cleanPara.replace("### ", "")}
-                  </h3>
-                );
-              }
-              if (cleanPara.startsWith("## ")) {
-                return (
-                  <h2 key={i} className="font-syne font-bold text-xl text-amber mt-8 mb-3 uppercase">
-                    {cleanPara.replace("## ", "")}
+          <section className="font-inter font-normal text-[15px] leading-[1.8] text-text-primary text-left">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h1: ({ children }) => (
+                  <h2 className="font-syne font-extrabold text-2xl text-amber mt-10 mb-4 uppercase">
+                    {children}
                   </h2>
-                );
-              }
-              return (
-                <p key={i} className="mb-[1.5rem]">
-                  {para}
-                </p>
-              );
-            })}
+                ),
+                h2: ({ children }) => (
+                  <h2 className="font-syne font-bold text-xl text-amber mt-8 mb-3 uppercase">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="font-syne font-bold text-lg text-amber mt-6 mb-2 uppercase">
+                    {children}
+                  </h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-4">
+                    {children}
+                  </p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc pl-5 space-y-2 my-4">
+                    {children}
+                  </ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal pl-5 space-y-2 my-4">
+                    {children}
+                  </ol>
+                ),
+                li: ({ children }) => (
+                  <li className="font-inter text-[15px] text-text-primary leading-[1.7]">
+                    {children}
+                  </li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-bold text-white">
+                    {children}
+                  </strong>
+                ),
+                code: ({ children, className }) => {
+                  const isInline = !className;
+                  if (isInline) {
+                    return (
+                      <code className="bg-[#1a1a1a] text-[#16A34A] border border-[#262626] px-1.5 py-0.5 font-mono text-xs rounded-none">
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <pre className="bg-[#22241d] border border-[#262626]/40 p-4 overflow-x-auto my-4 rounded-none font-mono text-xs text-zinc-300">
+                      <code>{children}</code>
+                    </pre>
+                  );
+                },
+              }}
+            >
+              {project.longDesc}
+            </ReactMarkdown>
           </section>
         )}
       </article>
