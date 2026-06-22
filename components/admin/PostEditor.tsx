@@ -144,6 +144,26 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
             return true;
           }
         }
+        if (!moved && event.dataTransfer) {
+          const dataStr = event.dataTransfer.getData("text/plain");
+          if (dataStr) {
+            try {
+              const data = JSON.parse(dataStr);
+              if (data && data.type === "engagement-widget") {
+                event.preventDefault();
+                const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY });
+                const pos = coordinates?.pos ?? view.state.selection.from;
+                const widgetName = data.widget.replace("-", " ").toUpperCase();
+                const placeholderHtml = `<div data-widget="${data.widget}">[ENGAGEMENT WIDGET: ${widgetName}]</div>`;
+                editor?.commands.insertContentAt(pos, placeholderHtml);
+                toast.success(`Dropped ${widgetName} widget into post body!`);
+                return true;
+              }
+            } catch (err) {
+              // ignore
+            }
+          }
+        }
         return false;
       },
       handlePaste(view, event, slice) {
@@ -521,31 +541,63 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           {engagementExpanded && (
             <div className="mt-4 space-y-3 border-t border-[#262626]/40 pt-3">
               {[
-                { label: "Emoji Reactions", value: emojiReactionsOn, onChange: setEmojiReactionsOn },
-                { label: "Helpful Vote", value: helpfulVoteOn, onChange: setHelpfulVoteOn },
-                { label: "Star Rating", value: starRatingOn, onChange: setStarRatingOn },
+                { label: "Emoji Reactions", value: emojiReactionsOn, onChange: setEmojiReactionsOn, widgetKey: "emoji-reactions" },
+                { label: "Helpful Vote", value: helpfulVoteOn, onChange: setHelpfulVoteOn, widgetKey: "helpful-vote" },
+                { label: "Star Rating", value: starRatingOn, onChange: setStarRatingOn, widgetKey: "star-rating" },
                 { label: "Section Reactions", value: sectionReactionsOn, onChange: setSectionReactionsOn },
-                { label: "End Post Survey", value: endSurveyOn, onChange: setEndSurveyOn },
+                { label: "End Post Survey", value: endSurveyOn, onChange: setEndSurveyOn, widgetKey: "end-survey" },
                 { label: "Difficulty Rating", value: difficultyToggleOn, onChange: setDifficultyToggleOn },
                 { label: "Exit Intent Popup", value: exitIntentOn, onChange: setExitIntentOn },
-                { label: "Notify Me Form", value: notifyMeOn, onChange: setNotifyMeOn },
-              ].map((cfg) => (
-                <div key={cfg.label} className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-zinc-300">{cfg.label}</span>
-                  <button
-                    type="button"
-                    onClick={() => cfg.onChange(!cfg.value)}
-                    className={cn(
-                      "px-2 py-0.5 border text-[10px] font-bold transition-colors uppercase rounded-none cursor-pointer",
-                      cfg.value
-                        ? "border-[#16A34A] bg-[#16A34A]/10 text-[#16A34A]"
-                        : "border-[#262626] bg-black/40 text-zinc-500 hover:text-zinc-400 hover:border-zinc-500"
+                { label: "Notify Me Form", value: notifyMeOn, onChange: setNotifyMeOn, widgetKey: "notify-me" },
+              ].map((cfg) => {
+                const canPlace = !!cfg.widgetKey;
+                return (
+                  <div key={cfg.label} className="border border-[#262626]/40 bg-black/10 p-2.5 space-y-2.5 rounded-none">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-zinc-300 font-bold">{cfg.label}</span>
+                      <button
+                        type="button"
+                        onClick={() => cfg.onChange(!cfg.value)}
+                        className={cn(
+                          "px-2 py-0.5 border text-[10px] font-bold transition-colors uppercase rounded-none cursor-pointer",
+                          cfg.value
+                            ? "border-[#16A34A] bg-[#16A34A]/10 text-[#16A34A]"
+                            : "border-[#262626] bg-black/40 text-zinc-500 hover:text-zinc-400 hover:border-zinc-500"
+                        )}
+                      >
+                        {cfg.value ? "ON" : "OFF"}
+                      </button>
+                    </div>
+
+                    {canPlace && cfg.value && (
+                      <div className="flex gap-2">
+                        <div
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData("text/plain", JSON.stringify({ type: "engagement-widget", widget: cfg.widgetKey }));
+                          }}
+                          className="flex-1 text-center py-1 bg-[#0c0c0c] border border-[#262626] hover:border-zinc-500 text-[9px] font-mono font-bold text-zinc-400 hover:text-zinc-200 cursor-grab active:cursor-grabbing select-none rounded-none"
+                          title="Drag this block and drop it anywhere inside the blog post body editor"
+                        >
+                          ⋮ DRAG TO BODY
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!editor) return;
+                            const placeholderHtml = `<div data-widget="${cfg.widgetKey}">[ENGAGEMENT WIDGET: ${cfg.label.toUpperCase()}]</div>`;
+                            editor.commands.insertContent(placeholderHtml);
+                            toast.success(`Inserted ${cfg.label} widget placeholder at cursor!`);
+                          }}
+                          className="px-2 py-1 bg-amber border border-amber text-black text-[9px] font-mono font-bold hover:bg-amber/90 transition-colors cursor-pointer rounded-none"
+                        >
+                          + INSERT
+                        </button>
+                      </div>
                     )}
-                  >
-                    {cfg.value ? "ON" : "OFF"}
-                  </button>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

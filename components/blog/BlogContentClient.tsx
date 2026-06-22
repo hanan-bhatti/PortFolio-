@@ -8,13 +8,14 @@
  * - BlogContentClient (default): Client side blog content container
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { getVisitorId } from "@/lib/analytics";
 
 interface Props {
   html: string;
   postId: string;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   sectionReactionsOn?: boolean;
   sectionSummary?: Record<string, Record<string, number>>;
   mySectionReactions?: Record<string, string[]>;
@@ -26,6 +27,7 @@ interface Props {
 export default function BlogContentClient({
   html,
   postId,
+  containerRef,
   sectionReactionsOn = false,
   sectionSummary = {},
   mySectionReactions = {},
@@ -33,7 +35,6 @@ export default function BlogContentClient({
   onSectionReact,
   onCopyEvent,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -100,7 +101,7 @@ export default function BlogContentClient({
         const sectionId = nearestHeading?.id || `intro-${idx}`;
         const containerDiv = document.createElement("div");
         containerDiv.className =
-          "section-react-pre-container absolute top-2 right-14 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 select-none";
+          "section-react-pre-container absolute top-2 right-14 opacity-50 group-hover:opacity-100 transition-opacity duration-200 z-10 select-none";
 
         const reactBtn = document.createElement("button");
         reactBtn.type = "button";
@@ -166,7 +167,7 @@ export default function BlogContentClient({
       (link as any)._onLinkClick = onLinkClick;
     });
 
-      // 4. Section Reactions for headings (H2, H3, H4, H5 with an id)
+    // 4. Section Reactions for headings (H2, H3, H4, H5 with an id)
     if (sectionReactionsOn) {
       const headings = container.querySelectorAll("h2, h3, h4, h5");
       headings.forEach((el) => {
@@ -181,7 +182,7 @@ export default function BlogContentClient({
         const trigger = document.createElement("button");
         trigger.type = "button";
         trigger.className =
-          "section-react-btn absolute right-full top-1/2 -translate-y-1/2 mr-2.5 opacity-0 group-hover/heading:opacity-100 transition-opacity duration-200 bg-[#0c0c0c] border border-[#262626] hover:border-amber text-zinc-400 hover:text-amber p-1 text-[11px] rounded-none cursor-pointer flex items-center justify-center select-none z-10";
+          "section-react-btn inline-flex items-center ml-3 opacity-40 group-hover/heading:opacity-100 focus:opacity-100 transition-opacity bg-transparent text-zinc-400 hover:text-amber p-1 text-[11px] rounded-none cursor-pointer select-none align-middle z-10";
         trigger.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
         trigger.title = "React to this section";
         trigger.addEventListener("click", (e) => {
@@ -263,6 +264,7 @@ export default function BlogContentClient({
   }, [
     html,
     postId,
+    containerRef,
     sectionReactionsOn,
     sectionSummary,
     mySectionReactions,

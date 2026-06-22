@@ -131,6 +131,44 @@ export const ImageGalleryNode = Node.create({
   },
 });
 
+export const EngagementWidgetNode = Node.create({
+  name: "engagementWidget",
+  group: "block",
+  atom: true,
+
+  addAttributes() {
+    return {
+      widget: {
+        default: "",
+        parseHTML: (element) => element.getAttribute("data-widget"),
+        renderHTML: (attributes) => ({
+          "data-widget": attributes.widget,
+          class: "engagement-widget-placeholder",
+        }),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "div[data-widget]",
+      },
+    ];
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    const widgetName = (node.attrs.widget || "").replace("-", " ").toUpperCase();
+    return [
+      "div",
+      mergeAttributes(HTMLAttributes, {
+        style: "border: 1px dashed #262626; background: rgba(12, 12, 12, 0.4); padding: 1rem; text-align: center; font-family: monospace; font-size: 11px; color: #71717a; user-select: none; margin: 1rem 0;"
+      }),
+      `[ENGAGEMENT WIDGET: ${widgetName}]`
+    ];
+  },
+});
+
 export function baseExtensions(): Extensions {
   return [
     StarterKit.configure({ codeBlock: false }),
@@ -146,6 +184,7 @@ export function baseExtensions(): Extensions {
     TableCell,
     CodeBlockLowlight.configure({ lowlight }),
     ImageGalleryNode,
+    EngagementWidgetNode,
   ];
 }
 
