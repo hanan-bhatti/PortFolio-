@@ -3,7 +3,7 @@
 /**
  * @file components/blog/PostEngagementWrapper.tsx
  * @description Unified client component wrapper for blog post engagements. Manages reactions, ratings, survey forms, notification requests, exit intent, and passive tracking.
- * 
+ *
  * @exports
  * - PostEngagementWrapper (default): Main React component for managing post engagements
  */
@@ -76,12 +76,15 @@ export default function PostEngagementWrapper({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const hasPlaceholder = (type: string) => new RegExp(`data-widget=["']${type}["']`).test(html);
+  const hasPlaceholder = (type: string) =>
+    new RegExp(`data-widget=["']${type}["']`).test(html);
 
   const [isPending, startTransition] = useTransition();
 
   // Passive analytics queue
-  const eventQueue = useRef<{ eventType: string; value?: string | null; visitorId: string }[]>([]);
+  const eventQueue = useRef<
+    { eventType: string; value?: string | null; visitorId: string }[]
+  >([]);
   const isFlushing = useRef(false);
   const utmAttribution = useRef({
     source: null as string | null,
@@ -147,22 +150,25 @@ export default function PostEngagementWrapper({
   }, [postId]);
 
   // Queue background passive analytics events
-  const queueEvent = useCallback((eventType: string, value?: string | null) => {
-    const vid = visitorId || getVisitorId();
-    if (!vid) return;
+  const queueEvent = useCallback(
+    (eventType: string, value?: string | null) => {
+      const vid = visitorId || getVisitorId();
+      if (!vid) return;
 
-    // Deduplicate event logs in active memory if they match exactly
-    const exists = eventQueue.current.some(
-      (e) => e.eventType === eventType && e.value === value
-    );
-    if (exists) return;
+      // Deduplicate event logs in active memory if they match exactly
+      const exists = eventQueue.current.some(
+        (e) => e.eventType === eventType && e.value === value,
+      );
+      if (exists) return;
 
-    eventQueue.current.push({
-      visitorId: vid,
-      eventType,
-      value: value || null,
-    });
-  }, [visitorId]);
+      eventQueue.current.push({
+        visitorId: vid,
+        eventType,
+        value: value || null,
+      });
+    },
+    [visitorId],
+  );
 
   const flushEvents = useCallback(async () => {
     if (eventQueue.current.length === 0 || isFlushing.current) return;
@@ -173,7 +179,8 @@ export default function PostEngagementWrapper({
     // Inject referral/UTM parameters to each event row
     const payload = batch.map((evt) => ({
       ...evt,
-      referrer: typeof document !== "undefined" ? document.referrer || null : null,
+      referrer:
+        typeof document !== "undefined" ? document.referrer || null : null,
       utmSource: utmAttribution.current.source,
       utmMedium: utmAttribution.current.medium,
       utmCampaign: utmAttribution.current.campaign,
@@ -213,9 +220,9 @@ export default function PostEngagementWrapper({
     const tick = () => {
       if (document.visibilityState === "visible") {
         activeTime.current += 1;
-        
+
         // Log "explored" event once user exceeds 30 seconds of active reading
-        if (activeTime.current === 30) {
+        if (activeTime.current >= 30 && activeTime.current < 32) {
           queueEvent("explored", "active_reading");
         }
       }
@@ -237,7 +244,7 @@ export default function PostEngagementWrapper({
             utmSource: utmAttribution.current.source,
             utmMedium: utmAttribution.current.medium,
             utmCampaign: utmAttribution.current.campaign,
-          }))
+          })),
         );
         eventQueue.current = [];
 
@@ -279,12 +286,16 @@ export default function PostEngagementWrapper({
     const triggeredCheckpoints = new Set<number>();
 
     const handleScroll = () => {
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (scrollHeight <= 0) return;
       const scrollPercent = Math.round((window.scrollY / scrollHeight) * 100);
 
       const checkAndTrigger = (threshold: number) => {
-        if (scrollPercent >= threshold && !triggeredCheckpoints.has(threshold)) {
+        if (
+          scrollPercent >= threshold &&
+          !triggeredCheckpoints.has(threshold)
+        ) {
           triggeredCheckpoints.add(threshold);
           queueEvent("scroll_depth", threshold.toString());
 
@@ -347,7 +358,7 @@ export default function PostEngagementWrapper({
 
     const previousEmojis = visitor?.myEmojis || [];
     const hasReacted = previousEmojis.includes(emoji);
-    
+
     // Optimistic UI updates
     setVisitor((prev) => {
       if (!prev) return null;
@@ -359,11 +370,14 @@ export default function PostEngagementWrapper({
 
     setSummary((prev) => {
       const nextEmojiSummary = { ...prev.emojiSummary };
-      
+
       // 1. Decrement previously selected emojis
       previousEmojis.forEach((prevEmoji) => {
         if (nextEmojiSummary[prevEmoji]) {
-          nextEmojiSummary[prevEmoji] = Math.max(0, nextEmojiSummary[prevEmoji] - 1);
+          nextEmojiSummary[prevEmoji] = Math.max(
+            0,
+            nextEmojiSummary[prevEmoji] - 1,
+          );
         }
       });
 
@@ -402,12 +416,15 @@ export default function PostEngagementWrapper({
       });
       setSummary((prev) => {
         const rollbackSummary = { ...prev.emojiSummary };
-        
+
         // Remove current optimistic emoji
         if (!hasReacted) {
-          rollbackSummary[emoji] = Math.max(0, (rollbackSummary[emoji] || 0) - 1);
+          rollbackSummary[emoji] = Math.max(
+            0,
+            (rollbackSummary[emoji] || 0) - 1,
+          );
         }
-        
+
         // Restore previous emojis
         previousEmojis.forEach((prevEmoji) => {
           rollbackSummary[prevEmoji] = (rollbackSummary[prevEmoji] || 0) + 1;
@@ -467,7 +484,9 @@ export default function PostEngagementWrapper({
     } catch {
       toast.error("Failed to register vote");
       // Rollback
-      setVisitor((prev) => (prev ? { ...prev, myHelpful: previousVote } : null));
+      setVisitor((prev) =>
+        prev ? { ...prev, myHelpful: previousVote } : null,
+      );
       setSummary((prev) => {
         let yesDiff = 0;
         let noDiff = 0;
@@ -508,13 +527,14 @@ export default function PostEngagementWrapper({
     setSummary((prev) => {
       const isNew = previousRating === null;
       const newTotal = isNew ? prev.rating.total + 1 : prev.rating.total;
-      
+
       const currentSum = prev.rating.average * prev.rating.total;
       const newSum = isNew
         ? currentSum + rating
         : currentSum - (previousRating || 0) + rating;
-      
-      const newAvg = newTotal > 0 ? parseFloat((newSum / newTotal).toFixed(1)) : 0;
+
+      const newAvg =
+        newTotal > 0 ? parseFloat((newSum / newTotal).toFixed(1)) : 0;
 
       return {
         ...prev,
@@ -533,17 +553,22 @@ export default function PostEngagementWrapper({
     } catch {
       toast.error("Failed to submit rating");
       // Rollback
-      setVisitor((prev) => (prev ? { ...prev, myRating: previousRating } : null));
+      setVisitor((prev) =>
+        prev ? { ...prev, myRating: previousRating } : null,
+      );
       setSummary((prev) => {
         const isNew = previousRating === null;
-        const oldTotal = isNew ? Math.max(0, prev.rating.total - 1) : prev.rating.total;
-        
+        const oldTotal = isNew
+          ? Math.max(0, prev.rating.total - 1)
+          : prev.rating.total;
+
         const currentSum = prev.rating.average * prev.rating.total;
         const oldSum = isNew
           ? currentSum - rating
           : currentSum - rating + (previousRating || 0);
 
-        const oldAvg = oldTotal > 0 ? parseFloat((oldSum / oldTotal).toFixed(1)) : 0;
+        const oldAvg =
+          oldTotal > 0 ? parseFloat((oldSum / oldTotal).toFixed(1)) : 0;
 
         return {
           ...prev,
@@ -585,7 +610,9 @@ export default function PostEngagementWrapper({
           ...prev.sectionSummary,
           [sectionId]: {
             ...sectionReactMap,
-            [emoji]: hasReacted ? Math.max(0, currentCount - 1) : currentCount + 1,
+            [emoji]: hasReacted
+              ? Math.max(0, currentCount - 1)
+              : currentCount + 1,
           },
         },
       };
@@ -623,7 +650,9 @@ export default function PostEngagementWrapper({
             ...prev.sectionSummary,
             [sectionId]: {
               ...sectionReactMap,
-              [emoji]: hasReacted ? currentCount + 1 : Math.max(0, currentCount - 1),
+              [emoji]: hasReacted
+                ? currentCount + 1
+                : Math.max(0, currentCount - 1),
             },
           },
         };
@@ -738,7 +767,9 @@ export default function PostEngagementWrapper({
         </div>
         <div className="flex gap-1.5 items-center py-1">
           {[1, 2, 3, 4, 5].map((star) => {
-            const active = hoverRating ? star <= hoverRating : star <= (visitor?.myRating || 0);
+            const active = hoverRating
+              ? star <= hoverRating
+              : star <= (visitor?.myRating || 0);
             return (
               <button
                 key={star}
@@ -777,8 +808,12 @@ export default function PostEngagementWrapper({
             onSubmit={async (e) => {
               e.preventDefault();
               const target = e.currentTarget;
-              const suggestions = (target.elements.namedItem("suggestions") as HTMLTextAreaElement)?.value;
-              const difficulty = (target.elements.namedItem("difficulty") as HTMLInputElement)?.value;
+              const suggestions = (
+                target.elements.namedItem("suggestions") as HTMLTextAreaElement
+              )?.value;
+              const difficulty = (
+                target.elements.namedItem("difficulty") as HTMLInputElement
+              )?.value;
               const vid = visitorId || getVisitorId();
 
               if (!vid) return;
@@ -809,7 +844,11 @@ export default function PostEngagementWrapper({
                 <label className="block font-mono text-[10px] uppercase text-zinc-400">
                   HOW WAS THE DIFFICULTY OF THIS POST?
                 </label>
-                <input type="hidden" name="difficulty" id="survey-difficulty-input" />
+                <input
+                  type="hidden"
+                  name="difficulty"
+                  id="survey-difficulty-input"
+                />
                 <div className="flex border border-[#262626] bg-black/40">
                   {[
                     { val: "too_basic", label: "TOO BASIC" },
@@ -820,12 +859,27 @@ export default function PostEngagementWrapper({
                       key={diff.val}
                       type="button"
                       onClick={() => {
-                        const input = document.getElementById("survey-difficulty-input") as HTMLInputElement;
+                        const input = document.getElementById(
+                          "survey-difficulty-input",
+                        ) as HTMLInputElement;
                         if (input) input.value = diff.val;
-                        const btns = document.querySelectorAll(".diff-select-btn");
-                        btns.forEach((b) => b.classList.remove("bg-amber/10", "text-amber", "border-amber"));
-                        const activeBtn = document.getElementById(`diff-btn-${diff.val}`);
-                        activeBtn?.classList.add("bg-amber/10", "text-amber", "border-amber");
+                        const btns =
+                          document.querySelectorAll(".diff-select-btn");
+                        btns.forEach((b) =>
+                          b.classList.remove(
+                            "bg-amber/10",
+                            "text-amber",
+                            "border-amber",
+                          ),
+                        );
+                        const activeBtn = document.getElementById(
+                          `diff-btn-${diff.val}`,
+                        );
+                        activeBtn?.classList.add(
+                          "bg-amber/10",
+                          "text-amber",
+                          "border-amber",
+                        );
                       }}
                       id={`diff-btn-${diff.val}`}
                       className="diff-select-btn flex-1 py-2 font-mono text-[10px] text-zinc-400 hover:text-zinc-200 text-center transition-colors cursor-pointer border-r border-[#262626] last:border-none rounded-none"
@@ -873,7 +927,8 @@ export default function PostEngagementWrapper({
             FOLLOW / SUBSCRIBE TO FUTURE POSTS
           </h4>
           <p className="font-mono text-[10px] text-zinc-500">
-            Get email alerts when I publish content on this topic. No spam, ever.
+            Get email alerts when I publish content on this topic. No spam,
+            ever.
           </p>
         </div>
 
@@ -886,8 +941,12 @@ export default function PostEngagementWrapper({
             onSubmit={async (e) => {
               e.preventDefault();
               const target = e.currentTarget;
-              const email = (target.elements.namedItem("email") as HTMLInputElement)?.value;
-              const topic = (target.elements.namedItem("topic") as HTMLInputElement)?.value;
+              const email = (
+                target.elements.namedItem("email") as HTMLInputElement
+              )?.value;
+              const topic = (
+                target.elements.namedItem("topic") as HTMLInputElement
+              )?.value;
 
               if (!email) return;
 
@@ -979,7 +1038,8 @@ export default function PostEngagementWrapper({
             }}
           >
             {["👍", "🔥", "🤯", "❤️", "😂"].map((emoji) => {
-              const mySectionList = visitor?.mySectionReactions[popoverState.sectionId] || [];
+              const mySectionList =
+                visitor?.mySectionReactions[popoverState.sectionId] || [];
               const isMyReact = mySectionList.includes(emoji);
               return (
                 <button
@@ -1006,19 +1066,27 @@ export default function PostEngagementWrapper({
       {/* Reader-Intent Fallback Engagement Sections (Appended only if not placed inline) */}
       <div className="mt-16 border-t border-[#262626] pt-12 space-y-12 max-w-full lg:max-w-3xl text-left">
         {/* Emoji Reactions Bar */}
-        {config.emojiReactionsOn && !hasPlaceholder("emoji-reactions") && renderEmojiReactions()}
+        {config.emojiReactionsOn &&
+          !hasPlaceholder("emoji-reactions") &&
+          renderEmojiReactions()}
 
         {/* Helpful Vote & Star Rating in Grid */}
-        {((config.helpfulVoteOn && !hasPlaceholder("helpful-vote")) || 
+        {((config.helpfulVoteOn && !hasPlaceholder("helpful-vote")) ||
           (config.starRatingOn && !hasPlaceholder("star-rating"))) && (
           <div className="grid gap-6 sm:grid-cols-2">
-            {config.helpfulVoteOn && !hasPlaceholder("helpful-vote") && renderHelpfulVote()}
-            {config.starRatingOn && !hasPlaceholder("star-rating") && renderStarRating()}
+            {config.helpfulVoteOn &&
+              !hasPlaceholder("helpful-vote") &&
+              renderHelpfulVote()}
+            {config.starRatingOn &&
+              !hasPlaceholder("star-rating") &&
+              renderStarRating()}
           </div>
         )}
 
         {/* Content Suggestion / Post End Survey */}
-        {config.endSurveyOn && !hasPlaceholder("end-survey") && renderEndSurvey()}
+        {config.endSurveyOn &&
+          !hasPlaceholder("end-survey") &&
+          renderEndSurvey()}
 
         {/* Notify Me subscription */}
         {config.notifyMeOn && !hasPlaceholder("notify-me") && renderNotifyMe()}
@@ -1041,7 +1109,9 @@ export default function PostEngagementWrapper({
             </button>
 
             <div className="space-y-1">
-              <h3 className="font-syne font-bold text-lg text-white">Before you go...</h3>
+              <h3 className="font-syne font-bold text-lg text-white">
+                Before you go...
+              </h3>
               <p className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
                 Would you like to stay in touch or suggest changes?
               </p>
@@ -1077,13 +1147,16 @@ export default function PostEngagementWrapper({
               {exitTab === "notify" ? (
                 <div className="space-y-3">
                   <p className="font-mono text-[10px] text-zinc-400">
-                    Leave your email to get notified when I cover new coding topics!
+                    Leave your email to get notified when I cover new coding
+                    topics!
                   </p>
                   <form
                     onSubmit={async (e) => {
                       e.preventDefault();
                       const target = e.currentTarget;
-                      const email = (target.elements.namedItem("email") as HTMLInputElement)?.value;
+                      const email = (
+                        target.elements.namedItem("email") as HTMLInputElement
+                      )?.value;
                       if (!email) return;
 
                       startTransition(async () => {
@@ -1091,7 +1164,10 @@ export default function PostEngagementWrapper({
                           await fetch(`/api/posts/${postId}/notify`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email, topic: "Exit Intent Subscribe" }),
+                            body: JSON.stringify({
+                              email,
+                              topic: "Exit Intent Subscribe",
+                            }),
                           });
                           trackExitIntentConvert();
                           toast.success("Subscribed successfully!");
@@ -1128,7 +1204,11 @@ export default function PostEngagementWrapper({
                     onSubmit={async (e) => {
                       e.preventDefault();
                       const target = e.currentTarget;
-                      const text = (target.elements.namedItem("suggestions") as HTMLTextAreaElement)?.value;
+                      const text = (
+                        target.elements.namedItem(
+                          "suggestions",
+                        ) as HTMLTextAreaElement
+                      )?.value;
                       if (!text) return;
                       const vid = visitorId || getVisitorId();
                       if (!vid) return;

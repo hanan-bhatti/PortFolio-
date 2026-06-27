@@ -149,15 +149,29 @@ export default async function ProjectDetailPage({ params }: Props) {
           <p className="font-inter font-normal text-[16px] text-text-muted max-w-[560px] text-left leading-relaxed">
             {project.description}
           </p>
-          {project.githubUrl && (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center font-inter font-semibold text-[14px] border border-amber bg-transparent text-text-primary hover:bg-amber hover:text-black px-6 py-3 transition-colors duration-200 uppercase whitespace-nowrap self-start md:self-auto cursor-pointer"
-            >
-              Source on GitHub ↗
-            </a>
+          {(project.liveUrl || project.githubUrl) && (
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto self-start md:self-auto">
+              {project.liveUrl && (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center font-inter font-semibold text-[14px] border border-amber bg-amber text-black hover:bg-transparent hover:text-white px-6 py-3 transition-colors duration-200 uppercase whitespace-nowrap min-h-[44px] cursor-pointer"
+                >
+                  Live Demo ↗
+                </a>
+              )}
+              {project.githubUrl && (
+                <a
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center font-inter font-semibold text-[14px] text-amber hover:text-white hover:underline px-4 py-3 transition-colors duration-200 uppercase whitespace-nowrap min-h-[44px] cursor-pointer"
+                >
+                  Source on GitHub ↗
+                </a>
+              )}
+            </div>
           )}
         </div>
 
