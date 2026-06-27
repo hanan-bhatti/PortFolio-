@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import { auth } from "@/lib/auth";
+import { cookies } from "next/headers";
 import PhotographyGrid from "@/components/ui/PhotographyGrid";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,18 @@ export default async function PhotographyPage() {
     where: session?.user ? undefined : { visible: true },
     orderBy: [{ order: "asc" }, { createdAt: "asc" }],
   });
+
+  const cookieStore = await cookies();
+  const visitorId = cookieStore.get("visitorId")?.value;
+
+  const likedPhotoIds = visitorId
+    ? (
+        await prisma.photoInteraction.findMany({
+          where: { visitorId, type: "like" },
+          select: { photoId: true },
+        })
+      ).map((i) => i.photoId)
+    : [];
 
   const title = settings.photography_title || "Through My Lens";
   const words = title.split(" ");
@@ -138,6 +151,10 @@ export default async function PhotographyPage() {
             title: p.title,
             description: p.description,
             exif_data: p.exif_data,
+            likes: p.likes,
+            downloads: p.downloads,
+            shares: p.shares,
+            isLiked: likedPhotoIds.includes(p.id),
           }))}
         />
       </div>

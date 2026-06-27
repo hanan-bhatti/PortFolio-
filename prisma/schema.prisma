@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Post {
@@ -189,7 +188,24 @@ model Photo {
   order       Int      @default(0)
   visible     Boolean  @default(true)
   exif_data   Json?    @db.JsonB
+  likes       Int      @default(0)
+  downloads   Int      @default(0)
+  shares      Int      @default(0)
   createdAt   DateTime @default(now())
+
+  interactions PhotoInteraction[]
+}
+
+model PhotoInteraction {
+  id          String   @id @default(cuid())
+  photoId     String
+  photo       Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  visitorId   String
+  type        String   // "like" | "download" | "share"
+  createdAt   DateTime @default(now())
+
+  @@index([photoId])
+  @@index([visitorId])
 }
 
 model AdminUser {

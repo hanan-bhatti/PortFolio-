@@ -10,6 +10,15 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
+import { FiHeart, FiDownload, FiShare2, FiCopy, FiX } from "react-icons/fi";
+import { FaLinkedinIn, FaWhatsapp, FaTwitter, FaInstagram } from "react-icons/fa";
+import { getVisitorId } from "@/lib/analytics";
+
+interface Particle {
+  id: number;
+  scale: number;
+  angle: number;
+}
 
 const formatShutter = (n: number) => {
   if (n >= 1) return `${n}s`;
@@ -44,6 +53,10 @@ interface Photo {
   title: string | null;
   description: string | null;
   exif_data?: ExifData | null;
+  likes: number;
+  downloads: number;
+  shares: number;
+  isLiked: boolean;
 }
 
 interface PhotoLightboxProps {
@@ -57,6 +70,23 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const [isMounted, setIsMounted] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
+  // Interaction States
+  const currentPhoto = photos[currentIndex];
+  const [likes, setLikes] = useState(currentPhoto?.likes || 0);
+  const [downloads, setDownloads] = useState(currentPhoto?.downloads || 0);
+  const [shares, setShares] = useState(currentPhoto?.shares || 0);
+  const [isLiked, setIsLiked] = useState(currentPhoto?.isLiked || false);
+  
+  // Animation/Modal States
+  const [showHeart, setShowHeart] = useState(false);
+  const [heartScale, setHeartScale] = useState(1);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copyFeedback, setCopyFeedback] = useState(false);
+  
+  const lastTapRef = useRef<number>(0);
+  const heartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     setIsMounted(true);
     const originalStyle = document.body.style.overflow;
@@ -66,6 +96,16 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
     };
   }, []);
 
+  // Sync state with current photo
+  useEffect(() => {
+    if (currentPhoto) {
+      setLikes(currentPhoto.likes || 0);
+      setDownloads(currentPhoto.downloads || 0);
+      setShares(currentPhoto.shares || 0);
+      setIsLiked(currentPhoto.isLiked || false);
+    }
+  }, [currentIndex, currentPhoto]);
+
   const handlePrev = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
   }, [photos.length]);
@@ -73,6 +113,141 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
   }, [photos.length]);
+
+  // Handle Like Action
+  const handleLike = useCallback(async () => {
+    if (!currentPhoto) return;
+    const visitorId = getVisitorId() || "anonymous";
+
+    // Toggle visually immediately
+    setIsLiked((prev) => {
+      const nextLiked = !prev;
+      setLikes((current) => Math.max(0, current + (nextLiked ? 1 : -1)));
+      return nextLiked;
+    });
+
+    try {
+      const res = await fetch(`/api/photography/${currentPhoto.id}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLikes(data.likes);
+        
+        // Also update parent state
+        currentPhoto.likes = data.likes;
+        currentPhoto.isLiked = data.liked;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [currentPhoto]);
+
+  const triggerBurst = useCallback(() => {
+    const newParticles: Particle[] = Array.from({ length: 12 }).map((_, i) => {
+      const angle = (i * 360) / 12 + (Math.random() * 15 - 7.5);
+      return {
+        id: Date.now() + i,
+        scale: Math.random() * 0.4 + 0.4,
+        angle,
+      };
+    });
+    setParticles(newParticles);
+    setTimeout(() => setParticles([]), 1000);
+  }, []);
+
+  // Handle Double click with scaling and burst
+  const handleImageClick = () => {
+    const now = Date.now();
+    const DOUBLE_CLICK_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_CLICK_DELAY) {
+      if (!isLiked) {
+        handleLike();
+      }
+      
+      setShowHeart(true);
+      setHeartScale((prev) => {
+        const nextScale = prev >= 2.2 ? 1.0 : prev + 0.3;
+        if (nextScale >= 2.2) {
+          triggerBurst();
+          return 1.0;
+        }
+        return nextScale;
+      });
+
+      if (heartTimeoutRef.current) clearTimeout(heartTimeoutRef.current);
+      heartTimeoutRef.current = setTimeout(() => {
+        setShowHeart(false);
+        setHeartScale(1.0);
+      }, 950);
+    }
+    lastTapRef.current = now;
+  };
+
+  // Handle Download Action
+  // Handle Download Action
+  const handleDownload = async () => {
+    if (!currentPhoto) return;
+    const visitorId = getVisitorId() || "anonymous";
+
+    try {
+      // Fetch the image as a blob to bypass cross-origin browser download restrictions
+      try {
+        const response = await fetch(currentPhoto.imageUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = currentPhoto.title
+          ? `${currentPhoto.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`
+          : `photo-${currentPhoto.id}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      } catch (corsErr) {
+        // Fallback for CORS block: open in a new tab
+        console.warn("Direct blob download failed, falling back to new tab:", corsErr);
+        const link = document.createElement("a");
+        link.href = currentPhoto.imageUrl;
+        link.download = currentPhoto.title || `photo-${currentPhoto.id}`;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Increment locally
+      setDownloads((prev) => prev + 1);
+
+      await fetch(`/api/photography/${currentPhoto.id}/download`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Handle Share Tracking
+  const trackShare = async (platform: string) => {
+    if (!currentPhoto) return;
+    const visitorId = getVisitorId() || "anonymous";
+    try {
+      setShares((prev) => prev + 1);
+      await fetch(`/api/photography/${currentPhoto.id}/share`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId, platform }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -105,9 +280,19 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   };
 
   if (!isMounted || photos.length === 0) return null;
-
-  const currentPhoto = photos[currentIndex];
   if (!currentPhoto) return null;
+
+  // Generate dynamic share link
+  const originUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const visitorId = getVisitorId() || "";
+  const shareLink = `${originUrl}/s/p/${currentPhoto.id}${visitorId ? `?u=${visitorId}` : ""}`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shareLink);
+    setCopyFeedback(true);
+    trackShare("copy");
+    setTimeout(() => setCopyFeedback(false), 2000);
+  };
 
   const exif = currentPhoto.exif_data;
   const hasExif = !!(
@@ -205,7 +390,10 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         className="relative flex flex-col items-center justify-center w-full max-w-4xl px-4 md:px-10"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center select-none">
+        <div 
+          className="relative w-full h-[55vh] md:h-[65vh] flex items-center justify-center select-none cursor-pointer overflow-hidden group/image"
+          onClick={handleImageClick}
+        >
           <Image
             src={currentPhoto.imageUrl}
             alt={currentPhoto.title ?? "Photo"}
@@ -215,6 +403,76 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             priority
             unoptimized
           />
+
+          {/* Custom drawing heart that scales */}
+          {showHeart && (
+            <div 
+              className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none select-none"
+              style={{
+                transform: `scale(${heartScale})`,
+                transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+              }}
+            >
+              <svg 
+                viewBox="0 0 24 24" 
+                className="w-24 h-24 text-red-500 fill-current drop-shadow-2xl pulse-heart-svg animate-ping"
+              >
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </div>
+          )}
+
+          {/* Burst Particles */}
+          {particles.map((p) => {
+            const distance = 100;
+            const rad = (p.angle * Math.PI) / 180;
+            const tx = Math.cos(rad) * distance;
+            const ty = Math.sin(rad) * distance;
+            return (
+              <div
+                key={p.id}
+                className="absolute z-30 pointer-events-none animate-particle"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  "--tx": `${tx}px`,
+                  "--ty": `${ty}px`,
+                  "--scale": p.scale,
+                } as React.CSSProperties}
+              >
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-red-400 fill-current">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Social Metrics Bar */}
+        <div className="flex justify-center items-center gap-6 mt-4 pb-2 border-b border-white/10 w-full max-w-[400px]">
+          <button 
+            onClick={handleLike} 
+            className="flex items-center gap-1.5 font-inter text-[13px] text-white/80 hover:text-red-400 transition-colors"
+          >
+            <FiHeart className={`w-5 h-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+            <span>{likes}</span>
+          </button>
+          
+          <button 
+            onClick={handleDownload} 
+            className="flex items-center gap-1.5 font-inter text-[13px] text-white/80 hover:text-green transition-colors"
+          >
+            <FiDownload className="w-5 h-5" />
+            <span>{downloads}</span>
+          </button>
+
+          <button 
+            onClick={() => setShowShareModal(true)} 
+            className="flex items-center gap-1.5 font-inter text-[13px] text-white/80 hover:text-amber-500 transition-colors"
+          >
+            <FiShare2 className="w-5 h-5" />
+            <span>{shares}</span>
+          </button>
         </div>
 
         {/* Info panel below the image */}
@@ -229,7 +487,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             className="text-center font-inter text-[13px] leading-relaxed text-white/50 italic"
             style={{
               maxWidth: "600px",
-              margin: "0.75rem auto 0",
+              margin: "0.5rem auto 0",
               fontWeight: 400,
             }}
           >
@@ -286,6 +544,99 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         )}
       </div>
 
+      {/* Share Modal */}
+      {showShareModal && (
+        <div 
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80"
+          onClick={() => setShowShareModal(false)}
+        >
+          <div 
+            className="bg-[#111] border border-white/10 p-6 max-w-sm w-full mx-4 relative"
+            style={{ borderRadius: "0px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowShareModal(false)}
+              className="absolute top-4 right-4 text-white/50 hover:text-white"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+            
+            <h4 className="font-syne font-bold text-white text-base uppercase tracking-tight mb-4">
+              Share Photograph
+            </h4>
+
+            {/* Social options */}
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <a 
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareLink)}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackShare("linkedin")}
+                className="flex flex-col items-center gap-1.5 p-3 bg-white/5 border border-white/5 hover:border-amber-500/50 hover:bg-white/10 text-white/80 hover:text-white transition-all"
+              >
+                <FaLinkedinIn className="w-5 h-5" />
+                <span className="text-[10px] font-inter">LinkedIn</span>
+              </a>
+              
+              <a 
+                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this photo: ${shareLink}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackShare("whatsapp")}
+                className="flex flex-col items-center gap-1.5 p-3 bg-white/5 border border-white/5 hover:border-amber-500/50 hover:bg-white/10 text-white/80 hover:text-white transition-all"
+              >
+                <FaWhatsapp className="w-5 h-5" />
+                <span className="text-[10px] font-inter">WhatsApp</span>
+              </a>
+
+              <a 
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(`Check out this photo: ${currentPhoto.title || ""}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackShare("twitter")}
+                className="flex flex-col items-center gap-1.5 p-3 bg-white/5 border border-white/5 hover:border-amber-500/50 hover:bg-white/10 text-white/80 hover:text-white transition-all"
+              >
+                <FaTwitter className="w-5 h-5" />
+                <span className="text-[10px] font-inter">Twitter/X</span>
+              </a>
+
+              <a 
+                href={`https://www.instagram.com/`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackShare("instagram")}
+                className="flex flex-col items-center gap-1.5 p-3 bg-white/5 border border-white/5 hover:border-amber-500/50 hover:bg-white/10 text-white/80 hover:text-white transition-all"
+              >
+                <FaInstagram className="w-5 h-5" />
+                <span className="text-[10px] font-inter">Instagram</span>
+              </a>
+            </div>
+
+            {/* Direct Copy link */}
+            <div className="flex gap-2 bg-black/40 border border-white/10 p-2.5">
+              <input 
+                type="text" 
+                readOnly 
+                value={shareLink} 
+                className="bg-transparent text-white/70 text-xs flex-grow outline-none border-none pointer-events-none select-all truncate"
+              />
+              <button 
+                onClick={copyToClipboard}
+                className="text-amber-500 hover:text-amber-400 p-1 flex items-center justify-center"
+                title="Copy link"
+              >
+                {copyFeedback ? (
+                  <span className="text-[10px] font-inter text-green font-medium">Copied!</span>
+                ) : (
+                  <FiCopy className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Left Navigation Button */}
       <button
         type="button"
@@ -313,6 +664,31 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       >
         <span className="text-lg">→</span>
       </button>
+
+      {/* Animation Styles */}
+      <style>{`
+        .pulse-heart-svg {
+          animation: pulseHeartSvg 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes pulseHeartSvg {
+          0% { transform: scale(0.6); opacity: 0; }
+          50% { transform: scale(1.1); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes particleOut {
+          0% {
+            transform: translate(-50%, -50%) translate(0, 0) scale(0.2);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(var(--scale));
+            opacity: 0;
+          }
+        }
+        .animate-particle {
+          animation: particleOut 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+      `}</style>
     </div>
   );
 }

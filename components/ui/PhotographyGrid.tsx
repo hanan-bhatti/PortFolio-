@@ -8,9 +8,12 @@
  * - PhotographyGrid (default): Main React component or function
  */
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { FiHeart, FiDownload, FiShare2 } from "react-icons/fi";
 import PhotoLightbox from "./PhotoLightbox";
+import { getVisitorId } from "@/lib/analytics";
 
 interface Photo {
   id: string;
@@ -18,14 +21,41 @@ interface Photo {
   title: string | null;
   description: string | null;
   exif_data?: any;
+  likes: number;
+  downloads: number;
+  shares: number;
+  isLiked: boolean;
 }
 
 interface PhotographyGridProps {
   photos: Photo[];
 }
 
-export default function PhotographyGrid({ photos }: PhotographyGridProps) {
+function GridContent({ photos }: PhotographyGridProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const searchParams = useSearchParams();
+
+  // Listen for ?photo=ID query parameter to auto-open lightbox and track referrals
+  useEffect(() => {
+    const photoId = searchParams.get("photo");
+    const referrerId = searchParams.get("ref");
+    if (photoId) {
+      const idx = photos.findIndex((p) => p.id === photoId);
+      if (idx !== -1) {
+        setActiveIndex(idx);
+      }
+      
+      // If opened via share link, track the referral click
+      if (referrerId) {
+        const visitorId = getVisitorId() || "anonymous";
+        fetch(`/api/photography/${photoId}/share-click`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ visitorId, referrerId }),
+        }).catch((err) => console.error("Referral track fail:", err));
+      }
+    }
+  }, [searchParams, photos]);
 
   if (photos.length === 0) {
     return (
@@ -47,10 +77,6 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
           >
             {/* Image Wrapper */}
             <div className="relative w-full overflow-hidden bg-zinc-900/50">
-              {/* Aspect-ratio spacer or natural aspect ratio. Since it's columns masonry, we can render the image using a standard img tag or Next.js Image with layout/styling */}
-              {/* To make it work with CSS columns and preserve aspect ratios perfectly, we can use a standard img tag or standard CSS. Let's use standard HTML img with Next.js styling or Image component with appropriate heights. */}
-              {/* A standard <img> tag is optimal for pure CSS masonry columns because it automatically scales the height proportionally based on the source image, making column layouts perfect without predefined heights! */}
-              {/* Let's use a standard img tag with tailwind and lazy loading! */}
               <Image
                 src={photo.imageUrl}
                 alt={photo.title ?? "Photograph"}
@@ -61,8 +87,8 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
                 priority={index < 3}
               />
               
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/50 flex flex-col justify-end p-5 opacity-0 group-hover:opacity-100">
+              {/* Overlay: always visible on mobile, hover-triggered on desktop */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent md:bg-black/0 md:transition-colors md:duration-300 md:group-hover:bg-black/70 flex flex-col justify-end p-5 opacity-100 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
                 <span className="font-syne text-xs uppercase tracking-widest text-amber-500 font-bold mb-1">
                   #{String(index + 1).padStart(2, "0")}
                 </span>
@@ -76,6 +102,22 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
                     {photo.description}
                   </p>
                 )}
+
+                {/* Counts Bar */}
+                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/10 font-inter text-xs text-white/70">
+                  <span className="flex items-center gap-1.5 hover:text-red-400 transition-colors">
+                    <FiHeart className="w-3.5 h-3.5 fill-current" />
+                    {photo.likes ?? 0}
+                  </span>
+                  <span className="flex items-center gap-1.5 hover:text-green transition-colors">
+                    <FiDownload className="w-3.5 h-3.5" />
+                    {photo.downloads ?? 0}
+                  </span>
+                  <span className="flex items-center gap-1.5 hover:text-amber-500 transition-colors">
+                    <FiShare2 className="w-3.5 h-3.5" />
+                    {photo.shares ?? 0}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -90,5 +132,13 @@ export default function PhotographyGrid({ photos }: PhotographyGridProps) {
         />
       )}
     </>
+  );
+}
+
+export default function PhotographyGrid(props: PhotographyGridProps) {
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-zinc-500">Loading grid...</div>}>
+      <GridContent {...props} />
+    </Suspense>
   );
 }

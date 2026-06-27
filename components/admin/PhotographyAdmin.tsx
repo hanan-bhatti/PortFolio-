@@ -12,6 +12,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useUploadThing } from "@/lib/uploadthing";
 import { toast } from "sonner";
+import { FiHeart, FiDownload, FiShare2, FiActivity, FiUser, FiMapPin, FiTerminal, FiGlobe } from "react-icons/fi";
 import EditorialModal from "./EditorialModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -22,6 +23,9 @@ interface Photo {
   order: number;
   visible: boolean;
   exif_data?: any;
+  likes: number;
+  downloads: number;
+  shares: number;
 }
 
 const renderExifSummary = (exif: any) => {
@@ -41,8 +45,25 @@ const renderExifSummary = (exif: any) => {
   return parts.length > 0 ? parts.join(" · ") : "No EXIF data";
 };
 
+interface Interaction {
+  id: string;
+  photoId: string;
+  photoTitle: string;
+  photoImageUrl: string;
+  visitorId: string;
+  type: string;
+  createdAt: string;
+  geo: {
+    country: string;
+    city: string;
+    device: string;
+    browser: string;
+  } | null;
+}
+
 interface PhotographyAdminProps {
   initialPhotos: Photo[];
+  interactions: Interaction[];
   initialEnabled: string;
   initialTitle: string;
   initialDescription: string;
@@ -51,6 +72,7 @@ interface PhotographyAdminProps {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function PhotographyAdmin({
   initialPhotos,
+  interactions,
   initialEnabled,
   initialTitle,
   initialDescription,
@@ -395,9 +417,16 @@ export default function PhotographyAdmin({
 
                   {/* EXIF Summary Line */}
                   <div
-                    className="mb-2 font-mono text-[9px] text-zinc-500 uppercase tracking-wide"
+                    className="mb-1 font-mono text-[9px] text-zinc-500 uppercase tracking-wide"
                   >
                     {renderExifSummary(photo.exif_data)}
+                  </div>
+
+                  {/* Photo Engagement Analytics */}
+                  <div className="flex gap-4 mb-3 font-mono text-[9px] text-zinc-400 uppercase tracking-wider items-center">
+                    <span title="Likes" className="flex items-center gap-1"><FiHeart className="w-3 h-3 text-red-500 fill-current" /> {photo.likes ?? 0}</span>
+                    <span title="Downloads" className="flex items-center gap-1"><FiDownload className="w-3 h-3 text-green" /> {photo.downloads ?? 0}</span>
+                    <span title="Shares" className="flex items-center gap-1"><FiShare2 className="w-3 h-3 text-amber-500" /> {photo.shares ?? 0}</span>
                   </div>
 
                   {/* Visibility toggle */}
@@ -415,6 +444,109 @@ export default function PhotographyAdmin({
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </section>
+
+      {/* ── Photo Engagement & Referral Tracking Log ── */}
+      <section className="mb-10 border border-[#262626] bg-[#0c0c0c] p-6 mt-10">
+        <div className="flex items-center gap-2 mb-6 border-b border-[#262626] pb-3">
+          <FiActivity className="w-4 h-4 text-[#F59E0B]" />
+          <h2 className="font-syne text-sm font-bold text-white uppercase tracking-wider">
+            Engagement & Referral Log
+          </h2>
+        </div>
+
+        {interactions.length === 0 ? (
+          <p className="text-zinc-650 font-mono">No interactions recorded yet.</p>
+        ) : (
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            {interactions.map((item) => {
+              // Parse platform or referral detail from type
+              let actionText = "";
+              let actionColor = "text-zinc-400";
+              let actionIcon = null;
+
+              if (item.type === "like") {
+                actionText = "Liked photograph";
+                actionColor = "text-red-500";
+                actionIcon = <FiHeart className="w-3.5 h-3.5 fill-current" />;
+              } else if (item.type === "download") {
+                actionText = "Downloaded photograph";
+                actionColor = "text-green-500";
+                actionIcon = <FiDownload className="w-3.5 h-3.5" />;
+              } else if (item.type.startsWith("share_")) {
+                const platform = item.type.split("_")[1] || "unknown";
+                actionText = `Shared to ${platform}`;
+                actionColor = "text-amber-500";
+                actionIcon = <FiShare2 className="w-3.5 h-3.5" />;
+              } else if (item.type.startsWith("ref_click:")) {
+                const referrerId = item.type.split(":")[1] || "";
+                actionText = `Opened shared link (Referred by user ${referrerId.substring(0, 8)}...)`;
+                actionColor = "text-blue-400";
+                actionIcon = <FiGlobe className="w-3.5 h-3.5" />;
+              } else {
+                actionText = `Interacted (${item.type})`;
+                actionIcon = <FiTerminal className="w-3.5 h-3.5" />;
+              }
+
+              const formattedTime = new Date(item.createdAt).toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              return (
+                <div key={item.id} className="flex gap-4 items-start border-b border-[#262626]/40 pb-3 last:border-0 last:pb-0 font-mono">
+                  {/* Photo Thumbnail */}
+                  <div className="relative w-12 h-12 bg-zinc-900 border border-[#262626] shrink-0">
+                    <Image
+                      src={item.photoImageUrl}
+                      alt={item.photoTitle}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+
+                  {/* Log Details */}
+                  <div className="flex-grow min-w-0 font-mono">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`flex items-center gap-1.5 font-bold uppercase tracking-wide text-[10px] ${actionColor}`}>
+                        {actionIcon}
+                        {actionText}
+                      </span>
+                      <span className="text-[10px] text-zinc-500">· {formattedTime}</span>
+                    </div>
+
+                    <div className="text-[11px] text-zinc-300 font-syne font-bold uppercase tracking-tight mt-1 truncate">
+                      {item.photoTitle}
+                    </div>
+
+                    {/* Visitor context */}
+                    <div className="flex gap-3 items-center text-[9px] text-zinc-500 mt-1 flex-wrap">
+                      <span className="flex items-center gap-1">
+                        <FiUser className="w-3 h-3" />
+                        {item.visitorId.substring(0, 10)}...
+                      </span>
+                      {item.geo && (
+                        <>
+                          <span className="flex items-center gap-1">
+                            <FiMapPin className="w-3 h-3 text-[#10B981]" />
+                            {item.geo.city}, {item.geo.country}
+                          </span>
+                          <span className="capitalize text-zinc-600">
+                            {item.geo.device} ({item.geo.browser})
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </section>

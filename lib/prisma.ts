@@ -8,11 +8,16 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+
 const basePrisma =
-  globalForPrisma.prisma ?? new PrismaClient({ log: ["error", "warn"] });
+  globalForPrisma.prisma ?? new PrismaClient({ adapter, log: ["error", "warn"] });
 
 // Apply extension to automatically touch resume_last_updated on changes
 const extendedPrisma = basePrisma.$extends({
