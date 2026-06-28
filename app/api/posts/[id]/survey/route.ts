@@ -41,13 +41,22 @@ export async function POST(
       return NextResponse.json({ error: "Invalid difficulty value." }, { status: 400 });
     }
 
-    const response = await prisma.postEndSurveyResponse.create({
-      data: {
-        postId,
-        visitorId,
-        responseText: responseText ? responseText.trim() : null,
-        difficulty: difficulty || null,
-      },
+    const response = await prisma.$transaction(async (tx) => {
+      await tx.postEndSurveyResponse.deleteMany({
+        where: {
+          postId,
+          visitorId,
+        },
+      });
+
+      return tx.postEndSurveyResponse.create({
+        data: {
+          postId,
+          visitorId,
+          responseText: responseText ? responseText.trim() : null,
+          difficulty: difficulty || null,
+        },
+      });
     });
 
     return NextResponse.json(response, { status: 201 });
