@@ -118,14 +118,19 @@ export default async function AdminEngagementOverviewPage() {
         ? Math.round((hit100.length / uniqueVisitors.length) * 100)
         : 0;
 
-    const timeEvents = postEvents.filter(
-      (e) => e.eventType === "time_on_page" && e.value
-    );
+    const visitorMaxTime: Record<string, number> = {};
+    postEvents
+      .filter((e) => e.eventType === "time_on_page" && e.value)
+      .forEach((e) => {
+        const val = parseFloat(e.value!);
+        if (visitorMaxTime[e.visitorId] === undefined || val > visitorMaxTime[e.visitorId]!) {
+          visitorMaxTime[e.visitorId] = val;
+        }
+      });
+    const maxTimes = Object.values(visitorMaxTime);
     const avgTimeOnPage =
-      timeEvents.length > 0
-        ? Math.round(
-            timeEvents.reduce((sum, e) => sum + parseFloat(e.value!), 0) / timeEvents.length
-          )
+      maxTimes.length > 0
+        ? Math.round(maxTimes.reduce((sum, val) => sum + val, 0) / maxTimes.length)
         : 0;
 
     const config = post.engagementConfig || {

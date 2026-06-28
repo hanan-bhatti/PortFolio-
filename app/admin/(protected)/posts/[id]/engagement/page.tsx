@@ -152,11 +152,17 @@ export default async function AdminPostEngagementPage({ params }: Props) {
     v100: scroll100,
   };
 
-  // 7. Time on Page Distribution
-  const timeValues = events
+  // 7. Time on Page Distribution (max per visitor)
+  const visitorMaxTime: Record<string, number> = {};
+  events
     .filter((e) => e.eventType === "time_on_page" && e.value)
-    .map((e) => parseFloat(e.value!))
-    .sort((a, b) => a - b);
+    .forEach((e) => {
+      const val = parseFloat(e.value!);
+      if (visitorMaxTime[e.visitorId] === undefined || val > visitorMaxTime[e.visitorId]!) {
+        visitorMaxTime[e.visitorId] = val;
+      }
+    });
+  const timeValues = Object.values(visitorMaxTime).sort((a, b) => a - b);
   const avgTimeSeconds =
     timeValues.length > 0
       ? Math.round(timeValues.reduce((sum, v) => sum + v, 0) / timeValues.length)

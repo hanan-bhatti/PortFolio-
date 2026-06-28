@@ -61,22 +61,36 @@ export async function GET(
       where: { postId },
     });
 
-    // 1. Average Scroll Depth
-    const scrollEvents = events.filter((e) => e.eventType === "scroll_depth" && e.value);
+    // 1. Average Scroll Depth (max per visitor to prevent checkpoint skew)
+    const visitorMaxScroll: Record<string, number> = {};
+    events
+      .filter((e) => e.eventType === "scroll_depth" && e.value)
+      .forEach((e) => {
+        const val = parseInt(e.value!, 10);
+        if (visitorMaxScroll[e.visitorId] === undefined || val > visitorMaxScroll[e.visitorId]!) {
+          visitorMaxScroll[e.visitorId] = val;
+        }
+      });
+    const maxScrolls = Object.values(visitorMaxScroll);
     const avgScrollDepth =
-      scrollEvents.length > 0
-        ? Math.round(
-            scrollEvents.reduce((sum, e) => sum + parseInt(e.value!, 10), 0) / scrollEvents.length
-          )
+      maxScrolls.length > 0
+        ? Math.round(maxScrolls.reduce((sum, val) => sum + val, 0) / maxScrolls.length)
         : 0;
 
-    // 2. Average Time on Page (stored in seconds)
-    const timeEvents = events.filter((e) => e.eventType === "time_on_page" && e.value);
+    // 2. Average Time on Page (max per visitor to prevent intermediate updates from deflating averages)
+    const visitorMaxTime: Record<string, number> = {};
+    events
+      .filter((e) => e.eventType === "time_on_page" && e.value)
+      .forEach((e) => {
+        const val = parseFloat(e.value!);
+        if (visitorMaxTime[e.visitorId] === undefined || val > visitorMaxTime[e.visitorId]!) {
+          visitorMaxTime[e.visitorId] = val;
+        }
+      });
+    const maxTimes = Object.values(visitorMaxTime);
     const avgTimeOnPage =
-      timeEvents.length > 0
-        ? Math.round(
-            timeEvents.reduce((sum, e) => sum + parseFloat(e.value!), 0) / timeEvents.length
-          )
+      maxTimes.length > 0
+        ? Math.round(maxTimes.reduce((sum, val) => sum + val, 0) / maxTimes.length)
         : 0;
 
     // 3. Bounce Rate vs Explored Rate
