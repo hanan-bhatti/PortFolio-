@@ -20,7 +20,57 @@ import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import { cn } from "@/lib/utils";
 import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiX } from "react-icons/fi";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import EditorialModal from "./EditorialModal";
+
+const MarkdownComponents = {
+  p: ({ children }: any) => (
+    <p className="font-mono text-xs leading-[1.8] text-zinc-300 mb-3 text-left whitespace-pre-line">
+      {children}
+    </p>
+  ),
+  h1: ({ children }: any) => (
+    <h2 className="font-syne font-bold text-lg text-white mt-4 mb-2 uppercase text-left">
+      {children}
+    </h2>
+  ),
+  h2: ({ children }: any) => (
+    <h2 className="font-syne font-bold text-base text-amber mt-4 mb-2 uppercase text-left">
+      {children}
+    </h2>
+  ),
+  h3: ({ children }: any) => (
+    <h3 className="font-syne font-bold text-sm text-amber mt-3 mb-1.5 uppercase text-left">
+      {children}
+    </h3>
+  ),
+  a: ({ href, children }: any) => (
+    <a
+      href={href}
+      className="text-green hover:underline font-medium"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {children}
+    </a>
+  ),
+  ul: ({ children }: any) => (
+    <ul className="list-disc pl-5 mb-3 space-y-1 text-left text-zinc-300">
+      {children}
+    </ul>
+  ),
+  ol: ({ children }: any) => (
+    <ol className="list-decimal pl-5 mb-3 space-y-1 text-left text-zinc-300">
+      {children}
+    </ol>
+  ),
+  li: ({ children }: any) => (
+    <li className="font-mono text-xs leading-[1.8] text-zinc-300">
+      {children}
+    </li>
+  ),
+};
 
 interface DomainBlock {
   domain: string;
@@ -48,6 +98,10 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
     resolver: zodResolver(aboutSchema),
     defaultValues: initial,
   });
+
+  const watchStory = watch("about_story") || "";
+  const watchCurrently = watch("about_currently") || "";
+  const watchBeyondCode = watch("about_beyond_code") || "";
 
   const aboutAvatarUrl = watch("about_avatar_url");
 
@@ -286,21 +340,38 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
 
       {/* STORY SECTION */}
       {activeTab === "story" && (
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
-          <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Story</h3>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-              Your Story (markdown supported)
-            </label>
-            <textarea
-              {...register("about_story")}
-              placeholder="Tell your story..."
-              rows={12}
-              className={inputClass}
-            />
-            {errors.about_story ? (
-              <p className="mt-1 text-xs text-red-400">{errors.about_story?.message}</p>
-            ) : null}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Editor */}
+          <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
+            <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Story Editor</h3>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-zinc-350">
+                Your Story (markdown supported)
+              </label>
+              <textarea
+                {...register("about_story")}
+                placeholder="Tell your story..."
+                rows={15}
+                className={inputClass}
+              />
+              {errors.about_story ? (
+                <p className="mt-1 text-xs text-red-400">{errors.about_story?.message}</p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4 flex flex-col">
+            <h3 className="text-lg font-bold text-zinc-400 border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Live Preview</h3>
+            <div className="flex-1 max-h-[400px] overflow-y-auto pr-2">
+              {watchStory.trim() ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
+                  {watchStory}
+                </ReactMarkdown>
+              ) : (
+                <p className="text-zinc-600 italic text-[11px]">Start typing to see the live rendering...</p>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -309,40 +380,74 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
       {activeTab === "status" && (
         <div className="space-y-6">
           {/* CURRENTLY SECTION */}
-          <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
-            <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Currently</h3>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-                What are you doing now? (markdown supported)
-              </label>
-              <textarea
-                {...register("about_currently")}
-                placeholder="What I'm doing now..."
-                rows={5}
-                className={inputClass}
-              />
-              {errors.about_currently ? (
-                <p className="mt-1 text-xs text-red-400">{errors.about_currently?.message}</p>
-              ) : null}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Editor */}
+            <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
+              <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Currently</h3>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-350">
+                  What are you doing now? (markdown supported)
+                </label>
+                <textarea
+                  {...register("about_currently")}
+                  placeholder="What I'm doing now..."
+                  rows={8}
+                  className={inputClass}
+                />
+                {errors.about_currently ? (
+                  <p className="mt-1 text-xs text-red-400">{errors.about_currently?.message}</p>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4 flex flex-col">
+              <h3 className="text-lg font-bold text-zinc-400 border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Currently Preview</h3>
+              <div className="flex-1 max-h-[250px] overflow-y-auto pr-2">
+                {watchCurrently.trim() ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
+                    {watchCurrently}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-zinc-600 italic text-[11px]">Start typing to see currently preview...</p>
+                )}
+              </div>
             </div>
           </div>
 
           {/* BEYOND CODE SECTION */}
-          <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
-            <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Beyond Code</h3>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-                The Human Side (markdown supported)
-              </label>
-              <textarea
-                {...register("about_beyond_code")}
-                placeholder="Outside of coding, I like to..."
-                rows={5}
-                className={inputClass}
-              />
-              {errors.about_beyond_code ? (
-                <p className="mt-1 text-xs text-red-400">{errors.about_beyond_code?.message}</p>
-              ) : null}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Editor */}
+            <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
+              <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Beyond Code</h3>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-zinc-350">
+                  The Human Side (markdown supported)
+                </label>
+                <textarea
+                  {...register("about_beyond_code")}
+                  placeholder="Outside of coding, I like to..."
+                  rows={8}
+                  className={inputClass}
+                />
+                {errors.about_beyond_code ? (
+                  <p className="mt-1 text-xs text-red-400">{errors.about_beyond_code?.message}</p>
+                ) : null}
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4 flex flex-col">
+              <h3 className="text-lg font-bold text-zinc-400 border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Beyond Code Preview</h3>
+              <div className="flex-1 max-h-[250px] overflow-y-auto pr-2">
+                {watchBeyondCode.trim() ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={MarkdownComponents}>
+                    {watchBeyondCode}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="text-zinc-600 italic text-[11px]">Start typing to see beyond code preview...</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
