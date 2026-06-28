@@ -25,7 +25,7 @@ export interface AnalyticsData {
   pageViewsToday: number;
   uniqueVisitorsToday: number;
   topPages: Array<{ path: string; count: number }>;
-  topReferrers: Array<{ referrer: string; count: number }>;
+  topReferrers: Array<{ referrer: string; count: number; medium: string }>;
   byCountry: Array<{ country: string; count: number }>;
   byDevice: Array<{ device: string; count: number }>;
   byBrowser: Array<{ browser: string; count: number }>;
@@ -210,7 +210,7 @@ export async function getAnalyticsData(filters: AnalyticsFiltersState): Promise<
 
   // Classify and group referrers by brand
   const OWN_DOMAINS = new Set(["hanan-bhatti.site", "www.hanan-bhatti.site", "localhost", "127.0.0.1"]);
-  const referrersMap = new Map<string, { label: string; count: number }>();
+  const referrersMap = new Map<string, { label: string; count: number; medium: string }>();
   
   topReferrersRaw.forEach((r) => {
     if (!r.referrer) return;
@@ -228,15 +228,14 @@ export async function getAnalyticsData(filters: AnalyticsFiltersState): Promise<
     if (classified.source === "direct") return;
 
     const label = classified.label;
-    const current = referrersMap.get(label) || { label, count: 0 };
+    const current = referrersMap.get(label) || { label, count: 0, medium: classified.medium };
     current.count += r._count.id;
     referrersMap.set(label, current);
   });
 
   const topReferrers = Array.from(referrersMap.values())
-    .map((item) => ({ referrer: item.label, count: item.count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
+    .map((item) => ({ referrer: item.label, count: item.count, medium: item.medium }))
+    .sort((a, b) => b.count - a.count);
 
   const byCountry = byCountryRaw
     .filter((c) => c.country !== null)

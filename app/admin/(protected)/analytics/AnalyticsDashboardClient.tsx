@@ -143,6 +143,13 @@ export default function AnalyticsDashboardClient({
   const [visitorPage, setVisitorPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Referrers table interactive states
+  const [referrerSearch, setReferrerSearch] = useState("");
+  const [referrerSortField, setReferrerSortField] = useState<string>("count");
+  const [referrerSortOrder, setReferrerSortOrder] = useState<"asc" | "desc">("desc");
+  const [referrerPage, setReferrerPage] = useState(1);
+  const referrersPerPage = 5;
+
   // Sync state if initialFilters change (e.g. on mount/reset)
   useEffect(() => {
     setFilters(initialFilters);
@@ -150,6 +157,8 @@ export default function AnalyticsDashboardClient({
     setData(initialData);
     setVisitorPage(1);
     setVisitorSearch("");
+    setReferrerPage(1);
+    setReferrerSearch("");
   }, [initialFilters, initialData]);
 
   const handleFilterChange = (updates: Partial<AnalyticsFiltersState>) => {
@@ -280,6 +289,41 @@ export default function AnalyticsDashboardClient({
   const paginatedVisitors = sortedVisitors.slice(
     (visitorPage - 1) * itemsPerPage,
     visitorPage * itemsPerPage
+  );
+
+  // ── Filter, Sort, and Paginate Referrers ──
+  const handleReferrerSort = (field: string) => {
+    if (referrerSortField === field) {
+      setReferrerSortOrder(referrerSortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setReferrerSortField(field);
+      setReferrerSortOrder("desc");
+    }
+    setReferrerPage(1);
+  };
+
+  const filteredReferrers = data.topReferrers.filter((ref) => {
+    const term = referrerSearch.toLowerCase();
+    return ref.referrer.toLowerCase().includes(term);
+  });
+
+  const sortedReferrers = [...filteredReferrers].sort((a, b) => {
+    let valA = (a as any)[referrerSortField];
+    let valB = (b as any)[referrerSortField];
+
+    if (referrerSortField === "referrer" || referrerSortField === "medium") {
+      return referrerSortOrder === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    }
+
+    return referrerSortOrder === "asc" ? valA - valB : valB - valA;
+  });
+
+  const totalReferrerPages = Math.ceil(sortedReferrers.length / referrersPerPage);
+  const paginatedReferrers = sortedReferrers.slice(
+    (referrerPage - 1) * referrersPerPage,
+    referrerPage * referrersPerPage
   );
 
   return (
@@ -497,45 +541,99 @@ export default function AnalyticsDashboardClient({
         </div>
 
         {/* Right Column: Top Referrers */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none">
-          <h3 className="mb-4 font-syne text-lg font-bold text-white">Top Referrers</h3>
-          <div className="overflow-x-auto scrollbar-none">
-            <table className="w-full table-fixed text-left font-sans text-[13px]">
-              <colgroup>
-                <col className="w-[75%] sm:w-[80%]" />
-                <col className="w-[25%] sm:w-[20%]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[#262626] text-zinc-500 font-mono text-xs uppercase">
-                  <th className="pb-3 font-medium pl-2">Referrer</th>
-                  <th className="pb-3 text-right font-medium pr-2">Views</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#262626]/50">
-                {data.topReferrers.map((ref, index) => (
-                  <tr
-                    key={ref.referrer}
-                    className={index % 2 === 1 ? "bg-[#0c0c0c]" : "bg-black/10"}
-                  >
-                    <td className="py-3 px-2 text-zinc-200 min-w-0">
-                      <div className="flex items-center gap-2.5">
-                        {getReferrerIcon(ref.referrer)}
-                        <span className="font-medium truncate" title={ref.referrer}>
-                          {ref.referrer}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-3 text-right text-white font-semibold pr-2">{ref.count}</td>
+        <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h3 className="font-syne text-lg font-bold text-white">Top Referrers</h3>
+              <input
+                type="text"
+                placeholder="Search referrer..."
+                value={referrerSearch}
+                onChange={(e) => {
+                  setReferrerSearch(e.target.value);
+                  setReferrerPage(1);
+                }}
+                className="w-full sm:w-48 bg-[#121212] border border-[#262626] px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
+              />
+            </div>
+            <div className="overflow-x-auto scrollbar-none">
+              <table className="w-full table-fixed text-left font-sans text-[13px]">
+                <colgroup>
+                  <col className="w-[50%] sm:w-[55%]" />
+                  <col className="w-[25%] sm:w-[25%]" />
+                  <col className="w-[25%] sm:w-[20%]" />
+                </colgroup>
+                <thead>
+                  <tr className="border-b border-[#262626] text-zinc-500 font-mono text-xs uppercase">
+                    <th 
+                      className="pb-3 font-medium pl-2 cursor-pointer hover:text-white transition select-none"
+                      onClick={() => handleReferrerSort("referrer")}
+                    >
+                      Referrer {referrerSortField === "referrer" && (referrerSortOrder === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th 
+                      className="pb-3 font-medium cursor-pointer hover:text-white transition select-none"
+                      onClick={() => handleReferrerSort("medium")}
+                    >
+                      Medium {referrerSortField === "medium" && (referrerSortOrder === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th 
+                      className="pb-3 text-right font-medium pr-2 cursor-pointer hover:text-white transition select-none"
+                      onClick={() => handleReferrerSort("count")}
+                    >
+                      Views {referrerSortField === "count" && (referrerSortOrder === "asc" ? "▲" : "▼")}
+                    </th>
                   </tr>
-                ))}
-                {data.topReferrers.length === 0 ? (
-                  <tr>
-                    <td colSpan={2} className="py-6 text-center text-zinc-600">No referrers tracked yet</td>
-                  </tr>
-                ) : null}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#262626]/50">
+                  {paginatedReferrers.map((ref, index) => (
+                    <tr
+                      key={ref.referrer}
+                      className={`${index % 2 === 1 ? "bg-[#0c0c0c]" : "bg-black/10"} cursor-pointer hover:bg-white/[0.02] transition`}
+                      onClick={() => router.push(`/admin/analytics/referrers/${encodeURIComponent(ref.referrer)}`)}
+                    >
+                      <td className="py-3 px-2 text-zinc-200 min-w-0">
+                        <div className="flex items-center gap-2.5">
+                          {getReferrerIcon(ref.referrer)}
+                          <span className="font-medium truncate" title={ref.referrer}>
+                            {ref.referrer}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 text-zinc-400 capitalize">{ref.medium}</td>
+                      <td className="py-3 text-right text-white font-semibold pr-2">{ref.count}</td>
+                    </tr>
+                  ))}
+                  {filteredReferrers.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="py-6 text-center text-zinc-600">No referrers found</td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
           </div>
+          {totalReferrerPages > 1 && (
+            <div className="flex items-center justify-between border-t border-[#262626] pt-4 mt-6">
+              <button
+                onClick={() => setReferrerPage((p) => Math.max(p - 1, 1))}
+                disabled={referrerPage === 1}
+                className="bg-[#121212] border border-[#262626] px-3 py-1 text-[11px] font-mono hover:bg-zinc-800 disabled:opacity-30 disabled:hover:bg-transparent transition text-zinc-300"
+              >
+                PREV
+              </button>
+              <span className="text-[11px] font-mono text-zinc-500">
+                PAGE {referrerPage} OF {totalReferrerPages}
+              </span>
+              <button
+                onClick={() => setReferrerPage((p) => Math.min(p + 1, totalReferrerPages))}
+                disabled={referrerPage === totalReferrerPages}
+                className="bg-[#121212] border border-[#262626] px-3 py-1 text-[11px] font-mono hover:bg-zinc-800 disabled:opacity-30 disabled:hover:bg-transparent transition text-zinc-300"
+              >
+                NEXT
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
