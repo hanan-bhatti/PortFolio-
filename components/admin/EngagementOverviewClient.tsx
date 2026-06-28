@@ -12,6 +12,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import {
+  LuSmile,
+  LuThumbsUp,
+  LuStar,
+  LuMessageSquare,
+  LuClipboardCheck,
+  LuLogOut,
+  LuBell
+} from "react-icons/lu";
 
 interface PostItem {
   id: string;
@@ -251,29 +260,29 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
                     </td>
 
                     {/* Active Config Flags */}
-                    <td className="px-4 py-3.5 font-mono text-[9px]">
-                      <div className="flex flex-wrap gap-1">
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {[
-                          { key: "emojiReactionsOn", symbol: "EM" },
-                          { key: "helpfulVoteOn", symbol: "HP" },
-                          { key: "starRatingOn", symbol: "ST" },
-                          { key: "sectionReactionsOn", symbol: "SE" },
-                          { key: "endSurveyOn", symbol: "SV" },
-                          { key: "exitIntentOn", symbol: "EX" },
-                          { key: "notifyMeOn", symbol: "NT" },
+                          { key: "emojiReactionsOn", label: "Emoji Reactions", icon: <LuSmile className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-emerald-900/60 bg-emerald-950/40 text-emerald-400" },
+                          { key: "helpfulVoteOn", label: "Helpful Feedback", icon: <LuThumbsUp className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-sky-900/60 bg-sky-950/40 text-sky-400" },
+                          { key: "starRatingOn", label: "Star Ratings", icon: <LuStar className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-amber-900/60 bg-amber-950/40 text-amber-400" },
+                          { key: "sectionReactionsOn", label: "Section Comments", icon: <LuMessageSquare className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-violet-900/60 bg-violet-950/40 text-violet-400" },
+                          { key: "endSurveyOn", label: "Post-End Survey", icon: <LuClipboardCheck className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-fuchsia-900/60 bg-fuchsia-950/40 text-fuchsia-400" },
+                          { key: "exitIntentOn", label: "Exit Intent Popup", icon: <LuLogOut className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-rose-900/60 bg-rose-950/40 text-rose-400" },
+                          { key: "notifyMeOn", label: "Newsletter Notify Me", icon: <LuBell className="w-3.5 h-3.5 flex-shrink-0" />, activeColor: "border-teal-900/60 bg-teal-950/40 text-teal-400" },
                         ].map((cfg) => {
                           const active = (post.config as any)[cfg.key];
                           return (
                             <span
                               key={cfg.key}
-                              className={`px-1 border font-bold ${
+                              className={`p-1 border rounded-none flex items-center justify-center transition-all ${
                                 active
-                                  ? "border-green/20 bg-green/5 text-green"
-                                  : "border-zinc-800 bg-transparent text-zinc-650"
+                                  ? `${cfg.activeColor} border`
+                                  : "border-zinc-900 bg-transparent text-zinc-700 opacity-20"
                               }`}
-                              title={`${cfg.key.replace("On", "")} toggle state`}
+                              title={`${cfg.label}: ${active ? "Active" : "Disabled"}`}
                             >
-                              {cfg.symbol}
+                              {cfg.icon}
                             </span>
                           );
                         })}
