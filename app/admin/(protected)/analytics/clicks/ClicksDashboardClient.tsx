@@ -10,8 +10,98 @@ import {
   LuShare2, 
   LuCopy, 
   LuFolderGit2, 
-  LuSparkles 
+  LuSparkles,
+  LuMail 
 } from "react-icons/lu";
+import {
+  FaLinkedin,
+  FaGithub,
+  FaTwitter,
+  FaXTwitter,
+  FaFacebook,
+  FaInstagram
+} from "react-icons/fa6";
+
+// Meta parser helper for quick links
+function parseShortLinkMeta(display: string, targetUrl: string) {
+  let brand = "globe";
+  if (display.includes("LinkedIn")) brand = "linkedin";
+  else if (display.includes("GitHub")) brand = "github";
+  else if (display.includes("Twitter") || display.includes("X Profile")) brand = "twitter";
+  else if (display.includes("Email") || targetUrl.startsWith("mailto:")) brand = "email";
+  else if (targetUrl.includes("instagram.com")) brand = "instagram";
+  else if (targetUrl.includes("facebook.com")) brand = "facebook";
+
+  let placement = "other";
+  const lowerDisplay = display.toLowerCase();
+  if (lowerDisplay.includes("hero")) placement = "hero";
+  else if (lowerDisplay.includes("footer")) placement = "footer";
+  else if (lowerDisplay.includes("contact")) placement = "contact";
+  else if (lowerDisplay.includes("resume")) placement = "resume";
+  else if (lowerDisplay.includes("campaign") || lowerDisplay.includes("email_campaign")) placement = "campaign";
+
+  return { brand, placement };
+}
+
+function getBrandIcon(brand: string) {
+  switch (brand) {
+    case "linkedin":
+      return <FaLinkedin className="w-4 h-4 flex-shrink-0" style={{ color: "#0A66C2" }} />;
+    case "github":
+      return <FaGithub className="w-4 h-4 flex-shrink-0 text-white" />;
+    case "twitter":
+      return <FaTwitter className="w-4 h-4 flex-shrink-0 text-sky-400" />;
+    case "email":
+      return <LuMail className="w-4 h-4 flex-shrink-0 text-rose-400" />;
+    case "instagram":
+      return <FaInstagram className="w-4 h-4 flex-shrink-0 text-pink-500" />;
+    case "facebook":
+      return <FaFacebook className="w-4 h-4 flex-shrink-0 text-blue-500" />;
+    default:
+      return <LuGlobe className="w-4 h-4 flex-shrink-0 text-zinc-500" />;
+  }
+}
+
+function getPlacementBadge(placement: string) {
+  switch (placement) {
+    case "hero":
+      return (
+        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-sky-950/40 text-sky-400 border border-sky-900/60">
+          Hero
+        </span>
+      );
+    case "footer":
+      return (
+        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/40 text-zinc-400 border border-zinc-700/60">
+          Footer
+        </span>
+      );
+    case "contact":
+      return (
+        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/60">
+          Contact
+        </span>
+      );
+    case "resume":
+      return (
+        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-amber-950/40 text-amber-400 border border-amber-900/60">
+          Resume
+        </span>
+      );
+    case "campaign":
+      return (
+        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-violet-950/40 text-violet-400 border border-violet-900/60">
+          Campaign
+        </span>
+      );
+    default:
+      return (
+        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/20 text-zinc-500 border border-zinc-800/60">
+          Other
+        </span>
+      );
+  }
+}
 
 interface BlogPostStat {
   id: string;
@@ -395,26 +485,38 @@ export default function ClicksDashboardClient({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1e1e1e]">
-                {paginatedLinks.map((link) => (
-                  <tr key={link.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                    <td className="py-3.5 max-w-[280px] truncate font-bold text-white">
-                      {link.targetDisplay}
-                    </td>
-                    <td className="py-3.5 text-zinc-400 font-semibold">/s/{link.code}</td>
-                    <td className="py-3.5 font-bold text-amber">{link.clicksCount}</td>
-                    <td className="py-3.5 text-zinc-500">{formatShortDate(link.lastClickTime)}</td>
-                    <td className="py-3.5 text-right">
-                      <a
-                        href={link.targetUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer inline-flex items-center gap-1"
-                      >
-                        VISIT LINK <LuExternalLink className="w-3 h-3" />
-                      </a>
-                    </td>
-                  </tr>
-                ))}
+                {paginatedLinks.map((link) => {
+                  const meta = parseShortLinkMeta(link.targetDisplay, link.targetUrl);
+                  const cleanName = link.targetDisplay.replace(/\s*\([^)]+\)\s*$/, "");
+                  return (
+                    <tr key={link.id} className="text-zinc-300 hover:bg-white/[0.01]">
+                      <td className="py-3.5 max-w-[280px] truncate font-bold text-white">
+                        <div className="flex items-center gap-2.5">
+                          {getBrandIcon(meta.brand)}
+                          <div className="flex flex-col min-w-0">
+                            <span className="truncate" title={cleanName}>{cleanName}</span>
+                            <div className="mt-1 flex items-center gap-1.5">
+                              {getPlacementBadge(meta.placement)}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 text-zinc-400 font-semibold font-mono">/s/{link.code}</td>
+                      <td className="py-3.5 font-bold text-amber">{link.clicksCount}</td>
+                      <td className="py-3.5 text-zinc-500">{formatShortDate(link.lastClickTime)}</td>
+                      <td className="py-3.5 text-right">
+                        <a
+                          href={link.targetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer inline-flex items-center gap-1"
+                        >
+                          VISIT LINK <LuExternalLink className="w-3 h-3" />
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {filteredLinks.length === 0 && (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-zinc-600">No short redirects match search query</td>
