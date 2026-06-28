@@ -424,7 +424,9 @@ export default function NewsletterManager({
             </div>
           )}
         </div>
-          {/* Bottom Row: Campaigns History */}
+      </div>
+
+      {/* Bottom Row: Campaigns History */}
       <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
         <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
           Campaigns History & Metrics
@@ -550,7 +552,7 @@ export default function NewsletterManager({
             </button>
           </div>
         )}
-      </div>    </div>
+      </div>
 
       <EditorialModal
         isOpen={deleteTarget !== null}
