@@ -9,6 +9,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { classifyReferrer } from "@/lib/classify-referrer";
 
 export interface AnalyticsFiltersState {
   range: string;
@@ -207,23 +208,34 @@ export async function getAnalyticsData(filters: AnalyticsFiltersState): Promise<
     count: p._count.id,
   }));
 
-  // Filter referrers
+  // Classify and group referrers by brand
   const OWN_DOMAINS = new Set(["hanan-bhatti.site", "www.hanan-bhatti.site", "localhost", "127.0.0.1"]);
-  const topReferrers = topReferrersRaw
-    .filter((r) => {
-      if (!r.referrer) return false;
-      if (r.referrer.startsWith("android-app://")) return false;
-      try {
-        const u = new URL(r.referrer);
-        const host = u.hostname.replace(/^www\./, "");
-        if (OWN_DOMAINS.has(host)) return false;
-        if (u.pathname.startsWith("/admin")) return false;
-      } catch {
-        return false;
+  const referrersMap = new Map<string, { label: string; count: number }>();
+  
+  topReferrersRaw.forEach((r) => {
+    if (!r.referrer) return;
+    try {
+      const u = new URL(r.referrer.startsWith("android-app://") ? r.referrer.replace("android-app://", "https://") : r.referrer);
+      const host = u.hostname.replace(/^www\./, "");
+      if (OWN_DOMAINS.has(host) || host.endsWith(".hanan-bhatti.site") || u.pathname.startsWith("/admin")) {
+        return;
       }
-      return true;
-    })
-    .map((r) => ({ referrer: r.referrer as string, count: r._count.id }))
+    } catch {
+      return;
+    }
+
+    const classified = classifyReferrer(r.referrer);
+    if (classified.source === "direct") return;
+
+    const label = classified.label;
+    const current = referrersMap.get(label) || { label, count: 0 };
+    current.count += r._count.id;
+    referrersMap.set(label, current);
+  });
+
+  const topReferrers = Array.from(referrersMap.values())
+    .map((item) => ({ referrer: item.label, count: item.count }))
+    .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 
   const byCountry = byCountryRaw

@@ -11,7 +11,113 @@
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  SiGoogle,
+  SiReddit,
+  SiWhatsapp,
+  SiPinterest,
+  SiYoutube,
+  SiTiktok,
+  SiMedium,
+  SiDevdotto,
+  SiStackoverflow,
+  SiDuckduckgo,
+  SiSubstack,
+  SiPatreon,
+  SiDribbble,
+  SiBehance,
+  SiFigma,
+  SiSlack,
+  SiDiscord,
+  SiTelegram,
+  SiProducthunt,
+  SiYcombinator,
+  SiWikipedia,
+  SiThreads,
+  SiQuora,
+  SiMastodon,
+  SiTumblr,
+  SiVimeo,
+  SiTwitch,
+  SiPocket,
+  SiFlipboard,
+  SiFeedly,
+  SiBlogger,
+  SiWordpress,
+  SiWechat,
+  SiSinaweibo,
+  SiLine
+} from "react-icons/si";
+import {
+  FaLinkedin,
+  FaTwitter,
+  FaXTwitter,
+  FaYahoo,
+  FaInstagram,
+  FaFacebook,
+  FaGithub
+} from "react-icons/fa6";
+import { LuGlobe, LuMail } from "react-icons/lu";
 import { getAnalyticsData, type AnalyticsData, type AnalyticsFiltersState } from "./actions";
+
+const REFERRER_ICONS: Record<string, { icon: any; color: string }> = {
+  google: { icon: SiGoogle, color: "#4285F4" },
+  linkedin: { icon: FaLinkedin, color: "#0A66C2" },
+  instagram: { icon: FaInstagram, color: "#E1306C" },
+  facebook: { icon: FaFacebook, color: "#1877F2" },
+  github: { icon: FaGithub, color: "#FFFFFF" },
+  twitter: { icon: FaTwitter, color: "#1DA1F2" },
+  x: { icon: FaXTwitter, color: "#FFFFFF" },
+  reddit: { icon: SiReddit, color: "#FF4500" },
+  whatsapp: { icon: SiWhatsapp, color: "#25D366" },
+  pinterest: { icon: SiPinterest, color: "#BD081C" },
+  youtube: { icon: SiYoutube, color: "#FF0000" },
+  tiktok: { icon: SiTiktok, color: "#FE2C55" },
+  medium: { icon: SiMedium, color: "#00AB6C" },
+  devto: { icon: SiDevdotto, color: "#FFFFFF" },
+  stackoverflow: { icon: SiStackoverflow, color: "#F48024" },
+  duckduckgo: { icon: SiDuckduckgo, color: "#DE5833" },
+  yahoo: { icon: FaYahoo, color: "#6001D2" },
+  bing: { icon: LuGlobe, color: "#00809D" },
+  substack: { icon: SiSubstack, color: "#FF6719" },
+  patreon: { icon: SiPatreon, color: "#FF424D" },
+  dribbble: { icon: SiDribbble, color: "#EA4C89" },
+  behance: { icon: SiBehance, color: "#1769FF" },
+  figma: { icon: SiFigma, color: "#F24E1E" },
+  slack: { icon: SiSlack, color: "#4A154B" },
+  discord: { icon: SiDiscord, color: "#5865F2" },
+  telegram: { icon: SiTelegram, color: "#26A5E4" },
+  producthunt: { icon: SiProducthunt, color: "#DA552F" },
+  hackernews: { icon: SiYcombinator, color: "#FF6600" },
+  ycombinator: { icon: SiYcombinator, color: "#FF6600" },
+  wikipedia: { icon: SiWikipedia, color: "#FFFFFF" },
+  threads: { icon: SiThreads, color: "#FFFFFF" },
+  quora: { icon: SiQuora, color: "#B92B27" },
+  mastodon: { icon: SiMastodon, color: "#563ACC" },
+  tumblr: { icon: SiTumblr, color: "#36465D" },
+  vimeo: { icon: SiVimeo, color: "#1AB7EA" },
+  twitch: { icon: SiTwitch, color: "#9146FF" },
+  pocket: { icon: SiPocket, color: "#EF4056" },
+  flipboard: { icon: SiFlipboard, color: "#E12828" },
+  feedly: { icon: SiFeedly, color: "#2BB24C" },
+  blogger: { icon: SiBlogger, color: "#FC4F08" },
+  wordpress: { icon: SiWordpress, color: "#21759B" },
+  wechat: { icon: SiWechat, color: "#07C160" },
+  weibo: { icon: SiSinaweibo, color: "#E6162D" },
+  line: { icon: SiLine, color: "#06C755" },
+  email: { icon: LuMail, color: "#EA4335" },
+  webmail: { icon: LuMail, color: "#EA4335" },
+};
+
+function getReferrerIcon(name: string) {
+  const key = name.toLowerCase().replace(/\s+/g, "");
+  const match = REFERRER_ICONS[key];
+  if (match) {
+    const Icon = match.icon;
+    return <Icon className="w-4 h-4 flex-shrink-0" style={{ color: match.color }} />;
+  }
+  return <LuGlobe className="w-4 h-4 text-zinc-500 flex-shrink-0" />;
+}
 
 interface AnalyticsDashboardClientProps {
   initialData: AnalyticsData;
@@ -411,8 +517,13 @@ export default function AnalyticsDashboardClient({
                     key={ref.referrer}
                     className={index % 2 === 1 ? "bg-[#0c0c0c]" : "bg-black/10"}
                   >
-                    <td className="py-3 px-2 font-mono text-zinc-300 min-w-0">
-                      <span className="block truncate" title={ref.referrer}>{ref.referrer}</span>
+                    <td className="py-3 px-2 text-zinc-200 min-w-0">
+                      <div className="flex items-center gap-2.5">
+                        {getReferrerIcon(ref.referrer)}
+                        <span className="font-medium truncate" title={ref.referrer}>
+                          {ref.referrer}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-3 text-right text-white font-semibold pr-2">{ref.count}</td>
                   </tr>
