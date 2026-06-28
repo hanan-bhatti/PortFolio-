@@ -19,6 +19,7 @@ import { saveAboutSettingsAction } from "@/lib/actions";
 import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import { cn } from "@/lib/utils";
+import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiX } from "react-icons/fi";
 import EditorialModal from "./EditorialModal";
 
 interface DomainBlock {
@@ -380,101 +381,113 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
 
       {/* TECH STACK VISUAL EDITOR */}
       {activeTab === "stack" && (
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-5">
-          <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Tech Stack</h3>
+        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-6 space-y-6">
+          <div className="border-b border-[#262626] pb-3 flex justify-between items-center">
+            <h3 className="text-sm font-bold text-white font-syne uppercase tracking-wider">Tech Stack Configuration</h3>
+            <span className="text-[10px] text-zinc-550 font-mono uppercase tracking-wider">{stack.length} Domains</span>
+          </div>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             {stack.map((block, domainIndex) => (
               <div
                 key={domainIndex}
-                className="border border-[#262626] bg-[#0c0c0c] p-4 relative space-y-3"
+                className="border border-[#262626] bg-[#080808] p-5 space-y-4 rounded-none hover:border-[#383838] transition-colors"
               >
-                {/* Domain header control row */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                {/* Domain Header Control Row */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between border-b border-[#262626]/40 pb-3">
                   <div className="flex flex-1 items-center gap-2">
-                    <div className="flex flex-col gap-1 mr-1 shrink-0">
+                    {/* Reorder Buttons */}
+                    <div className="flex items-center gap-1 mr-1 shrink-0 border border-[#262626] bg-black p-0.5">
                       <button
                         type="button"
                         disabled={domainIndex === 0}
                         onClick={() => moveDomainUp(domainIndex)}
-                        className="p-1 text-xs text-zinc-400 hover:text-amber disabled:opacity-30 transition-colors"
+                        className="p-1.5 text-zinc-500 hover:text-amber disabled:opacity-20 disabled:hover:text-zinc-500 transition-colors"
                         title="Move Up"
                       >
-                        ▲
+                        <FiArrowUp className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
                         disabled={domainIndex === stack.length - 1}
                         onClick={() => moveDomainDown(domainIndex)}
-                        className="p-1 text-xs text-zinc-400 hover:text-amber disabled:opacity-30 transition-colors"
+                        className="p-1.5 text-zinc-500 hover:text-amber disabled:opacity-20 disabled:hover:text-zinc-500 transition-colors border-l border-[#262626]"
                         title="Move Down"
                       >
-                        ▼
+                        <FiArrowDown className="w-3.5 h-3.5" />
                       </button>
                     </div>
+                    {/* Domain Title Input */}
                     <input
                       type="text"
                       value={block.domain}
                       placeholder="e.g. Frontend"
                       onChange={(e) => updateDomainName(domainIndex, e.target.value)}
-                      className="w-full sm:w-64 rounded-none border border-[#262626] bg-black/30 px-3 py-1.5 text-xs text-white placeholder-zinc-600 outline-none focus:border-amber font-mono uppercase tracking-wide"
+                      className="w-full sm:w-64 rounded-none border border-[#262626] bg-black px-3 py-1.5 text-xs text-white placeholder-zinc-700 outline-none focus:border-amber font-mono uppercase tracking-wider font-bold"
                     />
                   </div>
 
+                  {/* Remove Domain Button */}
                   <button
                     type="button"
                     onClick={() => removeDomain(domainIndex)}
-                    className="rounded-none border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-450 hover:bg-red-500/20 transition-colors sm:self-auto self-start"
+                    className="flex items-center gap-1.5 rounded-none border border-red-950 text-red-400 bg-red-950/20 px-3 py-1.5 text-xs hover:bg-red-950/40 hover:text-red-300 transition-colors sm:self-auto self-start font-mono uppercase tracking-wider font-bold"
+                    title="Remove Domain"
                   >
-                    × Remove Domain
+                    <FiTrash2 className="w-3.5 h-3.5" />
+                    <span>Delete Domain</span>
                   </button>
                 </div>
 
-                {/* Skills tags list */}
-                <div className="flex flex-wrap items-center gap-2 pt-2">
+                {/* Skills Tags List */}
+                <div className="flex flex-wrap items-center gap-2.5">
                   {block.skills.map((skill, skillIndex) => (
                     <span
                       key={skillIndex}
-                      className="group/tag inline-flex items-center gap-1 font-mono text-[10px] border border-[#262626] px-[10px] py-[3px] bg-white/[0.03] text-zinc-300 rounded-none cursor-default"
+                      className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold border border-[#262626] px-3 py-1 bg-black text-zinc-300 rounded-none transition-colors hover:border-[#383838]"
                     >
                       <span>{skill}</span>
                       <button
                         type="button"
                         onClick={() => removeSkill(domainIndex, skillIndex)}
-                        className="text-red-400 hover:text-red-500 font-bold ml-1 opacity-0 group-hover/tag:opacity-100 transition-opacity"
+                        className="text-red-400 hover:text-red-500 p-0.5 focus:outline-none transition-colors"
+                        title={`Remove ${skill}`}
                       >
-                        ×
+                        <FiX className="w-3 h-3 shrink-0" />
                       </button>
                     </span>
                   ))}
 
-                  {/* Inline Add Skill Input */}
-                  <input
-                    type="text"
-                    placeholder="+ Add Skill"
-                    value={skillInputs[domainIndex] ?? ""}
-                    onChange={(e) =>
-                      setSkillInputs({ ...skillInputs, [domainIndex]: e.target.value })
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === ",") {
-                        e.preventDefault();
-                        const val = skillInputs[domainIndex] ?? "";
-                        const skillName = val.trim().replace(/,$/, "");
-                        if (skillName) {
-                          addSkill(domainIndex, skillName);
-                          setSkillInputs({ ...skillInputs, [domainIndex]: "" });
-                        }
+                  {/* Inline Expanding Add Skill Input */}
+                  <div className="inline-flex items-center gap-1.5 border border-dashed border-[#262626] bg-black/40 pl-3 pr-2 py-1 text-zinc-500 focus-within:border-amber focus-within:text-zinc-300 transition-colors font-mono text-xs w-full sm:w-auto">
+                    <FiPlus className="w-3.5 h-3.5" />
+                    <input
+                      type="text"
+                      placeholder="Add skill..."
+                      value={skillInputs[domainIndex] ?? ""}
+                      onChange={(e) =>
+                        setSkillInputs({ ...skillInputs, [domainIndex]: e.target.value })
                       }
-                    }}
-                    className="rounded-none border border-[#262626] bg-black/20 px-2.5 py-1 text-[11px] text-white outline-none w-24 placeholder-zinc-600 focus:border-amber font-mono"
-                  />
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === ",") {
+                          e.preventDefault();
+                          const val = skillInputs[domainIndex] ?? "";
+                          const skillName = val.trim().replace(/,$/, "");
+                          if (skillName) {
+                            addSkill(domainIndex, skillName);
+                            setSkillInputs({ ...skillInputs, [domainIndex]: "" });
+                          }
+                        }
+                      }}
+                      className="bg-transparent border-0 outline-none text-[11px] text-white placeholder-zinc-650 w-24 focus:w-40 transition-all duration-300"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
 
             {stack.length === 0 && (
-              <div className="text-center py-6 text-zinc-500 border border-dashed border-[#262626] rounded-none text-xs font-mono uppercase tracking-wide">
+              <div className="text-center py-8 text-zinc-550 border border-dashed border-[#262626] rounded-none text-xs font-mono uppercase tracking-widest">
                 No domains added yet. Click the button below to start.
               </div>
             )}
@@ -482,7 +495,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
             <button
               type="button"
               onClick={addDomain}
-              className="w-full rounded-none border border-dashed border-[#262626] hover:border-amber py-3 text-xs font-bold font-mono uppercase tracking-widest text-zinc-400 hover:text-amber transition-colors cursor-pointer text-center"
+              className="w-full rounded-none border border-dashed border-[#262626] hover:border-amber py-3.5 text-xs font-bold font-mono uppercase tracking-widest text-zinc-400 hover:text-amber transition-colors cursor-pointer text-center"
             >
               + Add Domain
             </button>
