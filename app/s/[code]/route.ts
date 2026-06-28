@@ -12,6 +12,9 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+const BOT_PATTERN =
+  /bot|crawler|spider|scraper|headless|prerender|lighthouse|pagespeed|semrush|ahrefs|\bmoz\b|dataforseo|pingdom|uptimerobot|statuspage|node-fetch|python-requests|curl|wget|axios|postman|insomnia|go-http|java\/|okhttp|dart:|cfnetwork|libwww/i;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
@@ -28,27 +31,42 @@ export async function GET(
 
     const { searchParams } = new URL(request.url);
     const visitorId = searchParams.get("v") || null;
-    const userAgent = request.headers.get("user-agent") || null;
+    const visitorCookie = request.cookies.get("visitorId")?.value || null;
+    const userAgent = request.headers.get("user-agent") || "";
     const referer = request.headers.get("referer") || null;
 
     // Verify visitor ID exists in DB
     let validVisitorId: string | null = null;
-    if (visitorId) {
-      const visitorExists = await prisma.visitor.findUnique({ where: { id: visitorId } });
+    const targetVisitorId = visitorCookie || visitorId;
+    if (targetVisitorId) {
+      const visitorExists = await prisma.visitor.findUnique({ where: { id: targetVisitorId } });
       if (visitorExists) {
-        validVisitorId = visitorId;
+        validVisitorId = targetVisitorId;
       }
     }
 
-    // Save click event
-    await prisma.shortLinkClick.create({
-      data: {
-        shortLinkId: shortLink.id,
-        visitorId: validVisitorId,
-        userAgent,
-        referer,
-      },
-    });
+    const isBot = !userAgent || BOT_PATTERN.test(userAgent);
+    const isPrefetch =
+      request.headers.get("purpose") === "prefetch" ||
+      request.headers.get("x-purpose") === "prefetch" ||
+      request.headers.get("sec-purpose") === "prefetch" ||
+      request.headers.get("purpose") === "prerender" ||
+      request.headers.get("sec-purpose") === "prerender";
+
+    const secFetchMode = request.headers.get("sec-fetch-mode") || "";
+    const isNavigation = secFetchMode === "navigate" || !secFetchMode;
+
+    // Save click event (skip for bots/crawlers/pre-renderers/unverified sessions/background prefetchers)
+    if (validVisitorId && !isBot && !isPrefetch && isNavigation) {
+      await prisma.shortLinkClick.create({
+        data: {
+          shortLinkId: shortLink.id,
+          visitorId: validVisitorId,
+          userAgent: userAgent || null,
+          referer,
+        },
+      });
+    }
 
     let target: string;
     try {
