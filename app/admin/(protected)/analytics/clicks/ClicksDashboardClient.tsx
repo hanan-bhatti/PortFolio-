@@ -510,7 +510,13 @@ export default function ClicksDashboardClient({
                       <td className="py-3.5 max-w-[240px] truncate font-bold text-white">
                         <div className="flex items-center gap-2.5">
                           {getBrandIcon(meta.brand)}
-                          <span className="truncate" title={cleanName}>{cleanName}</span>
+                          <Link 
+                            href={`/admin/analytics/clicks/shortlinks/${link.code}`}
+                            className="truncate hover:text-amber hover:underline"
+                            title={cleanName}
+                          >
+                            {cleanName}
+                          </Link>
                         </div>
                       </td>
                       <td className="py-3.5">
@@ -519,14 +525,21 @@ export default function ClicksDashboardClient({
                       <td className="py-3.5 text-zinc-400 font-semibold font-mono">/s/{link.code}</td>
                       <td className="py-3.5 font-bold text-amber">{link.clicksCount}</td>
                       <td className="py-3.5 text-zinc-500">{formatShortDate(link.lastClickTime)}</td>
-                      <td className="py-3.5 text-right">
+                      <td className="py-3.5 text-right flex items-center justify-end gap-2">
+                        <Link
+                          href={`/admin/analytics/clicks/shortlinks/${link.code}`}
+                          className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer inline-flex items-center gap-1"
+                        >
+                          VIEW DETAILS →
+                        </Link>
                         <a
                           href={link.targetUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer inline-flex items-center gap-1"
+                          className="border border-[#262626] bg-black/20 hover:bg-black/60 px-2 py-1 text-[10px] font-bold text-zinc-500 hover:border-zinc-400 hover:text-white transition-colors rounded-none cursor-pointer inline-flex items-center gap-1"
+                          title="Visit external URL"
                         >
-                          VISIT LINK <LuExternalLink className="w-3 h-3" />
+                          <LuExternalLink className="w-3.5 h-3.5" />
                         </a>
                       </td>
                     </tr>
