@@ -72,10 +72,10 @@ export default async function ContactPage() {
   const settings = await getSiteSettings();
 
   const [githubCode, linkedinCode, twitterCode, emailCode] = await Promise.all([
-    settings.socialGithub ? getOrCreateShortLink(`${settings.socialGithub}?utm_source=contact`, "link") : null,
-    settings.socialLinkedin ? getOrCreateShortLink(`${settings.socialLinkedin}?utm_source=contact`, "link") : null,
-    settings.socialTwitter ? getOrCreateShortLink(`${settings.socialTwitter}?utm_source=contact`, "link") : null,
-    settings.socialEmail ? getOrCreateShortLink(`mailto:${settings.socialEmail}?utm_source=contact`, "link") : null,
+    settings.socialGithub ? getOrCreateShortLink(`${settings.socialGithub}?utm_source=portfolio&utm_medium=contact`, "link") : null,
+    settings.socialLinkedin ? getOrCreateShortLink(`${settings.socialLinkedin}?utm_source=portfolio&utm_medium=contact`, "link") : null,
+    settings.socialTwitter ? getOrCreateShortLink(`${settings.socialTwitter}?utm_source=portfolio&utm_medium=contact`, "link") : null,
+    settings.socialEmail ? getOrCreateShortLink(`mailto:${settings.socialEmail}?utm_source=portfolio&utm_medium=contact`, "link") : null,
   ]);
 
   const socials: SocialItem[] = [

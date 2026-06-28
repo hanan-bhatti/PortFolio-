@@ -39,8 +39,10 @@ export default async function ShortLinkDetailPage({ params }: Props) {
   try {
     const url = new URL(shortLink.targetUrl);
     const utmSource = url.searchParams.get("utm_source");
-    if (utmSource) {
-      sourceLabel = ` (${utmSource.charAt(0).toUpperCase() + utmSource.slice(1)})`;
+    const utmMedium = url.searchParams.get("utm_medium");
+    const chosenLabel = utmMedium || utmSource;
+    if (chosenLabel) {
+      sourceLabel = ` (${chosenLabel.charAt(0).toUpperCase() + chosenLabel.slice(1)})`;
     }
     if (url.protocol === "mailto:") {
       baseTargetUrl = `mailto:${url.pathname}`;
@@ -48,8 +50,10 @@ export default async function ShortLinkDetailPage({ params }: Props) {
       baseTargetUrl = url.origin + url.pathname;
     }
   } catch {
-    if (shortLink.targetUrl.includes("utm_source=")) {
-      const match = shortLink.targetUrl.match(/utm_source=([^&]+)/);
+    if (shortLink.targetUrl.includes("utm_medium=") || shortLink.targetUrl.includes("utm_source=")) {
+      const matchMedium = shortLink.targetUrl.match(/utm_medium=([^&]+)/);
+      const matchSource = shortLink.targetUrl.match(/utm_source=([^&]+)/);
+      const match = matchMedium || matchSource;
       if (match && match[1]) {
         sourceLabel = ` (${match[1].charAt(0).toUpperCase() + match[1].slice(1)})`;
       }

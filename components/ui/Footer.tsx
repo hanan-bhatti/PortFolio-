@@ -54,10 +54,10 @@ export default async function Footer() {
   const footerTimezone = map.get("footerTimezone") || "GMT+5 · Usually awake at 2am";
 
   const [githubCode, linkedinCode, twitterCode, emailCode] = await Promise.all([
-    githubUrl ? getOrCreateShortLink(`${githubUrl}?utm_source=footer`, "link") : null,
-    linkedinUrl ? getOrCreateShortLink(`${linkedinUrl}?utm_source=footer`, "link") : null,
-    twitterUrl ? getOrCreateShortLink(`${twitterUrl}?utm_source=footer`, "link") : null,
-    publicEmail ? getOrCreateShortLink(`mailto:${publicEmail}?utm_source=footer`, "link") : null,
+    githubUrl ? getOrCreateShortLink(`${githubUrl}?utm_source=portfolio&utm_medium=footer`, "link") : null,
+    linkedinUrl ? getOrCreateShortLink(`${linkedinUrl}?utm_source=portfolio&utm_medium=footer`, "link") : null,
+    twitterUrl ? getOrCreateShortLink(`${twitterUrl}?utm_source=portfolio&utm_medium=footer`, "link") : null,
+    publicEmail ? getOrCreateShortLink(`mailto:${publicEmail}?utm_source=portfolio&utm_medium=footer`, "link") : null,
   ]);
 
   const navLinks = [

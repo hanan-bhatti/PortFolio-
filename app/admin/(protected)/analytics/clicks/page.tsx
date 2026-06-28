@@ -283,8 +283,10 @@ export default async function AnalyticsInteractionsPage() {
     try {
       const url = new URL(link.targetUrl);
       const utmSource = url.searchParams.get("utm_source");
-      if (utmSource) {
-        sourceLabel = ` (${utmSource.charAt(0).toUpperCase() + utmSource.slice(1)})`;
+      const utmMedium = url.searchParams.get("utm_medium");
+      const chosenLabel = utmMedium || utmSource;
+      if (chosenLabel) {
+        sourceLabel = ` (${chosenLabel.charAt(0).toUpperCase() + chosenLabel.slice(1)})`;
       }
       if (url.protocol === "mailto:") {
         baseTargetUrl = `mailto:${url.pathname}`;
@@ -292,8 +294,10 @@ export default async function AnalyticsInteractionsPage() {
         baseTargetUrl = url.origin + url.pathname;
       }
     } catch {
-      if (link.targetUrl.includes("utm_source=")) {
-        const match = link.targetUrl.match(/utm_source=([^&]+)/);
+      if (link.targetUrl.includes("utm_medium=") || link.targetUrl.includes("utm_source=")) {
+        const matchMedium = link.targetUrl.match(/utm_medium=([^&]+)/);
+        const matchSource = link.targetUrl.match(/utm_source=([^&]+)/);
+        const match = matchMedium || matchSource;
         if (match && match[1]) {
           sourceLabel = ` (${match[1].charAt(0).toUpperCase() + match[1].slice(1)})`;
         }

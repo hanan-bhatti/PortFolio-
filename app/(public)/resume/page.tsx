@@ -79,9 +79,9 @@ export default async function ResumePage() {
   }
 
   const [githubCode, linkedinCode, twitterCode] = await Promise.all([
-    siteSettings.socialGithub ? getOrCreateShortLink(`${siteSettings.socialGithub}?utm_source=resume`, "link") : null,
-    siteSettings.socialLinkedin ? getOrCreateShortLink(`${siteSettings.socialLinkedin}?utm_source=resume`, "link") : null,
-    siteSettings.socialTwitter ? getOrCreateShortLink(`${siteSettings.socialTwitter}?utm_source=resume`, "link") : null,
+    siteSettings.socialGithub ? getOrCreateShortLink(`${siteSettings.socialGithub}?utm_source=portfolio&utm_medium=resume`, "link") : null,
+    siteSettings.socialLinkedin ? getOrCreateShortLink(`${siteSettings.socialLinkedin}?utm_source=portfolio&utm_medium=resume`, "link") : null,
+    siteSettings.socialTwitter ? getOrCreateShortLink(`${siteSettings.socialTwitter}?utm_source=portfolio&utm_medium=resume`, "link") : null,
   ]);
 
   const totalDownloads = await prisma.resumeDownload.count();

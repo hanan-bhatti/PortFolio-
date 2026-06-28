@@ -37,12 +37,23 @@ function parseShortLinkMeta(display: string, targetUrl: string) {
   else if (targetUrl.includes("facebook.com")) brand = "facebook";
 
   let placement = "other";
-  const lowerDisplay = display.toLowerCase();
-  if (lowerDisplay.includes("hero")) placement = "hero";
-  else if (lowerDisplay.includes("footer")) placement = "footer";
-  else if (lowerDisplay.includes("contact")) placement = "contact";
-  else if (lowerDisplay.includes("resume")) placement = "resume";
-  else if (lowerDisplay.includes("campaign") || lowerDisplay.includes("email_campaign")) placement = "campaign";
+  try {
+    const url = new URL(targetUrl);
+    const utmMedium = url.searchParams.get("utm_medium");
+    if (utmMedium) {
+      placement = utmMedium;
+    } else {
+      const utmSource = url.searchParams.get("utm_source");
+      if (utmSource) placement = utmSource;
+    }
+  } catch {
+    const lowerDisplay = display.toLowerCase();
+    if (lowerDisplay.includes("hero")) placement = "hero";
+    else if (lowerDisplay.includes("footer")) placement = "footer";
+    else if (lowerDisplay.includes("contact")) placement = "contact";
+    else if (lowerDisplay.includes("resume")) placement = "resume";
+    else if (lowerDisplay.includes("campaign") || lowerDisplay.includes("email_campaign")) placement = "campaign";
+  }
 
   return { brand, placement };
 }

@@ -41,9 +41,9 @@ export default async function HomePage() {
   ]);
 
   const [githubShortCode, linkedinShortCode, twitterShortCode] = await Promise.all([
-    settings.socialGithub ? getOrCreateShortLink(`${settings.socialGithub}?utm_source=hero`, "link") : null,
-    settings.socialLinkedin ? getOrCreateShortLink(`${settings.socialLinkedin}?utm_source=hero`, "link") : null,
-    settings.socialTwitter ? getOrCreateShortLink(`${settings.socialTwitter}?utm_source=hero`, "link") : null,
+    settings.socialGithub ? getOrCreateShortLink(`${settings.socialGithub}?utm_source=portfolio&utm_medium=hero`, "link") : null,
+    settings.socialLinkedin ? getOrCreateShortLink(`${settings.socialLinkedin}?utm_source=portfolio&utm_medium=hero`, "link") : null,
+    settings.socialTwitter ? getOrCreateShortLink(`${settings.socialTwitter}?utm_source=portfolio&utm_medium=hero`, "link") : null,
   ]);
 
   return (
