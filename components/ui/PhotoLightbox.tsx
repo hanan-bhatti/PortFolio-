@@ -79,7 +79,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   
   // Animation/Modal States
   const [showHeart, setShowHeart] = useState(false);
-  const [heartScale, setHeartScale] = useState(1);
+  const [heartKey, setHeartKey] = useState(0);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
@@ -167,21 +167,14 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         handleLike();
       }
       
+      setHeartKey((prev) => prev + 1);
       setShowHeart(true);
-      setHeartScale((prev) => {
-        const nextScale = prev >= 2.2 ? 1.0 : prev + 0.3;
-        if (nextScale >= 2.2) {
-          triggerBurst();
-          return 1.0;
-        }
-        return nextScale;
-      });
+      triggerBurst();
 
       if (heartTimeoutRef.current) clearTimeout(heartTimeoutRef.current);
       heartTimeoutRef.current = setTimeout(() => {
         setShowHeart(false);
-        setHeartScale(1.0);
-      }, 950);
+      }, 800);
     }
     lastTapRef.current = now;
   };
@@ -407,15 +400,12 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           {/* Custom drawing heart that scales */}
           {showHeart && (
             <div 
-              className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none select-none"
-              style={{
-                transform: `scale(${heartScale})`,
-                transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
-              }}
+              key={heartKey}
+              className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none select-none animate-instagram-heart"
             >
               <svg 
                 viewBox="0 0 24 24" 
-                className="w-24 h-24 text-red-500 fill-current drop-shadow-2xl pulse-heart-svg animate-ping"
+                className="w-24 h-24 text-red-500 fill-current drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]"
               >
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
@@ -667,13 +657,34 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
       {/* Animation Styles */}
       <style>{`
-        .pulse-heart-svg {
-          animation: pulseHeartSvg 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        @keyframes instagram-heart-pop {
+          0% {
+            opacity: 0;
+            transform: scale(0);
+          }
+          15% {
+            opacity: 0.9;
+            transform: scale(1.2);
+          }
+          30% {
+            opacity: 0.9;
+            transform: scale(0.9);
+          }
+          45% {
+            opacity: 0.9;
+            transform: scale(1.0);
+          }
+          80% {
+            opacity: 0.9;
+            transform: scale(1.0);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0);
+          }
         }
-        @keyframes pulseHeartSvg {
-          0% { transform: scale(0.6); opacity: 0; }
-          50% { transform: scale(1.1); opacity: 1; }
-          100% { transform: scale(1); opacity: 1; }
+        .animate-instagram-heart {
+          animation: instagram-heart-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         @keyframes particleOut {
           0% {

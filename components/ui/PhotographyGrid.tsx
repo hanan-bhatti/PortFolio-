@@ -43,7 +43,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
   }, [initialPhotos]);
 
   // Double click heart and burst animation states
-  const [heartAnim, setHeartAnim] = useState<{ [photoId: string]: { scale: number; visible: boolean } }>({});
+  const [heartAnim, setHeartAnim] = useState<{ [photoId: string]: { key: number; visible: boolean } }>({});
   const [particles, setParticles] = useState<{ [photoId: string]: { id: number; angle: number; scale: number }[] }>({});
   const lastTapRef = useRef<{ [photoId: string]: number }>({});
   const heartTimeoutRef = useRef<{ [photoId: string]: NodeJS.Timeout }>({});
@@ -219,35 +219,34 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
 
       // Trigger heart anim
       setHeartAnim((prev) => {
-        const current = prev[photoId] || { scale: 1.0, visible: false };
-        const nextScale = current.scale >= 2.2 ? 1.0 : current.scale + 0.3;
-        
-        if (nextScale >= 2.2) {
-          // Burst
-          const newParticles = Array.from({ length: 12 }).map((_, i) => {
-            const angle = (i * 360) / 12 + (Math.random() * 15 - 7.5);
-            return {
-              id: Date.now() + i,
-              scale: Math.random() * 0.4 + 0.4,
-              angle,
-            };
-          });
-          setParticles((p) => ({ ...p, [photoId]: newParticles }));
-          setTimeout(() => {
-            setParticles((p) => ({ ...p, [photoId]: [] }));
-          }, 1000);
-          return { ...prev, [photoId]: { scale: 1.0, visible: true } };
-        }
-        return { ...prev, [photoId]: { scale: nextScale, visible: true } };
+        const current = prev[photoId] || { key: 0, visible: false };
+        return {
+          ...prev,
+          [photoId]: { key: current.key + 1, visible: true },
+        };
       });
+
+      // Burst particles
+      const newParticles = Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i * 360) / 12 + (Math.random() * 15 - 7.5);
+        return {
+          id: Date.now() + i,
+          scale: Math.random() * 0.4 + 0.4,
+          angle,
+        };
+      });
+      setParticles((p) => ({ ...p, [photoId]: newParticles }));
+      setTimeout(() => {
+        setParticles((p) => ({ ...p, [photoId]: [] }));
+      }, 1000);
 
       if (heartTimeoutRef.current[photoId]) clearTimeout(heartTimeoutRef.current[photoId]);
       heartTimeoutRef.current[photoId] = setTimeout(() => {
         setHeartAnim((prev) => ({
           ...prev,
-          [photoId]: { scale: 1.0, visible: false },
+          [photoId]: { key: prev[photoId]?.key || 0, visible: false },
         }));
-      }, 950);
+      }, 800);
     } else {
       // Single click: open lightbox with a delay to allow detecting double click
       const singleClickTimeout = setTimeout(() => {
@@ -273,7 +272,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
       <div className="columns-2 lg:columns-3 gap-4 md:gap-6 [column-fill:_balance] space-y-4 md:space-y-6 w-full relative z-10">
         {photos.map((photo, index) => {
           const isLkd = photo.isLiked;
-          const anim = heartAnim[photo.id] || { scale: 1.0, visible: false };
+          const anim = heartAnim[photo.id] || { key: 0, visible: false };
           const pList = particles[photo.id] || [];
 
           return (
@@ -298,14 +297,11 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                 {/* Double click scaling heart overlay */}
                 {anim.visible && (
                   <div 
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30"
-                    style={{
-                      transform: `scale(${anim.scale})`,
-                      transition: "transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    }}
+                    key={anim.key}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 animate-instagram-heart"
                   >
                     <svg
-                      className="w-20 h-20 text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.7)] fill-current animate-heart-pop"
+                      className="w-20 h-20 text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] fill-current"
                       viewBox="0 0 24 24"
                     >
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -386,6 +382,39 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
           onClose={() => setActiveIndex(null)}
         />
       )}
+      {/* Scoped CSS for springy Instagram double-click heart animations */}
+      <style>{`
+        @keyframes instagram-heart-pop {
+          0% {
+            opacity: 0;
+            transform: scale(0);
+          }
+          15% {
+            opacity: 0.9;
+            transform: scale(1.2);
+          }
+          30% {
+            opacity: 0.9;
+            transform: scale(0.9);
+          }
+          45% {
+            opacity: 0.9;
+            transform: scale(1.0);
+          }
+          80% {
+            opacity: 0.9;
+            transform: scale(1.0);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0);
+          }
+        }
+
+        .animate-instagram-heart {
+          animation: instagram-heart-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+      `}</style>
     </>
   );
 }
