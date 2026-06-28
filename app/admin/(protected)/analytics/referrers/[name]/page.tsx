@@ -3,14 +3,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { 
   LuChevronLeft, 
-  LuLaptop, 
-  LuSmartphone, 
-  LuTablet, 
   LuGlobe, 
-  LuCalendar, 
-  LuClock, 
-  LuEye,
-  LuExternalLink 
+  LuCalendar
 } from "react-icons/lu";
 import {
   SiGoogle,
@@ -58,6 +52,7 @@ import {
   FaFacebook,
   FaGithub
 } from "react-icons/fa6";
+import ReferrerDetailClient from "./ReferrerDetailClient";
 
 const REFERRER_ICONS: Record<string, { icon: any; color: string }> = {
   google: { icon: SiGoogle, color: "#4285F4" },
@@ -124,7 +119,7 @@ export default async function ReferrerDetailPage({ params }: PageProps) {
   const { name } = await params;
   const decodedName = decodeURIComponent(name);
 
-  // Fetch page views attribute to this traffic source
+  // Fetch page views attributed to this traffic source
   const pageViews = await prisma.pageView.findMany({
     where: {
       trafficSource: decodedName.toLowerCase(),
@@ -152,17 +147,6 @@ export default async function ReferrerDetailPage({ params }: PageProps) {
 
   const uniqueVisitors = Array.from(visitorsMap.values());
 
-  // Aggregate page view count by visited pathname
-  const pathnamesMap = new Map<string, number>();
-  pageViews.forEach((pv) => {
-    pathnamesMap.set(pv.path, (pathnamesMap.get(pv.path) || 0) + 1);
-  });
-
-  const topPagesVisited = Array.from(pathnamesMap.entries())
-    .map(([path, count]) => ({ path, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10);
-
   // Date formatting helpers
   const formatDateTime = (date: Date) => {
     return date.toLocaleString("en-US", {
@@ -172,17 +156,6 @@ export default async function ReferrerDetailPage({ params }: PageProps) {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getDeviceIcon = (device: string | null) => {
-    switch (device?.toLowerCase()) {
-      case "mobile":
-        return <LuSmartphone className="w-3.5 h-3.5 text-emerald-400" />;
-      case "tablet":
-        return <LuTablet className="w-3.5 h-3.5 text-amber-400" />;
-      default:
-        return <LuLaptop className="w-3.5 h-3.5 text-sky-400" />;
-    }
   };
 
   const firstSeen = pageViews[pageViews.length - 1]?.timestamp || new Date();
@@ -228,116 +201,37 @@ export default async function ReferrerDetailPage({ params }: PageProps) {
             <span className="text-lg font-bold text-emerald-400">{uniqueVisitors.length}</span>
           </div>
           <div className="border-l border-zinc-800 pl-4 py-1 col-span-2 md:col-span-1">
-            <span className="text-zinc-500 block uppercase mb-1">FIRST DETECTED</span>
+            <span className="text-zinc-500 block uppercase mb-1 flex items-center gap-1">
+              <LuCalendar className="w-3 h-3 text-zinc-500" /> FIRST DETECTED
+            </span>
             <span className="text-zinc-300">{formatDateTime(firstSeen)}</span>
           </div>
           <div className="border-l border-zinc-800 pl-4 py-1 col-span-2 md:col-span-1">
-            <span className="text-zinc-500 block uppercase mb-1">LAST DETECTED</span>
+            <span className="text-zinc-500 block uppercase mb-1 flex items-center gap-1">
+              <LuCalendar className="w-3 h-3 text-zinc-500" /> LAST DETECTED
+            </span>
             <span className="text-zinc-300">{formatDateTime(lastSeen)}</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* LEFT COLUMN: Top pages hit */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none">
-            <h3 className="mb-4 font-syne text-md font-bold text-white tracking-tight flex items-center gap-2">
-              <LuEye className="w-5 h-5 text-sky-400" /> Top Target Pages
-            </h3>
-            <div className="space-y-3">
-              {topPagesVisited.map((page) => (
-                <div key={page.path} className="flex flex-col gap-1 py-2 border-b border-[#262626]/30 last:border-0">
-                  <span className="text-zinc-300 text-xs font-semibold font-mono truncate max-w-full" title={page.path}>
-                    {page.path}
-                  </span>
-                  <div className="flex justify-between items-center text-[11px] text-zinc-500 font-mono">
-                    <span>Views attributed</span>
-                    <span className="text-white font-semibold">{page.count} views</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Visitor details & Raw attribution timeline */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Unique Visitors from this referrer */}
-          <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none">
-            <h2 className="mb-4 font-syne text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <LuGlobe className="w-5 h-5 text-emerald-400" /> Attributed Visitors
-            </h2>
-            <div className="overflow-x-auto scrollbar-none">
-              <table className="w-full text-left font-sans text-xs">
-                <thead>
-                  <tr className="border-b border-[#262626] text-zinc-500 font-mono text-[10px] uppercase">
-                    <th className="pb-3 font-medium">Visitor Profile ID</th>
-                    <th className="pb-3 font-medium">Geo / Location</th>
-                    <th className="pb-3 font-medium">Device Configuration</th>
-                    <th className="pb-3 font-medium text-right">Referral Views</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#262626]/30">
-                  {uniqueVisitors.map((v) => (
-                    <tr key={v.id} className="hover:bg-white/[0.01]">
-                      <td className="py-3 font-medium text-zinc-200">
-                        <Link 
-                          href={`/admin/analytics/visitors/${v.id}`} 
-                          className="font-mono text-zinc-300 hover:text-white transition underline flex items-center gap-1.5"
-                        >
-                          {v.id.substring(0, 12)}... <LuExternalLink className="w-3 h-3" />
-                        </Link>
-                      </td>
-                      <td className="py-3 text-zinc-300">
-                        {v.city && v.country ? `${v.city}, ${v.country}` : v.country || "Unknown"}
-                      </td>
-                      <td className="py-3 text-zinc-400 flex items-center gap-2 capitalize">
-                        {getDeviceIcon(v.device)}
-                        {v.browser || "Browser"}
-                      </td>
-                      <td className="py-3 text-right text-white font-mono font-semibold">{v.pageViewsCount} views</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Raw hits logs */}
-          <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none">
-            <h2 className="mb-4 font-syne text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <LuClock className="w-5 h-5 text-amber-500" /> Recent Referral Log
-            </h2>
-            <div className="overflow-x-auto scrollbar-none">
-              <table className="w-full text-left font-sans text-xs">
-                <thead>
-                  <tr className="border-b border-[#262626] text-zinc-500 font-mono text-[10px] uppercase">
-                    <th className="pb-3 font-medium">Page Visited</th>
-                    <th className="pb-3 font-medium">Full Raw Referrer URL</th>
-                    <th className="pb-3 font-medium text-right">Timestamp</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#262626]/30">
-                  {pageViews.map((pv) => (
-                    <tr key={pv.id} className="hover:bg-white/[0.01]">
-                      <td className="py-3 font-semibold text-zinc-200 font-mono truncate max-w-[200px]" title={pv.path}>
-                        {pv.path}
-                      </td>
-                      <td className="py-3 text-zinc-400 truncate max-w-[280px] font-mono text-[11px]" title={pv.referrer || ""}>
-                        {pv.referrer}
-                      </td>
-                      <td className="py-3 text-right text-zinc-500 font-mono text-[11px]">
-                        {formatDateTime(pv.timestamp)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* INTERACTIVE DATA CLIENT COMPONENT */}
+      <ReferrerDetailClient
+        initialVisitors={uniqueVisitors.map((v) => ({
+          id: v.id,
+          city: v.city,
+          country: v.country,
+          device: v.device,
+          browser: v.browser,
+          pageViewsCount: v.pageViewsCount,
+        }))}
+        initialPageViews={pageViews.map((pv) => ({
+          id: pv.id,
+          path: pv.path,
+          referrer: pv.referrer,
+          timestamp: pv.timestamp.toISOString(),
+        }))}
+      />
     </div>
   );
 }
