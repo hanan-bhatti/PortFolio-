@@ -16,6 +16,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { extractTwitterUsername } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { getOrCreateShortLink } from "@/lib/shortener";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -78,6 +79,17 @@ export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
   const project = await prisma.project.findUnique({ where: { slug } });
   if (!project) notFound();
+
+  const gitShortCode = project.githubUrl
+    ? await getOrCreateShortLink(`${project.githubUrl}?utm_source=project_detail`, "link", undefined, project.id)
+    : null;
+
+  const liveShortCode = project.liveUrl
+    ? await getOrCreateShortLink(`${project.liveUrl}?utm_source=project_detail`, "link", undefined, project.id)
+    : null;
+
+  const trackedGithubUrl = gitShortCode ? `/s/${gitShortCode}` : project.githubUrl;
+  const trackedLiveUrl = liveShortCode ? `/s/${liveShortCode}` : project.liveUrl;
 
   // Fetch all projects to determine previous and next project links
   const allProjects = await prisma.project.findMany({
@@ -153,7 +165,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto self-start md:self-auto">
               {project.liveUrl && (
                 <a
-                  href={project.liveUrl}
+                  href={trackedLiveUrl || undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center font-inter font-semibold text-[14px] border border-amber bg-amber text-black hover:bg-transparent hover:text-white px-6 py-3 transition-colors duration-200 uppercase whitespace-nowrap min-h-[44px] cursor-pointer"
@@ -163,7 +175,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               )}
               {project.githubUrl && (
                 <a
-                  href={project.githubUrl}
+                  href={trackedGithubUrl || undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center font-inter font-semibold text-[14px] text-amber hover:text-white hover:underline px-4 py-3 transition-colors duration-200 uppercase whitespace-nowrap min-h-[44px] cursor-pointer"

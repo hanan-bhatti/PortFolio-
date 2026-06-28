@@ -30,6 +30,7 @@ model Post {
   endSurveyResponses  PostEndSurveyResponse[]
   notifyRequests      PostNotifyRequest[]
   analyticsEvents     PostAnalyticsEvent[]
+  emailCampaigns      EmailCampaign[]
 }
 
 model Project {
@@ -46,6 +47,7 @@ model Project {
   order       Int      @default(0)
   resumeBullets String?  @db.Text
   createdAt   DateTime @default(now())
+  shortLinks  ShortLink[]
 }
 
 model Skill {
@@ -245,6 +247,8 @@ model ShortLink {
   type      String   // "link" | "share"
   postId    String?
   post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 
   clicks    ShortLinkClick[]
@@ -351,8 +355,8 @@ model PostEndSurveyResponse {
 
 model PostNotifyRequest {
   id        String   @id @default(cuid())
-  postId    String   // post they were reading when they signed up
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String?  // post they were reading when they signed up (null for global newsletter)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   email     String
   topic     String?  // optional free text on what topic they want notified about
   confirmed Boolean  @default(false)
@@ -385,4 +389,24 @@ model SiteSearchQuery {
   createdAt DateTime @default(now())
 
   @@index([query])
+}
+
+model EmailCampaign {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  subject   String
+  sentCount Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  opens     EmailOpen[]
+}
+
+model EmailOpen {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  email       String
+  userAgent   String?
+  openedAt    DateTime @default(now())
 }

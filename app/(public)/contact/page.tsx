@@ -70,20 +70,27 @@ function ContactMarquee() {
 export default async function ContactPage() {
   const settings = await getSiteSettings();
 
+  const [githubCode, linkedinCode, twitterCode, emailCode] = await Promise.all([
+    settings.socialGithub ? getOrCreateShortLink(`${settings.socialGithub}?utm_source=contact`, "link") : null,
+    settings.socialLinkedin ? getOrCreateShortLink(`${settings.socialLinkedin}?utm_source=contact`, "link") : null,
+    settings.socialTwitter ? getOrCreateShortLink(`${settings.socialTwitter}?utm_source=contact`, "link") : null,
+    settings.socialEmail ? getOrCreateShortLink(`mailto:${settings.socialEmail}?utm_source=contact`, "link") : null,
+  ]);
+
   const socials: SocialItem[] = [
     settings.socialGithub && {
       label: "GitHub",
-      href: settings.socialGithub,
+      href: githubCode ? `/s/${githubCode}` : settings.socialGithub,
       icon: "github" as const,
     },
     settings.socialLinkedin && {
       label: "LinkedIn",
-      href: settings.socialLinkedin,
+      href: linkedinCode ? `/s/${linkedinCode}` : settings.socialLinkedin,
       icon: "linkedin" as const,
     },
     settings.socialTwitter && {
       label: "Twitter / X",
-      href: settings.socialTwitter,
+      href: twitterCode ? `/s/${twitterCode}` : settings.socialTwitter,
       icon: "twitter" as const,
     },
     settings.socialEmail && {

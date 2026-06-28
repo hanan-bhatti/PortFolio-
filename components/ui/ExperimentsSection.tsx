@@ -8,12 +8,31 @@
 
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { getOrCreateShortLink } from "@/lib/shortener";
 
 export default async function ExperimentsSection() {
-  const projects = await prisma.project.findMany({
+  const rawProjects = await prisma.project.findMany({
     where: { featured: false },
     orderBy: [{ order: "asc" }, { createdAt: "desc" }],
   });
+
+  const projects = await Promise.all(
+    rawProjects.map(async (project) => {
+      const gitShortCode = project.githubUrl
+        ? await getOrCreateShortLink(`${project.githubUrl}?utm_source=homepage_experiments`, "link", undefined, project.id)
+        : null;
+
+      const liveShortCode = project.liveUrl
+        ? await getOrCreateShortLink(`${project.liveUrl}?utm_source=homepage_experiments`, "link", undefined, project.id)
+        : null;
+
+      return {
+        ...project,
+        githubUrl: gitShortCode ? `/s/${gitShortCode}` : project.githubUrl,
+        liveUrl: liveShortCode ? `/s/${liveShortCode}` : project.liveUrl,
+      };
+    })
+  );
 
   if (projects.length === 0) return null;
 
@@ -77,8 +96,8 @@ export default async function ExperimentsSection() {
                     ))}
                   </div>
 
-                  {project.githubUrl && (
-                    <div className="pt-2 border-t border-border/30">
+                  <div className="pt-2 border-t border-border/30 flex justify-between items-center">
+                    {project.githubUrl ? (
                       <a
                         href={project.githubUrl}
                         target="_blank"
@@ -87,8 +106,20 @@ export default async function ExperimentsSection() {
                       >
                         GitHub →
                       </a>
-                    </div>
-                  )}
+                    ) : (
+                      <span />
+                    )}
+                    {project.liveUrl && (
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-inter font-medium text-[12px] text-amber hover:underline transition-colors duration-200"
+                      >
+                        Live Demo →
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             );

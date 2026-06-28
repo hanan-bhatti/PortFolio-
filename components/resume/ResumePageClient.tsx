@@ -280,7 +280,7 @@ export default function ResumePageClient({
                 )}
                 {settings.social_github && (
                   <a 
-                    href={settings.social_github}
+                    href={settings.social_github_link || settings.social_github}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#555555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
@@ -292,7 +292,7 @@ export default function ResumePageClient({
                 )}
                 {settings.social_linkedin && (
                   <a 
-                    href={settings.social_linkedin}
+                    href={settings.social_linkedin_link || settings.social_linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#555555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
@@ -304,7 +304,7 @@ export default function ResumePageClient({
                 )}
                 {settings.social_twitter && (
                   <a 
-                    href={settings.social_twitter}
+                    href={settings.social_twitter_link || settings.social_twitter}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#555555", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}

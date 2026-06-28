@@ -204,6 +204,20 @@ export default function ProjectForm({ project }: { project: ProjectFormData | nu
         </label>
       </div>
 
+      {/* Homepage Display Info Hint */}
+      <div className="border border-zinc-800/60 bg-[#080808] p-3.5 text-[11px] text-zinc-550 space-y-1.5 font-mono">
+        <p className="font-bold text-zinc-400 uppercase tracking-wider text-[9px] mb-1">💡 Homepage Display Info</p>
+        <p>
+          • <span className="text-zinc-300 font-semibold">Featured Toggle [ON]</span>: Project displays in the main featured projects section.
+        </p>
+        <p>
+          • <span className="text-zinc-300 font-semibold">Featured Toggle [OFF]</span>: Project displays in the <span className="text-amber font-semibold">Experiments & Side Builds</span> grid.
+        </p>
+        <p>
+          • <span className="text-zinc-300 font-semibold">Discontinued State</span>: To mark an experiment as discontinued, include the word <span className="text-green font-semibold">&quot;discontinued&quot;</span> (case-insensitive) anywhere in the description or long description.
+        </p>
+      </div>
+
       <button type="submit" disabled={isPending} className="border border-amber bg-amber px-6 py-2.5 text-xs font-bold font-mono uppercase tracking-widest text-black hover:bg-amber/90 disabled:opacity-50 transition-all cursor-pointer">
         {isPending ? "Saving..." : project ? "Update Project" : "Create Project"}
       </button>

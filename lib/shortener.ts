@@ -10,43 +10,63 @@
 import { prisma } from "@/lib/prisma";
 import { generateShortCode } from "@/lib/utils";
 
+const pendingShortLinks = new Map<string, Promise<string>>();
+
 export async function getOrCreateShortLink(
   targetUrl: string,
   type: "link" | "share",
-  postId?: string
+  postId?: string,
+  projectId?: string
 ): Promise<string> {
-  const existing = await prisma.shortLink.findFirst({
-    where: {
-      targetUrl,
-      type,
-      postId: postId || null,
-    },
-  });
-
-  if (existing) {
-    return existing.code;
+  const key = `${targetUrl}:${type}:${postId || ""}:${projectId || ""}`;
+  
+  if (pendingShortLinks.has(key)) {
+    return pendingShortLinks.get(key)!;
   }
 
-  // Generate a unique code
-  let code = generateShortCode();
-  let attempts = 0;
-  while (attempts < 10) {
-    const conflict = await prisma.shortLink.findUnique({ where: { code } });
-    if (!conflict) break;
-    code = generateShortCode();
-    attempts++;
-  }
+  const promise = (async () => {
+    try {
+      const existing = await prisma.shortLink.findFirst({
+        where: {
+          targetUrl,
+          type,
+          postId: postId || null,
+          projectId: projectId || null,
+        },
+      });
 
-  const created = await prisma.shortLink.create({
-    data: {
-      code,
-      targetUrl,
-      type,
-      postId: postId || null,
-    },
-  });
+      if (existing) {
+        return existing.code;
+      }
 
-  return created.code;
+      // Generate a unique code
+      let code = generateShortCode();
+      let attempts = 0;
+      while (attempts < 10) {
+        const conflict = await prisma.shortLink.findUnique({ where: { code } });
+        if (!conflict) break;
+        code = generateShortCode();
+        attempts++;
+      }
+
+      const created = await prisma.shortLink.create({
+        data: {
+          code,
+          targetUrl,
+          type,
+          postId: postId || null,
+          projectId: projectId || null,
+        },
+      });
+
+      return created.code;
+    } finally {
+      pendingShortLinks.delete(key);
+    }
+  })();
+
+  pendingShortLinks.set(key, promise);
+  return promise;
 }
 
 export async function shortenPostHtml(html: string, postId: string): Promise<string> {

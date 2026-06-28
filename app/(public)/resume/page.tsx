@@ -15,6 +15,7 @@ import { getSiteSettings } from "@/lib/settings";
 import ResumePageClient from "@/components/resume/ResumePageClient";
 import type { Metadata } from "next";
 import { extractTwitterUsername } from "@/lib/utils";
+import { getOrCreateShortLink } from "@/lib/shortener";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +78,12 @@ export default async function ResumePage() {
     notFound();
   }
 
+  const [githubCode, linkedinCode, twitterCode] = await Promise.all([
+    siteSettings.socialGithub ? getOrCreateShortLink(`${siteSettings.socialGithub}?utm_source=resume`, "link") : null,
+    siteSettings.socialLinkedin ? getOrCreateShortLink(`${siteSettings.socialLinkedin}?utm_source=resume`, "link") : null,
+    siteSettings.socialTwitter ? getOrCreateShortLink(`${siteSettings.socialTwitter}?utm_source=resume`, "link") : null,
+  ]);
+
   const totalDownloads = await prisma.resumeDownload.count();
 
   return (
@@ -86,6 +93,9 @@ export default async function ResumePage() {
         social_github: siteSettings.socialGithub || "",
         social_linkedin: siteSettings.socialLinkedin || "",
         social_twitter: siteSettings.socialTwitter || "",
+        social_github_link: githubCode ? `/s/${githubCode}` : "",
+        social_linkedin_link: linkedinCode ? `/s/${linkedinCode}` : "",
+        social_twitter_link: twitterCode ? `/s/${twitterCode}` : "",
       }}
       education={education}
       certifications={certifications}

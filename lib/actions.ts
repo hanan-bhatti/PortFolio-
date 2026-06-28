@@ -33,6 +33,7 @@ import {
 } from "@/lib/validations";
 import { verifyTOTP } from "@/lib/twofactor";
 import { sendEmail } from "@/lib/email";
+import { getOrCreateShortLink } from "@/lib/shortener";
 import { hash, compare } from "bcryptjs";
 import crypto from "crypto";
 
@@ -433,4 +434,102 @@ export async function deleteThreadAction(email: string): Promise<ActionResult> {
   revalidatePath("/admin/messages");
   revalidatePath("/admin/dashboard");
   return {};
+}
+
+export async function dispatchCampaignAction(postId: string, subject: string): Promise<ActionResult> {
+  await requireAdmin();
+
+  if (!postId || !subject) {
+    return { error: "Post ID and Subject are required." };
+  }
+
+  try {
+    const post = await prisma.post.findUnique({ where: { id: postId } });
+    if (!post) {
+      return { error: "Post not found." };
+    }
+
+    // Get all unique subscribers
+    const subscribers = await prisma.postNotifyRequest.findMany({
+      select: { id: true, email: true },
+      distinct: ["email"],
+    });
+
+    if (subscribers.length === 0) {
+      return { error: "No subscribers found." };
+    }
+
+    // Create Campaign
+    const campaign = await prisma.emailCampaign.create({
+      data: {
+        postId,
+        subject,
+        sentCount: subscribers.length,
+      },
+    });
+
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://hanan-bhatti.site").replace(/\/$/, "");
+
+    // Generate unique read more tracking link for this campaign
+    const campaignLinkCode = await getOrCreateShortLink(
+      `${siteUrl}/blog/${post.slug}?utm_source=email_campaign&utm_medium=email&utm_campaign=${campaign.id}`,
+      "link"
+    );
+    const readMoreUrl = `${siteUrl}/s/${campaignLinkCode}`;
+
+    // Sender from environment variable requested
+    const fromSender = process.env.BLOG_EMAIL_FROM || "Portfolio <marketing@hanan-bhatti.site>";
+
+    // Send emails in parallel
+    await Promise.all(
+      subscribers.map(async (sub) => {
+        const trackingPixel = `<img src="${siteUrl}/api/newsletter/track/open?c=${campaign.id}&e=${encodeURIComponent(sub.email)}" width="1" height="1" style="display:none;" />`;
+        
+        const htmlBody = `
+          <div style="background-color: #0c0c0c; color: #ffffff; font-family: sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; border: 1px solid #262626;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h2 style="font-weight: 800; letter-spacing: 0.1em; color: #F59E0B; margin: 0; font-family: 'Syne', sans-serif;">NEW BLOG POST</h2>
+            </div>
+            ${post.coverImage ? `<div style="margin-bottom: 25px; border: 1px solid #262626; overflow: hidden;"><img src="${post.coverImage}" alt="${post.title}" style="width: 100%; height: auto; display: block;" /></div>` : ''}
+            <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #ffffff;">${post.title}</h1>
+            ${post.subtitle ? `<h3 style="font-size: 16px; font-weight: normal; color: #a1a1aa; margin-top: 0; margin-bottom: 20px;">${post.subtitle}</h3>` : ''}
+            <p style="font-size: 14px; line-height: 1.6; color: #a1a1aa; margin-bottom: 30px;">${post.excerpt || 'Read the latest post on my portfolio.'}</p>
+            <div style="text-align: center; margin-bottom: 40px;">
+              <a href="${readMoreUrl}" style="display: inline-block; background-color: #F59E0B; color: #000000; text-decoration: none; padding: 12px 30px; font-weight: bold; font-size: 13px; letter-spacing: 0.1em; border: 1px solid #F59E0B;">READ MORE →</a>
+            </div>
+            <div style="border-top: 1px solid #262626; padding-top: 20px; text-align: center; font-size: 11px; color: #71717a;">
+              <p>You received this because you subscribed to updates on my portfolio site.</p>
+              <p>&copy; ${new Date().getFullYear()} Hanan Bhatti. All rights reserved.</p>
+            </div>
+            ${trackingPixel}
+          </div>
+        `;
+
+        await sendEmail({
+          to: sub.email,
+          from: fromSender,
+          subject: subject,
+          text: `New post: ${post.title}. Read it here: ${readMoreUrl}`,
+          html: htmlBody,
+        });
+      })
+    );
+
+    revalidatePath("/admin/newsletter");
+    return { id: campaign.id };
+  } catch (error: any) {
+    console.error("Failed to dispatch email campaign:", error);
+    return { error: error.message || "An unexpected error occurred." };
+  }
+}
+
+export async function deleteSubscriberAction(id: string): Promise<ActionResult> {
+  await requireAdmin();
+  try {
+    await prisma.postNotifyRequest.delete({ where: { id } });
+    revalidatePath("/admin/newsletter");
+    return {};
+  } catch (error: any) {
+    return { error: error.message };
+  }
 }

@@ -19,6 +19,7 @@ import SelectedWork from "@/components/ui/SelectedWork";
 import GithubActivity from "@/components/ui/GithubActivity";
 import ExperimentsSection from "@/components/ui/ExperimentsSection";
 import WritingSection from "@/components/ui/WritingSection";
+import { getOrCreateShortLink } from "@/lib/shortener";
 
 export const dynamic = "force-dynamic";
 
@@ -39,15 +40,21 @@ export default async function HomePage() {
     }),
   ]);
 
+  const [githubShortCode, linkedinShortCode, twitterShortCode] = await Promise.all([
+    settings.socialGithub ? getOrCreateShortLink(`${settings.socialGithub}?utm_source=hero`, "link") : null,
+    settings.socialLinkedin ? getOrCreateShortLink(`${settings.socialLinkedin}?utm_source=hero`, "link") : null,
+    settings.socialTwitter ? getOrCreateShortLink(`${settings.socialTwitter}?utm_source=hero`, "link") : null,
+  ]);
+
   return (
     <>
       <HeroSection
         siteName={settings.siteName}
         heroPhotoUrl={settings.heroPhotoUrl}
         heroTagline={settings.heroTagline}
-        socialGithub={settings.socialGithub}
-        socialLinkedin={settings.socialLinkedin}
-        socialTwitter={settings.socialTwitter}
+        socialGithub={githubShortCode ? `/s/${githubShortCode}` : ""}
+        socialLinkedin={linkedinShortCode ? `/s/${linkedinShortCode}` : ""}
+        socialTwitter={twitterShortCode ? `/s/${twitterShortCode}` : ""}
       />
       <ScrollingMarquee skills={settings.marqueeSkills} />
       <StatsBar
@@ -62,6 +69,7 @@ export default async function HomePage() {
       <GithubActivity
         socialGithub={settings.socialGithub}
         statsCommits={settings.statsCommits}
+        socialGithubLink={githubShortCode ? `/s/${githubShortCode}` : ""}
       />
       <ExperimentsSection />
       <WritingSection />

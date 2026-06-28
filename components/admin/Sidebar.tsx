@@ -30,6 +30,7 @@ import {
   FiMenu,
   FiX,
   FiTrendingUp,
+  FiSend,
 } from "react-icons/fi";
 
 interface SidebarItem {
@@ -60,6 +61,7 @@ const SECTIONS: SidebarSection[] = [
       { href: "/admin/posts", label: "Posts", icon: FiEdit3 },
       { href: "/admin/projects", label: "Projects", icon: FiFolder },
       { href: "/admin/photography", label: "Photography", icon: FiCamera },
+      { href: "/admin/newsletter", label: "Newsletter", icon: FiSend },
     ],
   },
   {

@@ -11,6 +11,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { SiGithub, SiX, SiGmail } from "react-icons/si";
+import { getOrCreateShortLink } from "@/lib/shortener";
+import NewsletterForm from "./NewsletterForm";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +50,15 @@ export default async function Footer() {
   const aboutHeroTagline = map.get("about_hero_tagline") || "";
   const photographyEnabled = map.get("photography_enabled") === "true";
   const resumeEnabled = resumeMap.get("resume_enabled") !== "false"; // default true
+  const footerLocation = map.get("footerLocation") || "Lahore, Pakistan";
+  const footerTimezone = map.get("footerTimezone") || "GMT+5 · Usually awake at 2am";
+
+  const [githubCode, linkedinCode, twitterCode, emailCode] = await Promise.all([
+    githubUrl ? getOrCreateShortLink(`${githubUrl}?utm_source=footer`, "link") : null,
+    linkedinUrl ? getOrCreateShortLink(`${linkedinUrl}?utm_source=footer`, "link") : null,
+    twitterUrl ? getOrCreateShortLink(`${twitterUrl}?utm_source=footer`, "link") : null,
+    publicEmail ? getOrCreateShortLink(`mailto:${publicEmail}?utm_source=footer`, "link") : null,
+  ]);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -62,22 +73,22 @@ export default async function Footer() {
   const socialLinks = [
     githubUrl && {
       label: "GitHub",
-      href: githubUrl,
+      href: githubCode ? `/s/${githubCode}` : githubUrl,
       icon: <SiGithub />,
     },
     linkedinUrl && {
       label: "LinkedIn",
-      href: linkedinUrl,
+      href: linkedinCode ? `/s/${linkedinCode}` : linkedinUrl,
       icon: <SiLinkedin />,
     },
     twitterUrl && {
       label: "Twitter / X",
-      href: twitterUrl,
+      href: twitterCode ? `/s/${twitterCode}` : twitterUrl,
       icon: <SiX />,
     },
     publicEmail && {
       label: "Email",
-      href: `mailto:${publicEmail}`,
+      href: emailCode ? `/s/${emailCode}` : `mailto:${publicEmail}`,
       icon: <SiGmail />,
     },
   ].filter(Boolean) as { label: string; href: string; icon: React.ReactNode }[];
@@ -147,6 +158,24 @@ export default async function Footer() {
             }} />
             AVAILABLE FOR WORK
           </span>
+
+          {/* Newsletter Section */}
+          <div style={{ marginTop: "2rem", width: "100%", maxWidth: "280px" }}>
+            <p
+              style={{
+                fontFamily: "Inter, sans-serif",
+                fontWeight: 600,
+                fontSize: "10px",
+                letterSpacing: "0.2em",
+                color: "var(--text-muted)",
+                marginBottom: "0.75rem",
+                textTransform: "uppercase",
+              }}
+            >
+              SUBSCRIBE
+            </p>
+            <NewsletterForm />
+          </div>
         </div>
 
         {/* MIDDLE COLUMN */}
@@ -242,7 +271,7 @@ export default async function Footer() {
                 color: "rgba(255,255,255,0.25)",
               }}
             >
-              📍 Lahore, Pakistan
+              📍 {footerLocation}
             </p>
             <p
               style={{
@@ -253,7 +282,7 @@ export default async function Footer() {
                 marginTop: "2px",
               }}
             >
-              GMT+5 · Usually awake at 2am
+              {footerTimezone}
             </p>
           </div>
         </div>

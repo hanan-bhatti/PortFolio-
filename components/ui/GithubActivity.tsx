@@ -13,6 +13,7 @@ import React, { useState } from "react";
 interface GithubActivityProps {
   socialGithub: string;
   statsCommits: string;
+  socialGithubLink?: string;
 }
 
 interface GithubCardProps {
@@ -42,14 +43,14 @@ function GithubCard({ src, alt }: GithubCardProps) {
   );
 }
 
-export default function GithubActivity({ socialGithub, statsCommits }: GithubActivityProps) {
+export default function GithubActivity({ socialGithub, statsCommits, socialGithubLink }: GithubActivityProps) {
   // Extract username from socialGithub URL (e.g. "https://github.com/Hanan-Bhatti" -> "Hanan-Bhatti")
   // If the setting is empty, fallback to the default "Hanan-Bhatti"
   const githubUsername = socialGithub
     ? socialGithub.replace(/\/$/, "").split("/").pop() || "Hanan-Bhatti"
     : "Hanan-Bhatti";
 
-  const githubUrl = socialGithub || `https://github.com/${githubUsername}`;
+  const githubUrl = socialGithubLink || socialGithub || `https://github.com/${githubUsername}`;
 
   const card1Url = `https://github-readme-stats.vercel.app/api?username=${githubUsername}&show_icons=true&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&icon_color=16A34A&text_color=6B7280&ring_color=F59E0B&include_all_commits=true&count_private=true`;
   const card2Url = `https://github-readme-stats.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&text_color=6B7280&langs_count=8`;

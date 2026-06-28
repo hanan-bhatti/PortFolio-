@@ -99,6 +99,8 @@ export const settingsSchema = z.object({
   photography_description: z.string().max(500),
   analytics_enabled: z.string(),
   cookie_consent_text: z.string().max(2000, "Cookie consent text must not exceed 2000 characters"),
+  footerLocation: z.string().max(200).or(z.literal("")),
+  footerTimezone: z.string().max(200).or(z.literal("")),
 });
 export type SettingsInput = z.infer<typeof settingsSchema>;
 

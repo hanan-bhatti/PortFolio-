@@ -32,6 +32,8 @@ const DEFAULTS: SettingsInput = {
   photography_description: "Moments captured on budget devices.",
   analytics_enabled: "true",
   cookie_consent_text: "We use cookies to analyze site traffic and improve your experience. Your data stays on our servers — no third parties.",
+  footerLocation: "Lahore, Pakistan",
+  footerTimezone: "GMT+5 · Usually awake at 2am",
 };
 
 const ABOUT_DEFAULTS: AboutInput = {
@@ -70,6 +72,8 @@ export const getSiteSettings = unstable_cache(
       photography_description: map.get("photography_description") ?? DEFAULTS.photography_description,
       analytics_enabled: map.get("analytics_enabled") ?? DEFAULTS.analytics_enabled,
       cookie_consent_text: map.get("cookie_consent_text") ?? DEFAULTS.cookie_consent_text,
+      footerLocation: map.get("footerLocation") ?? DEFAULTS.footerLocation,
+      footerTimezone: map.get("footerTimezone") ?? DEFAULTS.footerTimezone,
     };
   },
   ["site-settings-cache"],

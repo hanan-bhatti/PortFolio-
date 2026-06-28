@@ -52,6 +52,8 @@ const GENERAL_FIELDS: Array<{ name: keyof SettingsInput; label: string; placehol
   { name: "siteName", label: "Site Name", placeholder: "Hanan Bhatti" },
   { name: "tagline", label: "Tagline", placeholder: "Full-Stack Developer" },
   { name: "socialEmail", label: "Public Email", placeholder: "you@example.com" },
+  { name: "footerLocation", label: "Footer Location", placeholder: "Lahore, Pakistan" },
+  { name: "footerTimezone", label: "Footer Timezone / Awake Info", placeholder: "GMT+5 · Usually awake at 2am" },
 ];
 
 const HERO_FIELDS: Array<{ name: keyof SettingsInput; label: string; placeholder: string; textarea?: boolean }> = [

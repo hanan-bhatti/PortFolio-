@@ -75,13 +75,84 @@ export default async function AnalyticsInteractionsPage() {
     };
   });
 
-  // Global short links not associated with a specific post (if any exist)
+  // Global short links not associated with a specific post or project
   const orphanShortLinks = await prisma.shortLink.findMany({
-    where: { postId: null },
+    where: { postId: null, projectId: null },
     include: { clicks: true },
   });
 
   const orphanClicks = orphanShortLinks.reduce((sum, l) => sum + l.clicks.length, 0);
+
+  // Grouped project clicks
+  const projectsWithClicks = await prisma.project.findMany({
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      createdAt: true,
+      shortLinks: {
+        select: {
+          id: true,
+          targetUrl: true,
+          clicks: { select: { createdAt: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const projectsStats = projectsWithClicks.map((proj) => {
+    let githubTotal = 0;
+    let liveTotal = 0;
+    
+    const sourceBreakdown: Record<string, number> = {
+      homepage_experiments: 0,
+      projects_list: 0,
+      project_detail: 0,
+    };
+
+    proj.shortLinks.forEach((link) => {
+      const isGithub = link.targetUrl.toLowerCase().includes("github.com");
+      const isLive = !isGithub;
+      const clicksCount = link.clicks.length;
+
+      if (isGithub) githubTotal += clicksCount;
+      if (isLive) liveTotal += clicksCount;
+
+      let source = "other";
+      try {
+        const url = new URL(link.targetUrl);
+        const utmSource = url.searchParams.get("utm_source");
+        if (utmSource) source = utmSource;
+      } catch {
+        if (link.targetUrl.includes("utm_source=")) {
+          const match = link.targetUrl.match(/utm_source=([^&]+)/);
+          if (match && match[1]) source = match[1];
+        }
+      }
+
+      if (source in sourceBreakdown) {
+        sourceBreakdown[source] += clicksCount;
+      } else {
+        sourceBreakdown[source] = (sourceBreakdown[source] || 0) + clicksCount;
+      }
+    });
+
+    const totalClicks = githubTotal + liveTotal;
+    const clickTimes = proj.shortLinks.flatMap((l) => l.clicks.map((c) => c.createdAt.getTime()));
+    const lastActivity = clickTimes.length > 0 ? new Date(Math.max(...clickTimes)) : null;
+
+    return {
+      id: proj.id,
+      title: proj.title,
+      slug: proj.slug,
+      githubTotal,
+      liveTotal,
+      totalClicks,
+      sourceBreakdown,
+      lastActivity,
+    };
+  });
 
   // Sorting for top performing posts chart (max 5)
   const topPosts = [...postsWithStats]
@@ -323,17 +394,118 @@ export default async function AnalyticsInteractionsPage() {
                   </td>
                 </tr>
               ))}
-              {orphanClicks > 0 && (
-                <tr className="text-zinc-300 hover:bg-white/[0.01] bg-black/10">
-                  <td className="py-3.5 font-bold text-zinc-450 italic">Global / Short links (Not tied to post)</td>
-                  <td className="py-3.5 text-zinc-400">{orphanClicks}</td>
-                  <td className="py-3.5 text-zinc-400">0</td>
-                  <td className="py-3.5 text-zinc-400">0</td>
-                  <td className="py-3.5 font-bold text-amber">{orphanClicks}</td>
-                  <td className="py-3.5 text-zinc-500">—</td>
-                  <td className="py-3.5 text-right">—</td>
+              {orphanShortLinks.map((link) => {
+                let sourceLabel = "";
+                let baseTargetUrl = link.targetUrl;
+                try {
+                  const url = new URL(link.targetUrl);
+                  const utmSource = url.searchParams.get("utm_source");
+                  if (utmSource) {
+                    sourceLabel = ` (${utmSource.charAt(0).toUpperCase() + utmSource.slice(1)})`;
+                  }
+                  if (url.protocol === "mailto:") {
+                    baseTargetUrl = `mailto:${url.pathname}`;
+                  } else {
+                    baseTargetUrl = url.origin + url.pathname;
+                  }
+                } catch {
+                  if (link.targetUrl.includes("utm_source=")) {
+                    const match = link.targetUrl.match(/utm_source=([^&]+)/);
+                    if (match && match[1]) {
+                      sourceLabel = ` (${match[1].charAt(0).toUpperCase() + match[1].slice(1)})`;
+                    }
+                    baseTargetUrl = link.targetUrl.split("?")[0];
+                  }
+                }
+
+                const targetDisplay = baseTargetUrl.includes("github.com")
+                  ? `GitHub Profile${sourceLabel}`
+                  : baseTargetUrl.includes("linkedin.com")
+                  ? `LinkedIn Profile${sourceLabel}`
+                  : baseTargetUrl.includes("twitter.com") || baseTargetUrl.includes("x.com")
+                  ? `Twitter / X Profile${sourceLabel}`
+                  : baseTargetUrl.includes("mailto:")
+                  ? `Email Link (${baseTargetUrl.replace("mailto:", "").split("?")[0]})${sourceLabel}`
+                  : `${baseTargetUrl}${sourceLabel}`;
+
+                const lastClickTime = link.clicks.length > 0
+                  ? new Date(Math.max(...link.clicks.map((c) => c.createdAt.getTime())))
+                  : null;
+
+                return (
+                  <tr key={link.id} className="text-zinc-300 hover:bg-white/[0.01] bg-black/10">
+                    <td className="py-3.5 max-w-[280px] truncate font-bold text-zinc-400">
+                      <div>{targetDisplay}</div>
+                      <div className="text-[10px] text-zinc-500 font-normal mt-0.5">/s/{link.code}</div>
+                    </td>
+                    <td className="py-3.5 text-zinc-400">{link.clicks.length}</td>
+                    <td className="py-3.5 text-zinc-500">—</td>
+                    <td className="py-3.5 text-zinc-500">—</td>
+                    <td className="py-3.5 font-bold text-amber">{link.clicks.length}</td>
+                    <td className="py-3.5 text-zinc-500">
+                      {lastClickTime ? formatDate(lastClickTime) : "—"}
+                    </td>
+                    <td className="py-3.5 text-right">
+                      <a
+                        href={link.targetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer inline-block"
+                      >
+                        VISIT LINK →
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Project-wise Grouped Table */}
+      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+        <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
+          Project Link Clicks Summary
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left font-mono text-xs">
+            <thead>
+              <tr className="border-b border-[#262626] text-zinc-500">
+                <th className="pb-3 font-bold uppercase tracking-wider">Project</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">GitHub Clicks</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Live Clicks</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Source Breakdown</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Total</th>
+                <th className="pb-3 font-bold uppercase tracking-wider">Last Click</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#1e1e1e]">
+              {projectsStats.map((proj) => (
+                <tr key={proj.id} className="text-zinc-300 hover:bg-white/[0.01]">
+                  <td className="py-3.5 font-bold text-white">
+                    {proj.title}
+                  </td>
+                  <td className="py-3.5 text-zinc-400">{proj.githubTotal}</td>
+                  <td className="py-3.5 text-zinc-400">{proj.liveTotal}</td>
+                  <td className="py-3.5 text-[10px] text-zinc-500">
+                    <span className="text-zinc-400">Home:</span> {proj.sourceBreakdown.homepage_experiments} |{" "}
+                    <span className="text-zinc-400">List:</span> {proj.sourceBreakdown.projects_list} |{" "}
+                    <span className="text-zinc-400">Detail:</span> {proj.sourceBreakdown.project_detail}
+                  </td>
+                  <td className="py-3.5 font-bold text-amber">{proj.totalClicks}</td>
+                  <td className="py-3.5 text-zinc-500">
+                    {proj.lastActivity ? formatDate(proj.lastActivity) : "—"}
+                  </td>
                 </tr>
-              )}
+              ))}
+              {projectsStats.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-zinc-550 uppercase">
+                    No projects found
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>

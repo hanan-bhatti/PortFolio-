@@ -11,6 +11,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import ProjectsGrid from "@/components/ui/ProjectsGrid";
+import { getOrCreateShortLink } from "@/lib/shortener";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,26 @@ export const metadata: Metadata = {
 
 export default async function ProjectsPage() {
   const projects = await prisma.project.findMany({ orderBy: [{ order: "asc" }, { createdAt: "desc" }] });
+
+  const projectsWithShortLinks = await Promise.all(
+    projects.map(async (p) => {
+      const gitShortCode = p.githubUrl
+        ? await getOrCreateShortLink(`${p.githubUrl}?utm_source=projects_list`, "link", undefined, p.id)
+        : null;
+      const liveShortCode = p.liveUrl
+        ? await getOrCreateShortLink(`${p.liveUrl}?utm_source=projects_list`, "link", undefined, p.id)
+        : null;
+      return {
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        techStack: p.techStack,
+        coverImage: p.coverImage,
+        githubUrl: gitShortCode ? `/s/${gitShortCode}` : p.githubUrl,
+        liveUrl: liveShortCode ? `/s/${liveShortCode}` : p.liveUrl,
+      };
+    })
+  );
 
   return (
     <div
@@ -52,17 +73,7 @@ export default async function ProjectsPage() {
             {"Things I've built — from full-stack apps to small experiments."}
           </p>
         </div>
-        <ProjectsGrid
-          projects={projects.map((p) => ({
-            slug: p.slug,
-            title: p.title,
-            description: p.description,
-            techStack: p.techStack,
-            coverImage: p.coverImage,
-            liveUrl: p.liveUrl,
-            githubUrl: p.githubUrl,
-          }))}
-        />
+        <ProjectsGrid projects={projectsWithShortLinks} />
       </div>
     </div>
   );

@@ -15,17 +15,18 @@ export interface SendEmailOptions {
   text: string;
   html?: string;
   replyTo?: string;
+  from?: string;
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.CONTACT_EMAIL_FROM || "onboarding@resend.dev";
+  const fromAddress = options.from || process.env.CONTACT_EMAIL_FROM || "onboarding@resend.dev";
   
   if (apiKey) {
     try {
       const resend = new Resend(apiKey);
       await resend.emails.send({
-        from,
+        from: fromAddress,
         to: options.to,
         replyTo: options.replyTo,
         subject: options.subject,
@@ -40,7 +41,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<boolean> {
 
   // Fallback / Development logging
   console.log("=== MOCK EMAIL SENT ===");
-  console.log(`From:    ${from}`);
+  console.log(`From:    ${fromAddress}`);
   console.log(`To:      ${options.to}`);
   console.log(`Subject: ${options.subject}`);
   console.log(`Text:    ${options.text}`);
