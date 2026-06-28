@@ -13,6 +13,39 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
+import {
+  LuGlobe,
+  LuMegaphone
+} from "react-icons/lu";
+import {
+  FaLinkedin,
+  FaGithub,
+  FaTwitter,
+  FaFacebook,
+  FaInstagram,
+  FaGoogle
+} from "react-icons/fa6";
+import { classifyReferrer } from "@/lib/classify-referrer";
+
+function getReferrerBrandIcon(source: string) {
+  switch (source) {
+    case "linkedin":
+      return <FaLinkedin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#0A66C2" }} />;
+    case "github":
+      return <FaGithub className="w-3.5 h-3.5 flex-shrink-0 text-white" />;
+    case "twitter":
+    case "x":
+      return <FaTwitter className="w-3.5 h-3.5 flex-shrink-0 text-sky-400" />;
+    case "facebook":
+      return <FaFacebook className="w-3.5 h-3.5 flex-shrink-0 text-blue-500" />;
+    case "instagram":
+      return <FaInstagram className="w-3.5 h-3.5 flex-shrink-0 text-pink-500" />;
+    case "google":
+      return <FaGoogle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" style={{ color: "#EA4335" }} />;
+    default:
+      return <LuGlobe className="w-3.5 h-3.5 flex-shrink-0 text-zinc-500" />;
+  }
+}
 
 interface TocHeading {
   id: string;
@@ -77,7 +110,7 @@ interface Props {
       }
     >;
     toc: TocHeading[];
-    topCopiedBlocks: { blockId: string; count: number }[];
+    topCopiedBlocks: { blockId: string; codeBlock?: string; count: number }[];
     traffic: {
       referrers: { name: string; count: number }[];
       utm: {
@@ -505,14 +538,21 @@ export default function PostEngagementDrilldownClient({
                 {metrics.topCopiedBlocks.map((block) => (
                   <div
                     key={block.blockId}
-                    className="border border-[#262626] bg-[#080808] px-3.5 py-3 flex justify-between items-center rounded-none"
+                    className="border border-[#262626] bg-[#080808] px-3.5 py-3 space-y-2 rounded-none"
                   >
-                    <span className="text-zinc-400 font-bold max-w-[65%] truncate" title={block.blockId}>
-                      {block.blockId}
-                    </span>
-                    <span className="px-2 py-0.5 border border-amber/25 bg-amber/5 text-amber text-[10px] font-bold">
-                      {block.count} copies
-                    </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 font-bold max-w-[65%] truncate text-[10px] uppercase font-mono" title={block.blockId}>
+                        {block.blockId}
+                      </span>
+                      <span className="px-2 py-0.5 border border-amber/25 bg-amber/5 text-amber text-[10px] font-bold shrink-0">
+                        {block.count} copies
+                      </span>
+                    </div>
+                    {block.codeBlock && (
+                      <pre className="p-2.5 border border-zinc-900 bg-black/40 text-zinc-300 overflow-x-auto text-[10px] font-mono whitespace-pre max-h-[100px] max-w-full rounded-none">
+                        <code>{block.codeBlock}</code>
+                      </pre>
+                    )}
                   </div>
                 ))}
               </div>
@@ -538,14 +578,22 @@ export default function PostEngagementDrilldownClient({
                 <span className="font-mono text-xs text-zinc-600 italic">No referrers logged</span>
               ) : (
                 <div className="border border-[#262626] bg-[#080808] font-mono text-xs divide-y divide-[#262626]/30 max-h-[220px] overflow-y-auto">
-                  {metrics.traffic.referrers.map((ref) => (
-                    <div key={ref.name} className="px-4 py-2.5 flex justify-between">
-                      <span className="text-zinc-300 truncate pr-4" title={ref.name}>
-                        {ref.name}
-                      </span>
-                      <span className="text-zinc-550 font-bold shrink-0">{ref.count}</span>
-                    </div>
-                  ))}
+                  {metrics.traffic.referrers.map((ref) => {
+                    const classification = classifyReferrer(ref.name);
+                    const displayName = classification.label || ref.name;
+                    return (
+                      <div key={ref.name} className="px-4 py-2.5 flex justify-between items-center hover:bg-white/[0.01]">
+                        <span className="text-zinc-300 truncate pr-4 flex items-center gap-2" title={ref.name}>
+                          {getReferrerBrandIcon(classification.source)}
+                          <span className="font-sans font-bold text-white">{displayName}</span>
+                          {displayName.toLowerCase() !== ref.name.toLowerCase() && (
+                            <span className="text-[10px] text-zinc-550 font-mono font-normal">({ref.name})</span>
+                          )}
+                        </span>
+                        <span className="text-zinc-550 font-bold shrink-0">{ref.count}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -560,9 +608,10 @@ export default function PostEngagementDrilldownClient({
               ) : (
                 <div className="border border-[#262626] bg-[#080808] font-mono text-xs divide-y divide-[#262626]/30 max-h-[220px] overflow-y-auto">
                   {metrics.traffic.utm.campaigns.map((utm) => (
-                    <div key={utm.name} className="px-4 py-2.5 flex justify-between">
-                      <span className="text-zinc-300 truncate pr-4" title={utm.name}>
-                        {utm.name}
+                    <div key={utm.name} className="px-4 py-2.5 flex justify-between items-center hover:bg-white/[0.01]">
+                      <span className="text-zinc-300 truncate pr-4 flex items-center gap-2" title={utm.name}>
+                        <LuMegaphone className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+                        <span className="font-sans font-bold text-white">{utm.name}</span>
                       </span>
                       <span className="text-zinc-550 font-bold shrink-0">{utm.count}</span>
                     </div>

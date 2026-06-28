@@ -120,10 +120,11 @@ export default async function AdminPostEngagementPage({ params }: Props) {
   const uniqueInteractedSet = new Set<string>();
   
   // Get unique visitor IDs who completed reactions, helpful votes, or ratings
-  const [dbReactions, dbVotes, dbRatings] = await Promise.all([
+  const [dbReactions, dbVotes, dbRatings, codeCopyEvents] = await Promise.all([
     prisma.postEmojiReaction.findMany({ where: { postId: id }, select: { visitorId: true } }),
     prisma.postHelpfulVote.findMany({ where: { postId: id }, select: { visitorId: true } }),
     prisma.postStarRating.findMany({ where: { postId: id }, select: { visitorId: true } }),
+    prisma.codeCopyEvent.findMany({ where: { postId: id }, select: { codeBlockId: true, codeBlock: true } }),
   ]);
   dbReactions.forEach((r) => uniqueInteractedSet.add(r.visitorId));
   dbVotes.forEach((v) => uniqueInteractedSet.add(v.visitorId));
@@ -212,13 +213,24 @@ export default async function AdminPostEngagementPage({ params }: Props) {
   const { toc } = renderPostContent(post.content);
 
   // 10. Top Copied Code Blocks
+  const codeBlocksMap = new Map<string, string>();
+  codeCopyEvents.forEach((c) => {
+    if (c.codeBlockId && c.codeBlock) {
+      codeBlocksMap.set(c.codeBlockId, c.codeBlock);
+    }
+  });
+
   const copyEvents = events.filter((e) => e.eventType === "copy_event" && e.value);
   const copyCounts: Record<string, number> = {};
   copyEvents.forEach((e) => {
     copyCounts[e.value!] = (copyCounts[e.value!] || 0) + 1;
   });
   const topCopiedBlocks = Object.entries(copyCounts)
-    .map(([blockId, count]) => ({ blockId, count }))
+    .map(([blockId, count]) => ({
+      blockId,
+      codeBlock: codeBlocksMap.get(blockId) || "",
+      count,
+    }))
     .sort((a, b) => b.count - a.count);
 
   // 11. Traffic Context Referrers (Unique per Visitor)
@@ -272,17 +284,28 @@ export default async function AdminPostEngagementPage({ params }: Props) {
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
+  // 12. Survey and Suggestions Results
+  const [surveys, emailCampaigns] = await Promise.all([
+    prisma.postEndSurveyResponse.findMany({
+      where: { postId: id },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.emailCampaign.findMany({
+      select: { id: true, subject: true },
+    }),
+  ]);
+
+  const campaignMap = new Map(emailCampaigns.map((c) => [c.id, c.subject]));
+
   const utmAttributions = {
     sources: Object.entries(utmSources).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
     mediums: Object.entries(utmMediums).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
-    campaigns: Object.entries(utmCampaigns).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+    campaigns: Object.entries(utmCampaigns).map(([name, count]) => {
+      const resolvedName = campaignMap.get(name) || name;
+      return { name: resolvedName, count };
+    }).sort((a, b) => b.count - a.count),
   };
 
-  // 12. Survey and Suggestions Results
-  const surveys = await prisma.postEndSurveyResponse.findMany({
-    where: { postId: id },
-    orderBy: { createdAt: "desc" },
-  });
   const difficultySummary = {
     too_basic: surveys.filter((s) => s.difficulty === "too_basic").length,
     just_right: surveys.filter((s) => s.difficulty === "just_right").length,
