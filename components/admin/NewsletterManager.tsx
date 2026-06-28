@@ -1,10 +1,30 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { toast } from "sonner";
-import { FiMail, FiTrash2, FiSend, FiUsers, FiActivity, FiEye } from "react-icons/fi";
+import {
+  FiMail,
+  FiTrash2,
+  FiSend,
+  FiUsers,
+  FiActivity,
+  FiEye,
+  FiCalendar,
+  FiChevronLeft,
+  FiChevronRight,
+  FiSearch
+} from "react-icons/fi";
 import { dispatchCampaignAction, deleteSubscriberAction } from "@/lib/actions";
 import EditorialModal from "./EditorialModal";
+
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return email;
+  if (local.length <= 2) {
+    return `${local[0]}*@${domain}`;
+  }
+  return `${local[0]}${local.slice(1, -1).replace(/./g, "*")}${local[local.length - 1]}@${domain}`;
+}
 
 interface PostItem {
   id: string;
@@ -51,6 +71,54 @@ export default function NewsletterManager({
   const [selectedPost, setSelectedPost] = useState("");
   const [subject, setSubject] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<SubscriberItem | null>(null);
+
+  // Subscribers list states
+  const [subSearch, setSubSearch] = useState("");
+  const [subSortField, setSubSortField] = useState<"email" | "joined">("joined");
+  const [subSortOrder, setSubSortOrder] = useState<"asc" | "desc">("desc");
+  const [subPage, setSubPage] = useState(1);
+  const subItemsPerPage = 5;
+
+  // Filter list
+  const filteredSubscribers = subscribers.filter((sub) =>
+    sub.email.toLowerCase().includes(subSearch.toLowerCase())
+  );
+
+  // Sort list
+  const sortedSubscribers = [...filteredSubscribers].sort((a, b) => {
+    if (subSortField === "email") {
+      return subSortOrder === "asc"
+        ? a.email.localeCompare(b.email)
+        : b.email.localeCompare(a.email);
+    } else {
+      const timeA = new Date(a.createdAt).getTime();
+      const timeB = new Date(b.createdAt).getTime();
+      return subSortOrder === "asc" ? timeA - timeB : timeB - timeA;
+    }
+  });
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setSubPage(1);
+  }, [subSearch]);
+
+  // Paginated chunk
+  const totalSubPages = Math.ceil(sortedSubscribers.length / subItemsPerPage) || 1;
+  const activeSubPage = Math.min(subPage, totalSubPages);
+  const startSubIndex = (activeSubPage - 1) * subItemsPerPage;
+  const paginatedSubscribers = sortedSubscribers.slice(
+    startSubIndex,
+    startSubIndex + subItemsPerPage
+  );
+
+  const toggleSort = (field: "email" | "joined") => {
+    if (subSortField === field) {
+      setSubSortOrder(subSortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSubSortField(field);
+      setSubSortOrder("desc");
+    }
+  };
 
   const handleSendCampaign = (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,23 +255,60 @@ export default function NewsletterManager({
 
         {/* Right Column: Subscribers List */}
         <div className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
-          <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
-            Subscribers ({subscribers.length})
-          </h2>
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
+              Subscribers ({filteredSubscribers.length} of {subscribers.length})
+            </h2>
+          </div>
+
+          {/* Search filter */}
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+              <FiSearch className="text-zinc-500 w-3.5 h-3.5" />
+            </span>
+            <input
+              type="text"
+              value={subSearch}
+              onChange={(e) => setSubSearch(e.target.value)}
+              placeholder="Search subscribers by email..."
+              className="w-full pl-8 pr-3 py-1.5 border border-[#262626] bg-black text-zinc-300 placeholder-zinc-650 outline-none focus:border-amber font-mono text-[11px] rounded-none"
+            />
+          </div>
+
           <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-[#262626] text-zinc-500 text-[10px] uppercase font-bold tracking-wider">
-                  <th className="pb-2">Email</th>
-                  <th className="pb-2">Status</th>
-                  <th className="pb-2">Joined</th>
+                  <th className="pb-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("email")}
+                      className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                    >
+                      <FiMail className="w-3.5 h-3.5 text-zinc-500" /> Email {subSortField === "email" && (subSortOrder === "asc" ? "▲" : "▼")}
+                    </button>
+                  </th>
+                  <th className="pb-2">
+                    <span className="flex items-center gap-1 uppercase tracking-wider font-bold">
+                      <FiActivity className="w-3.5 h-3.5 text-zinc-500" /> Status
+                    </span>
+                  </th>
+                  <th className="pb-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("joined")}
+                      className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                    >
+                      <FiCalendar className="w-3.5 h-3.5 text-zinc-500" /> Joined {subSortField === "joined" && (subSortOrder === "asc" ? "▲" : "▼")}
+                    </button>
+                  </th>
                   <th className="pb-2 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1e1e1e]">
-                {subscribers.map((sub) => (
+                {paginatedSubscribers.map((sub) => (
                   <tr key={sub.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                    <td className="py-2.5 font-bold text-white">{sub.email}</td>
+                    <td className="py-2.5 font-bold text-white font-mono">{maskEmail(sub.email)}</td>
                     <td className="py-2.5">
                       <span className={`px-1.5 py-0.5 border text-[9px] uppercase font-bold ${
                         sub.confirmed 
@@ -213,7 +318,7 @@ export default function NewsletterManager({
                         {sub.confirmed ? "Active" : "Pending"}
                       </span>
                     </td>
-                    <td className="py-2.5 text-zinc-500">{new Date(sub.createdAt).toLocaleDateString()}</td>
+                    <td className="py-2.5 text-zinc-500 font-mono">{new Date(sub.createdAt).toLocaleDateString()}</td>
                     <td className="py-2.5 text-right">
                       <button
                         type="button"
@@ -225,9 +330,9 @@ export default function NewsletterManager({
                     </td>
                   </tr>
                 ))}
-                {subscribers.length === 0 ? (
+                {filteredSubscribers.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-zinc-550 uppercase">
+                    <td colSpan={4} className="py-8 text-center text-zinc-555 uppercase font-mono italic">
                       No subscribers found
                     </td>
                   </tr>
@@ -235,6 +340,31 @@ export default function NewsletterManager({
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {totalSubPages > 1 && (
+            <div className="flex items-center justify-between border-t border-[#262626]/45 pt-4 mt-4 text-[10px]">
+              <button
+                type="button"
+                disabled={activeSubPage === 1}
+                onClick={() => setSubPage(activeSubPage - 1)}
+                className="flex items-center gap-1 uppercase font-bold tracking-wider px-2 py-1 border border-[#262626] bg-black text-zinc-400 hover:border-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:border-[#262626] disabled:hover:text-zinc-400 transition-colors"
+              >
+                <FiChevronLeft className="w-3.5 h-3.5" /> Prev
+              </button>
+              <span className="text-zinc-550 font-bold uppercase tracking-wider">
+                Page {activeSubPage} of {totalSubPages}
+              </span>
+              <button
+                type="button"
+                disabled={activeSubPage === totalSubPages}
+                onClick={() => setSubPage(activeSubPage + 1)}
+                className="flex items-center gap-1 uppercase font-bold tracking-wider px-2 py-1 border border-[#262626] bg-black text-zinc-400 hover:border-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:border-[#262626] disabled:hover:text-zinc-400 transition-colors"
+              >
+                Next <FiChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
