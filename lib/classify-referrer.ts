@@ -1,14 +1,12 @@
 /**
  * @file lib/classify-referrer.ts
- * @description Referrer classification engine using tldts for robust domain
- * extraction and a maintainable JSON database for source mapping.
- *
- * To add a new traffic source: edit lib/referrer-sources.json — no code changes needed.
+ * @description Referrer classification engine using tldts for domain
+ * extraction and pre-compiled referers.json for attribution mapping.
  */
 
 import { parse as parseDomain } from "tldts";
-import Referer from "referer-parser";
 import sources from "./referrer-sources.json";
+import referersData from "./referers.json";
 
 export interface ReferrerResult {
   /** Canonical source key — e.g. "linkedin", "google", "direct" */
@@ -20,6 +18,14 @@ export interface ReferrerResult {
   /** Cleaned referrer URL (origin + pathname, no query params) or null for direct */
   cleanReferrer: string | null;
 }
+
+interface RefererRecord {
+  name: string;
+  medium: string;
+  params?: string[];
+}
+
+const referers = referersData as Record<string, RefererRecord>;
 
 // Own-domain hostnames — these should never appear as referrers
 const OWN_DOMAINS = new Set([
@@ -42,6 +48,35 @@ type SourceMap = Record<string, SourceEntry>;
 type AndroidMap = Record<string, SourceEntry>;
 
 const domainMap = sources as unknown as SourceMap & { _android_apps: { _comment?: string } & AndroidMap; _comment?: string; _format?: string };
+
+/**
+ * Recursively looks up referrer configuration inside referers.json database
+ */
+function lookupReferer(refHost: string, refPath: string, includePath: boolean): RefererRecord | null {
+  let referer: RefererRecord | null = null;
+
+  if (includePath) {
+    referer = referers[refHost + refPath] || null;
+  } else {
+    referer = referers[refHost] || null;
+  }
+
+  if (!referer && includePath) {
+    const pathParts = refPath.split("/");
+    if (pathParts.length > 1) {
+      referer = referers[refHost + "/" + pathParts[1]] || null;
+    }
+  }
+
+  if (!referer) {
+    const idx = refHost.indexOf(".");
+    if (idx === -1) return null;
+    const slicedHost = refHost.slice(idx + 1);
+    return lookupReferer(slicedHost, refPath, includePath);
+  }
+
+  return referer;
+}
 
 /**
  * Classify a raw referrer URL into a traffic source.
@@ -94,19 +129,22 @@ export function classifyReferrer(rawReferrer: string | null | undefined): Referr
   // Clean referrer: keep origin + pathname, strip query params (privacy)
   const cleanReferrer = `${url.origin}${url.pathname}`.replace(/\/$/, "") || url.origin;
 
-  // ── referer-parser attribution library ───────────────────────────────────
+  // ── Pre-compiled referer-parser attribution database ────────────────────
   try {
-    const parser = new Referer(ref);
-    if (parser.known && parser.referer) {
+    let matched = lookupReferer(hostname, url.pathname, true);
+    if (!matched) {
+      matched = lookupReferer(hostname, url.pathname, false);
+    }
+    if (matched && matched.name) {
       return {
-        source: parser.referer.toLowerCase(),
-        label: parser.referer,
-        medium: (parser.medium === "unknown" ? "referral" : parser.medium) as ReferrerResult["medium"],
+        source: matched.name.toLowerCase(),
+        label: matched.name,
+        medium: (matched.medium === "unknown" ? "referral" : matched.medium) as ReferrerResult["medium"],
         cleanReferrer,
       };
     }
   } catch (err) {
-    console.error("referer-parser parsing failed:", err);
+    console.error("In-memory referrer classification lookup failed:", err);
   }
 
   // ── Exact hostname match (e.g. "m.facebook.com") ─────────────────────────
