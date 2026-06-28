@@ -173,7 +173,7 @@ export async function getAnalyticsData(filters: AnalyticsFiltersState): Promise<
     prisma.visitor.findMany({
       where: visitorWhere,
       orderBy: { lastSeen: "desc" },
-      take: 20,
+      take: 100,
       include: {
         _count: {
           select: {

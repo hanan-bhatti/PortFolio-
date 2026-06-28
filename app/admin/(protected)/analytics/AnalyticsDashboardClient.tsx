@@ -10,6 +10,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getAnalyticsData, type AnalyticsData, type AnalyticsFiltersState } from "./actions";
 
 interface AnalyticsDashboardClientProps {
@@ -23,16 +24,26 @@ export default function AnalyticsDashboardClient({
   countries,
   initialFilters,
 }: AnalyticsDashboardClientProps) {
+  const router = useRouter();
   const [filters, setFilters] = useState<AnalyticsFiltersState>(initialFilters);
   const [data, setData] = useState<AnalyticsData>(initialData);
   const [isPending, startTransition] = useTransition();
   const [pathInput, setPathInput] = useState(filters.path);
+
+  // Visitors table interactive states
+  const [visitorSearch, setVisitorSearch] = useState("");
+  const [sortField, setSortField] = useState<string>("lastSeen");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [visitorPage, setVisitorPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Sync state if initialFilters change (e.g. on mount/reset)
   useEffect(() => {
     setFilters(initialFilters);
     setPathInput(initialFilters.path);
     setData(initialData);
+    setVisitorPage(1);
+    setVisitorSearch("");
   }, [initialFilters, initialData]);
 
   const handleFilterChange = (updates: Partial<AnalyticsFiltersState>) => {
@@ -103,6 +114,67 @@ export default function AnalyticsDashboardClient({
   const totalCountry = data.byCountry.reduce((acc, c) => acc + c.count, 0);
   const totalBrowser = data.byBrowser.reduce((acc, b) => acc + b.count, 0);
   const totalTraffic = data.trafficSources.reduce((acc, t) => acc + t.count, 0);
+
+  // ── Filter, Sort, and Paginate Visitors ──
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("desc");
+    }
+    setVisitorPage(1);
+  };
+
+  const filteredVisitors = data.recentVisitors.filter((visitor) => {
+    const term = visitorSearch.toLowerCase();
+    const country = (visitor.country || "").toLowerCase();
+    const city = (visitor.city || "").toLowerCase();
+    const browser = (visitor.browser || "").toLowerCase();
+    const device = (visitor.device || "").toLowerCase();
+    return (
+      country.includes(term) ||
+      city.includes(term) ||
+      browser.includes(term) ||
+      device.includes(term)
+    );
+  });
+
+  const sortedVisitors = [...filteredVisitors].sort((a, b) => {
+    let valA: any = (a as any)[sortField];
+    let valB: any = (b as any)[sortField];
+
+    if (sortField === "pageViews") {
+      valA = a._count.pageViews;
+      valB = b._count.pageViews;
+    } else if (sortField === "formSubmissions") {
+      valA = a._count.formSubmissions;
+      valB = b._count.formSubmissions;
+    }
+
+    if (valA === null || valA === undefined) return sortOrder === "asc" ? -1 : 1;
+    if (valB === null || valB === undefined) return sortOrder === "asc" ? 1 : -1;
+
+    if (valA instanceof Date && valB instanceof Date) {
+      return sortOrder === "asc"
+        ? valA.getTime() - valB.getTime()
+        : valB.getTime() - valA.getTime();
+    }
+
+    if (typeof valA === "string" && typeof valB === "string") {
+      return sortOrder === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    }
+
+    return sortOrder === "asc" ? valA - valB : valB - valA;
+  });
+
+  const totalVisitorPages = Math.ceil(sortedVisitors.length / itemsPerPage);
+  const paginatedVisitors = sortedVisitors.slice(
+    (visitorPage - 1) * itemsPerPage,
+    visitorPage * itemsPerPage
+  );
 
   return (
     <div className="space-y-8">
@@ -497,26 +569,91 @@ export default function AnalyticsDashboardClient({
       </div>
 
       {/* ROW 5: Recent Visitors */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none">
-        <h3 className="mb-4 font-syne text-lg font-bold text-white">Recent Visitors</h3>
+      <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="font-syne text-lg font-bold text-white">Recent Visitors</h3>
+          {/* Visitor Search Input */}
+          <div className="relative max-w-xs w-full">
+            <input
+              type="text"
+              placeholder="Search by country, device, browser..."
+              value={visitorSearch}
+              onChange={(e) => {
+                setVisitorSearch(e.target.value);
+                setVisitorPage(1);
+              }}
+              className="w-full bg-[#141414] border border-[#262626] px-3 py-1.5 text-xs text-white placeholder-zinc-500 rounded-none focus:outline-none focus:border-[#F59E0B] font-mono"
+            />
+          </div>
+        </div>
+
         <div className="overflow-x-auto scrollbar-none">
           <table className="w-full text-left font-sans text-[13px]">
             <thead>
-              <tr className="border-b border-[#262626] text-zinc-500 font-mono text-xs uppercase">
-                <th className="pb-3 font-medium pl-2">Country</th>
-                <th className="pb-3 font-medium hidden sm:table-cell">Device</th>
-                <th className="pb-3 font-medium hidden md:table-cell">Browser</th>
-                <th className="pb-3 font-medium hidden lg:table-cell">First Seen</th>
-                <th className="pb-3 font-medium">Last Seen</th>
-                <th className="pb-3 text-right font-medium hidden sm:table-cell">Visits</th>
-                <th className="pb-3 text-right font-medium pr-2">Pages</th>
-                <th className="pb-3 text-center font-medium hidden md:table-cell">Consent</th>
-                <th className="pb-3 text-right font-medium hidden md:table-cell">Forms</th>
+              <tr className="border-b border-[#262626] text-zinc-500 font-mono text-xs uppercase select-none">
+                <th 
+                  onClick={() => handleSort("country")}
+                  className="pb-3 font-medium pl-2 cursor-pointer hover:text-white transition-colors"
+                >
+                  Country {sortField === "country" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("device")}
+                  className="pb-3 font-medium hidden sm:table-cell cursor-pointer hover:text-white transition-colors"
+                >
+                  Device {sortField === "device" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("browser")}
+                  className="pb-3 font-medium hidden md:table-cell cursor-pointer hover:text-white transition-colors"
+                >
+                  Browser {sortField === "browser" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("firstSeen")}
+                  className="pb-3 font-medium hidden lg:table-cell cursor-pointer hover:text-white transition-colors"
+                >
+                  First Seen {sortField === "firstSeen" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("lastSeen")}
+                  className="pb-3 font-medium cursor-pointer hover:text-white transition-colors"
+                >
+                  Last Seen {sortField === "lastSeen" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("visits")}
+                  className="pb-3 text-right font-medium hidden sm:table-cell cursor-pointer hover:text-white transition-colors"
+                >
+                  Visits {sortField === "visits" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("pageViews")}
+                  className="pb-3 text-right font-medium pr-2 cursor-pointer hover:text-white transition-colors"
+                >
+                  Pages {sortField === "pageViews" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("consentType")}
+                  className="pb-3 text-center font-medium hidden md:table-cell cursor-pointer hover:text-white transition-colors"
+                >
+                  Consent {sortField === "consentType" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
+                <th 
+                  onClick={() => handleSort("formSubmissions")}
+                  className="pb-3 text-right font-medium hidden md:table-cell pr-2 cursor-pointer hover:text-white transition-colors"
+                >
+                  Forms {sortField === "formSubmissions" && (sortOrder === "asc" ? "▲" : "▼")}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#262626]/50">
-              {data.recentVisitors.map((visitor) => (
-                <tr key={visitor.id} className="hover:bg-white/[0.01]">
+              {paginatedVisitors.map((visitor) => (
+                <tr 
+                  key={visitor.id} 
+                  onClick={() => router.push(`/admin/analytics/visitors/${visitor.id}`)}
+                  className="hover:bg-white/[0.03] transition-colors cursor-pointer"
+                >
                   <td className="py-4 font-medium text-zinc-200 pl-2">
                     <span className="block truncate max-w-[120px] sm:max-w-none" title={
                       visitor.city && visitor.country
@@ -566,14 +703,45 @@ export default function AnalyticsDashboardClient({
                   </td>
                 </tr>
               ))}
-              {data.recentVisitors.length === 0 ? (
+              {paginatedVisitors.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-6 text-center text-zinc-600">No visitors tracked yet</td>
+                  <td colSpan={9} className="py-6 text-center text-zinc-600">No visitors match the search term</td>
                 </tr>
               ) : null}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        {totalVisitorPages > 1 && (
+          <div className="flex items-center justify-between border-t border-[#262626] pt-4 font-mono text-xs">
+            <span className="text-zinc-500">
+              Showing {Math.min(sortedVisitors.length, (visitorPage - 1) * itemsPerPage + 1)} to{" "}
+              {Math.min(sortedVisitors.length, visitorPage * itemsPerPage)} of {sortedVisitors.length} visitors
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setVisitorPage(Math.max(1, visitorPage - 1))}
+                disabled={visitorPage === 1}
+                className="px-2.5 py-1.5 border border-[#262626] bg-[#141414] text-zinc-300 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-300 cursor-pointer rounded-none"
+              >
+                PREV
+              </button>
+              <span className="px-3 py-1.5 border border-[#262626] bg-black text-[#F59E0B] font-bold">
+                {visitorPage} / {totalVisitorPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setVisitorPage(Math.min(totalVisitorPages, visitorPage + 1))}
+                disabled={visitorPage === totalVisitorPages}
+                className="px-2.5 py-1.5 border border-[#262626] bg-[#141414] text-zinc-300 hover:text-white disabled:opacity-40 disabled:hover:text-zinc-300 cursor-pointer rounded-none"
+              >
+                NEXT
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
