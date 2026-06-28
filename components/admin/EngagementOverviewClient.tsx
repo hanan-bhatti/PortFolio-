@@ -19,7 +19,13 @@ import {
   LuMessageSquare,
   LuClipboardCheck,
   LuLogOut,
-  LuBell
+  LuBell,
+  LuFileText,
+  LuCalendar,
+  LuSettings,
+  LuClock,
+  LuActivity,
+  LuInfo
 } from "react-icons/lu";
 
 interface PostItem {
@@ -216,14 +222,46 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
         <table className="w-full min-w-[800px] border-collapse font-sans text-left text-xs">
           <thead>
             <tr className="border-b border-[#262626] bg-black/20 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-550">
-              <th className="px-5 py-3">Post Title</th>
-              <th className="px-4 py-3">Published</th>
-              <th className="px-4 py-3">Active Config</th>
-              <th className="px-4 py-3 text-right">Emojis</th>
-              <th className="px-4 py-3 text-right">Helpful Ratio</th>
-              <th className="px-4 py-3 text-right">Rating</th>
-              <th className="px-4 py-3 text-right">Scroll Depth</th>
-              <th className="px-5 py-3 text-right">Read Time (Avg/Est)</th>
+              <th className="px-5 py-3">
+                <span className="flex items-center gap-1">
+                  <LuFileText className="w-3.5 h-3.5 text-zinc-500" /> Post Title
+                </span>
+              </th>
+              <th className="px-4 py-3">
+                <span className="flex items-center gap-1">
+                  <LuCalendar className="w-3.5 h-3.5 text-zinc-500" /> Published
+                </span>
+              </th>
+              <th className="px-4 py-3">
+                <span className="flex items-center gap-1">
+                  <LuSettings className="w-3.5 h-3.5 text-zinc-500" /> Active Config
+                </span>
+              </th>
+              <th className="px-4 py-3 text-right">
+                <span className="flex items-center gap-1 justify-end">
+                  <LuSmile className="w-3.5 h-3.5 text-zinc-500" /> Emojis
+                </span>
+              </th>
+              <th className="px-4 py-3 text-right">
+                <span className="flex items-center gap-1 justify-end">
+                  <LuThumbsUp className="w-3.5 h-3.5 text-zinc-500" /> Helpful Ratio
+                </span>
+              </th>
+              <th className="px-4 py-3 text-right">
+                <span className="flex items-center gap-1 justify-end">
+                  <LuStar className="w-3.5 h-3.5 text-zinc-500" /> Rating
+                </span>
+              </th>
+              <th className="px-4 py-3 text-right">
+                <span className="flex items-center gap-1 justify-end">
+                  <LuActivity className="w-3.5 h-3.5 text-zinc-500" /> Scroll Depth
+                </span>
+              </th>
+              <th className="px-5 py-3 text-right">
+                <span className="flex items-center gap-1 justify-end">
+                  <LuClock className="w-3.5 h-3.5 text-zinc-500" /> Read Time
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#262626]/40 text-zinc-300">
@@ -291,18 +329,35 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
 
                     {/* Emoji Counts */}
                     <td className="px-4 py-3.5 font-mono text-right font-medium">
-                      {post.config.emojiReactionsOn ? post.metrics.emojiCount : <span className="text-zinc-600">—</span>}
+                      {post.config.emojiReactionsOn ? (
+                        post.metrics.emojiCount > 0 ? (
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold bg-zinc-800/40 text-zinc-300 border border-zinc-700/60 rounded-none w-fit">
+                            {post.metrics.emojiCount}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-650">0</span>
+                        )
+                      ) : (
+                        <span className="text-zinc-600">—</span>
+                      )}
                     </td>
 
                     {/* Helpful Ratio */}
-                    <td className="px-4 py-3.5 font-mono text-right text-zinc-400">
+                    <td className="px-4 py-3.5 font-mono text-right">
                       {post.config.helpfulVoteOn ? (
                         totalHelpful > 0 ? (
-                          <span title={`${post.metrics.helpful.yes} of ${totalHelpful} voters found this helpful`}>
-                            {helpfulPercent}% <span className="text-[10px] text-zinc-550">({totalHelpful})</span>
+                          <span 
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-bold border rounded-none w-fit ${
+                              helpfulPercent !== null && helpfulPercent >= 70
+                                ? "bg-emerald-950/40 text-emerald-400 border-emerald-900/60"
+                                : "bg-amber-950/40 text-amber-400 border-amber-900/60"
+                            }`}
+                            title={`${post.metrics.helpful.yes} of ${totalHelpful} voters found this helpful`}
+                          >
+                            {helpfulPercent}% <span className="text-[9px] opacity-60">({totalHelpful})</span>
                           </span>
                         ) : (
-                          <span className="text-zinc-550">0%</span>
+                          <span className="text-zinc-650">0%</span>
                         )
                       ) : (
                         <span className="text-zinc-600">—</span>
@@ -310,15 +365,17 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
                     </td>
 
                     {/* Ratings */}
-                    <td className="px-4 py-3.5 font-mono text-right text-zinc-400">
+                    <td className="px-4 py-3.5 font-mono text-right">
                       {post.config.starRatingOn ? (
                         post.metrics.rating.total > 0 ? (
-                          <span className="text-amber">
-                            ★ {post.metrics.rating.average}{" "}
-                            <span className="text-[10px] text-zinc-550">({post.metrics.rating.total})</span>
+                          <span 
+                            className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold bg-amber-950/40 text-amber-400 border border-amber-900/60 rounded-none w-fit"
+                            title={`Average star rating from ${post.metrics.rating.total} submissions`}
+                          >
+                            ★ {post.metrics.rating.average} <span className="text-[9px] opacity-60">({post.metrics.rating.total})</span>
                           </span>
                         ) : (
-                          <span className="text-zinc-550">Unrated</span>
+                          <span className="text-zinc-655">Unrated</span>
                         )
                       ) : (
                         <span className="text-zinc-600">—</span>
@@ -326,22 +383,33 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
                     </td>
 
                     {/* Scroll rate */}
-                    <td className="px-4 py-3.5 font-mono text-right text-zinc-400">
-                      {post.metrics.scrollCompletionRate}%
+                    <td className="px-4 py-3.5 font-mono text-right">
+                      <span 
+                        className={`inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold border rounded-none w-fit ${
+                          post.metrics.scrollCompletionRate >= 50
+                            ? "bg-emerald-950/40 text-emerald-400 border-emerald-900/60"
+                            : "bg-zinc-800/40 text-zinc-400 border-zinc-700/60"
+                        }`}
+                      >
+                        {post.metrics.scrollCompletionRate}%
+                      </span>
                     </td>
 
                     {/* Time vs Estimate */}
                     <td className="px-5 py-3.5 font-mono text-right">
                       {isSkimming ? (
                         <span
-                          className="px-1.5 py-0.5 border border-amber/30 bg-amber/5 text-amber text-[11px] font-bold"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 border border-rose-900/60 bg-rose-950/40 text-rose-400 text-[11px] font-bold rounded-none w-fit"
                           title="Reader skimming warning: Avg read time is under half the estimated read time"
                         >
-                          {avgMins}m / {estMins}m
+                          <LuInfo className="w-3 h-3 text-rose-400 flex-shrink-0" /> {avgMins}m / {estMins}m
                         </span>
                       ) : (
-                        <span className="text-zinc-400">
-                          {avgMins}m / <span className="text-zinc-550">{estMins}m est.</span>
+                        <span 
+                          className="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold bg-zinc-800/40 text-zinc-300 border border-zinc-700/60 rounded-none w-fit"
+                          title="Average read time vs Estimated read time"
+                        >
+                          {avgMins}m / {estMins}m
                         </span>
                       )}
                     </td>
