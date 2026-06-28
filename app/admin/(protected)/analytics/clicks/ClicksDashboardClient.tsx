@@ -11,7 +11,11 @@ import {
   LuCopy, 
   LuFolderGit2, 
   LuSparkles,
-  LuMail 
+  LuMail,
+  LuPanelBottom,
+  LuMessageSquare,
+  LuFileText,
+  LuMegaphone
 } from "react-icons/lu";
 import {
   FaLinkedin,
@@ -66,38 +70,38 @@ function getPlacementBadge(placement: string) {
   switch (placement) {
     case "hero":
       return (
-        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-sky-950/40 text-sky-400 border border-sky-900/60">
-          Hero
+        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-sky-950/40 text-sky-400 border border-sky-900/60 rounded-none">
+          <LuSparkles className="w-3 h-3 text-sky-400 flex-shrink-0" /> Hero
         </span>
       );
     case "footer":
       return (
-        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/40 text-zinc-400 border border-zinc-700/60">
-          Footer
+        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/40 text-zinc-400 border border-zinc-700/60 rounded-none">
+          <LuPanelBottom className="w-3 h-3 text-zinc-400 flex-shrink-0" /> Footer
         </span>
       );
     case "contact":
       return (
-        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/60">
-          Contact
+        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 rounded-none">
+          <LuMessageSquare className="w-3 h-3 text-emerald-400 flex-shrink-0" /> Contact
         </span>
       );
     case "resume":
       return (
-        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-amber-950/40 text-amber-400 border border-amber-900/60">
-          Resume
+        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-amber-950/40 text-amber-400 border border-amber-900/60 rounded-none">
+          <LuFileText className="w-3 h-3 text-amber-400 flex-shrink-0" /> Resume
         </span>
       );
     case "campaign":
       return (
-        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-violet-950/40 text-violet-400 border border-violet-900/60">
-          Campaign
+        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-violet-950/40 text-violet-400 border border-violet-900/60 rounded-none">
+          <LuMegaphone className="w-3 h-3 text-violet-400 flex-shrink-0" /> Campaign
         </span>
       );
     default:
       return (
-        <span className="px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/20 text-zinc-500 border border-zinc-800/60">
-          Other
+        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/20 text-zinc-500 border border-zinc-800/60 rounded-none">
+          <LuGlobe className="w-3 h-3 text-zinc-500 flex-shrink-0" /> Other
         </span>
       );
   }
