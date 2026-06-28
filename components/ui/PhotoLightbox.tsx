@@ -397,41 +397,35 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/98 transition-opacity duration-300"
+      className="fixed inset-0 z-[9999] flex flex-col justify-between p-4 md:p-6 bg-black/98 transition-opacity duration-300 overflow-hidden h-[100dvh]"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={onClose}
     >
-      {/* Top bar with Close button */}
-      <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-6 z-10 pointer-events-none">
-        <div className="text-xs uppercase tracking-widest text-zinc-500 font-inter">
-          {currentIndex + 1} / {photos.length}
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="pointer-events-auto flex h-10 w-10 items-center justify-center border border-white/10 bg-white/5 text-white transition hover:bg-white/10 hover:border-white/20 active:scale-95"
-          aria-label="Close lightbox"
-          style={{ borderRadius: "0px" }}
-        >
-          <span className="text-xl font-light">×</span>
-        </button>
-      </div>
+      {/* Close button - Fixed Top Right */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 z-[9999] flex h-10 w-10 items-center justify-center bg-black/50 text-white/80 active:scale-95"
+        aria-label="Close lightbox"
+      >
+        <FiX className="w-5 h-5" />
+      </button>
 
-      {/* Main Image Container */}
+      {/* Main Image Container - Flex-1, expands, shrinks to fit viewport */}
       <div
-        className="relative flex flex-col items-center justify-center w-full max-w-4xl px-4 md:px-10"
+        className="flex-1 min-h-[50dvh] w-full max-w-4xl mx-auto relative flex items-center justify-center overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div 
-          className="relative w-full h-[55vh] md:h-[65vh] flex items-center justify-center select-none cursor-pointer overflow-hidden group/image"
+          className="relative w-full h-full flex items-center justify-center select-none cursor-pointer overflow-hidden group/image"
           onClick={handleImageClick}
         >
           <Image
             src={currentPhoto.imageUrl}
             alt={currentPhoto.title ?? "Photo"}
             fill
-            className="object-contain transition-all duration-300"
+            className="object-contain transition-all duration-300 w-full h-full max-h-full min-h-0"
             sizes="(max-width: 768px) 100vw, 80vw"
             priority
             unoptimized
@@ -445,7 +439,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             >
               <svg 
                 viewBox="0 0 24 24" 
-                className="w-24 h-24 text-red-500 fill-current drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]"
+                className="w-20 h-20 text-red-500 fill-current drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]"
               >
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
@@ -481,9 +475,15 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             );
           })}
         </div>
+      </div>
 
-        {/* Bottom actions & indicators bar */}
-        <div className="flex items-center justify-between mt-4 w-full border-b border-white/5 pb-3">
+      {/* Info & Metadata Panel - Locked at bottom */}
+      <div 
+        className="w-full max-w-4xl mx-auto flex flex-col shrink-0"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Action Row - Fixed height strip ~40px */}
+        <div className="h-10 flex items-center justify-between border-b border-white/5 shrink-0">
           {/* Actions on the left */}
           <div className="flex items-center gap-5">
             <button 
@@ -515,10 +515,9 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           <div className="flex items-center gap-1 select-none">
             {photos.map((_, i) => {
               const distance = Math.abs(i - currentIndex);
-              if (distance >= 3) return null; // Show only active bar, neighbors, and fading dots
+              if (distance >= 3) return null;
               
               if (distance === 0) {
-                // Wide bar for current image
                 return (
                   <span 
                     key={i} 
@@ -526,7 +525,6 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
                   />
                 );
               } else if (distance === 1) {
-                // Neighbors
                 return (
                   <span 
                     key={i} 
@@ -534,7 +532,6 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
                   />
                 );
               } else {
-                // Edge fading dots
                 return (
                   <span 
                     key={i} 
@@ -546,31 +543,29 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           </div>
         </div>
 
-        {/* Info panel below the image */}
-        <div className="w-full mt-4 font-inter text-left space-y-3">
-          {/* Main Caption Card */}
-          <div className="space-y-1">
-            {currentPhoto.title && (
-              <h3 className="font-syne text-sm font-bold text-white uppercase tracking-wider">
-                {currentPhoto.title}
-              </h3>
-            )}
-            {currentPhoto.description && (
-              <p className="font-inter text-xs text-zinc-400 italic leading-relaxed">
-                {currentPhoto.description}
-              </p>
-            )}
-          </div>
+        {/* Text descriptions and EXIF tags */}
+        <div className="w-full text-left mt-2 select-text">
+          {currentPhoto.title && (
+            <h3 className="text-base font-semibold text-white uppercase tracking-wider">
+              {currentPhoto.title}
+            </h3>
+          )}
 
-          {/* Camera specs inline flex tags */}
+          {currentPhoto.description && (
+            <p className="text-sm text-white/70 mt-1 leading-relaxed">
+              {currentPhoto.description}
+            </p>
+          )}
+
+          {/* Camera specs inline flex tags - Footnotes style, no backgrounds/borders */}
           {hasExif && exifItems.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/5 w-full">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
               {exifItems.map((item, idx) => {
                 const icon = getExifIcon(item.label);
                 return (
                   <div 
                     key={idx} 
-                    className="flex items-center gap-1 bg-white/[0.02] border border-white/5 px-2 py-0.5 text-[9px] text-zinc-400 font-mono"
+                    className="flex items-center gap-1 text-[11px] text-white/40 font-mono font-light"
                     title={item.label}
                   >
                     {icon}
