@@ -97,7 +97,7 @@ export function classifyReferrer(rawReferrer: string | null | undefined): Referr
   // ── referer-parser attribution library ───────────────────────────────────
   try {
     const parser = new Referer(ref);
-    if (parser.known) {
+    if (parser.known && parser.referer) {
       return {
         source: parser.referer.toLowerCase(),
         label: parser.referer,
