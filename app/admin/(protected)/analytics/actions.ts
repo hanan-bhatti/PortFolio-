@@ -151,7 +151,6 @@ export async function getAnalyticsData(filters: AnalyticsFiltersState): Promise<
       where: pageViewWhere,
       _count: { id: true },
       orderBy: { _count: { id: "desc" } },
-      take: 10,
     }),
     prisma.visitor.groupBy({
       by: ["country"],
