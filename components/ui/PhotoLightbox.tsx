@@ -16,8 +16,13 @@ import { getVisitorId } from "@/lib/analytics";
 
 interface Particle {
   id: number;
-  scale: number;
-  angle: number;
+  tx: number;
+  ty: number;
+  rot: number;
+  size: number;
+  color: string;
+  delay: number;
+  duration: number;
 }
 
 const formatShutter = (n: number) => {
@@ -146,16 +151,31 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   }, [currentPhoto]);
 
   const triggerBurst = useCallback(() => {
-    const newParticles: Particle[] = Array.from({ length: 12 }).map((_, i) => {
-      const angle = (i * 360) / 12 + (Math.random() * 15 - 7.5);
+    const colors = ["#FF2D55", "#FF375F", "#FF453A", "#FF9F0A", "#FFD60A", "#FFFFFF", "#FF85A2", "#FF5E7E"];
+    const newParticles: Particle[] = Array.from({ length: 16 }).map((_, i) => {
+      const angle = Math.random() * 360;
+      const distance = Math.random() * 80 + 60; // 60px to 140px spread
+      const tx = Math.cos((angle * Math.PI) / 180) * distance;
+      const ty = Math.sin((angle * Math.PI) / 180) * distance;
+      const rot = Math.random() * 360 - 180;
+      const size = Math.random() * 8 + 6; // 6px to 14px tiny cute hearts
+      const color = colors[Math.floor(Math.random() * colors.length)] || "#FF2D55";
+      const delay = Math.random() * 0.15; // staggered wave
+      const duration = Math.random() * 0.4 + 0.6; // 0.6s to 1.0s
+
       return {
         id: Date.now() + i,
-        scale: Math.random() * 0.4 + 0.4,
-        angle,
+        tx,
+        ty,
+        rot,
+        size,
+        color,
+        delay,
+        duration,
       };
     });
     setParticles(newParticles);
-    setTimeout(() => setParticles([]), 1000);
+    setTimeout(() => setParticles([]), 1500);
   }, []);
 
   // Handle Double click with scaling and burst
@@ -414,23 +434,27 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
           {/* Burst Particles */}
           {particles.map((p) => {
-            const distance = 100;
-            const rad = (p.angle * Math.PI) / 180;
-            const tx = Math.cos(rad) * distance;
-            const ty = Math.sin(rad) * distance;
             return (
               <div
                 key={p.id}
-                className="absolute z-30 pointer-events-none animate-particle"
+                className="absolute z-30 pointer-events-none animate-particle-rich"
                 style={{
                   left: "50%",
                   top: "50%",
-                  "--tx": `${tx}px`,
-                  "--ty": `${ty}px`,
-                  "--scale": p.scale,
+                  "--tx": `${p.tx}px`,
+                  "--ty": `${p.ty}px`,
+                  "--rot": `${p.rot}deg`,
+                  "--delay": `${p.delay}s`,
+                  "--duration": `${p.duration}s`,
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
                 } as React.CSSProperties}
               >
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-red-400 fill-current">
+                <svg 
+                  viewBox="0 0 24 24" 
+                  className="w-full h-full fill-current drop-shadow-[0_0_4px_rgba(0,0,0,0.3)]"
+                  style={{ color: p.color }}
+                >
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
@@ -686,18 +710,22 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         .animate-instagram-heart {
           animation: instagram-heart-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-        @keyframes particleOut {
+        @keyframes particle-burst-out {
           0% {
-            transform: translate(-50%, -50%) translate(0, 0) scale(0.2);
+            transform: translate(-50%, -50%) translate(0, 0) scale(0) rotate(0deg);
+            opacity: 0;
+          }
+          15% {
             opacity: 1;
+            transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(1.1) rotate(calc(var(--rot) * 0.2));
           }
           100% {
-            transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(var(--scale));
+            transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot));
             opacity: 0;
           }
         }
-        .animate-particle {
-          animation: particleOut 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        .animate-particle-rich {
+          animation: particle-burst-out var(--duration) cubic-bezier(0.15, 0.85, 0.3, 1) var(--delay) forwards;
         }
       `}</style>
     </div>
