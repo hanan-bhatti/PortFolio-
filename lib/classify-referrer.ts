@@ -7,6 +7,7 @@
  */
 
 import { parse as parseDomain } from "tldts";
+import Referer from "referer-parser";
 import sources from "./referrer-sources.json";
 
 export interface ReferrerResult {
@@ -92,6 +93,21 @@ export function classifyReferrer(rawReferrer: string | null | undefined): Referr
 
   // Clean referrer: keep origin + pathname, strip query params (privacy)
   const cleanReferrer = `${url.origin}${url.pathname}`.replace(/\/$/, "") || url.origin;
+
+  // ── referer-parser attribution library ───────────────────────────────────
+  try {
+    const parser = new Referer(ref);
+    if (parser.known) {
+      return {
+        source: parser.referer.toLowerCase(),
+        label: parser.referer,
+        medium: (parser.medium === "unknown" ? "referral" : parser.medium) as ReferrerResult["medium"],
+        cleanReferrer,
+      };
+    }
+  } catch (err) {
+    console.error("referer-parser parsing failed:", err);
+  }
 
   // ── Exact hostname match (e.g. "m.facebook.com") ─────────────────────────
   const exactMatch = domainMap[hostname];
