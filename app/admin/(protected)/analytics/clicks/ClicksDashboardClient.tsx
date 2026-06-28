@@ -249,13 +249,20 @@ export default function ClicksDashboardClient({
     let valA = (a as any)[linkSortField];
     let valB = (b as any)[linkSortField];
 
+    if (linkSortField === "placement") {
+      valA = parseShortLinkMeta(a.targetDisplay, a.targetUrl).placement;
+      valB = parseShortLinkMeta(b.targetDisplay, b.targetUrl).placement;
+    }
+
     if (linkSortField === "lastClickTime") {
       const timeA = valA ? new Date(valA).getTime() : 0;
       const timeB = valB ? new Date(valB).getTime() : 0;
       return linkSortOrder === "asc" ? timeA - timeB : timeB - timeA;
     }
 
-    if (linkSortField === "targetDisplay" || linkSortField === "code") {
+    if (linkSortField === "targetDisplay" || linkSortField === "code" || linkSortField === "placement") {
+      valA = valA || "";
+      valB = valB || "";
       return linkSortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
 
@@ -469,6 +476,12 @@ export default function ClicksDashboardClient({
                   </th>
                   <th 
                     className="pb-3 font-bold uppercase tracking-wider cursor-pointer hover:text-white transition select-none"
+                    onClick={() => handleLinkSort("placement")}
+                  >
+                    Placement {linkSortField === "placement" && (linkSortOrder === "asc" ? "▲" : "▼")}
+                  </th>
+                  <th 
+                    className="pb-3 font-bold uppercase tracking-wider cursor-pointer hover:text-white transition select-none"
                     onClick={() => handleLinkSort("code")}
                   >
                     Code Path {linkSortField === "code" && (linkSortOrder === "asc" ? "▲" : "▼")}
@@ -494,16 +507,14 @@ export default function ClicksDashboardClient({
                   const cleanName = link.targetDisplay.replace(/\s*\([^)]+\)\s*$/, "");
                   return (
                     <tr key={link.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                      <td className="py-3.5 max-w-[280px] truncate font-bold text-white">
+                      <td className="py-3.5 max-w-[240px] truncate font-bold text-white">
                         <div className="flex items-center gap-2.5">
                           {getBrandIcon(meta.brand)}
-                          <div className="flex flex-col min-w-0">
-                            <span className="truncate" title={cleanName}>{cleanName}</span>
-                            <div className="mt-1 flex items-center gap-1.5">
-                              {getPlacementBadge(meta.placement)}
-                            </div>
-                          </div>
+                          <span className="truncate" title={cleanName}>{cleanName}</span>
                         </div>
+                      </td>
+                      <td className="py-3.5">
+                        {getPlacementBadge(meta.placement)}
                       </td>
                       <td className="py-3.5 text-zinc-400 font-semibold font-mono">/s/{link.code}</td>
                       <td className="py-3.5 font-bold text-amber">{link.clicksCount}</td>
@@ -523,7 +534,7 @@ export default function ClicksDashboardClient({
                 })}
                 {filteredLinks.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-zinc-600">No short redirects match search query</td>
+                    <td colSpan={6} className="py-8 text-center text-zinc-600">No short redirects match search query</td>
                   </tr>
                 )}
               </tbody>
