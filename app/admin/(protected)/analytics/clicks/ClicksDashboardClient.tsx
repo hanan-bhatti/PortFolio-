@@ -70,37 +70,37 @@ function getPlacementBadge(placement: string) {
   switch (placement) {
     case "hero":
       return (
-        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-sky-950/40 text-sky-400 border border-sky-900/60 rounded-none">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-sky-950/40 text-sky-400 border border-sky-900/60 rounded-none w-fit">
           <LuSparkles className="w-3 h-3 text-sky-400 flex-shrink-0" /> Hero
         </span>
       );
     case "footer":
       return (
-        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/40 text-zinc-400 border border-zinc-700/60 rounded-none">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/40 text-zinc-400 border border-zinc-700/60 rounded-none w-fit">
           <LuPanelBottom className="w-3 h-3 text-zinc-400 flex-shrink-0" /> Footer
         </span>
       );
     case "contact":
       return (
-        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 rounded-none">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 rounded-none w-fit">
           <LuMessageSquare className="w-3 h-3 text-emerald-400 flex-shrink-0" /> Contact
         </span>
       );
     case "resume":
       return (
-        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-amber-950/40 text-amber-400 border border-amber-900/60 rounded-none">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-amber-950/40 text-amber-400 border border-amber-900/60 rounded-none w-fit">
           <LuFileText className="w-3 h-3 text-amber-400 flex-shrink-0" /> Resume
         </span>
       );
     case "campaign":
       return (
-        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-violet-950/40 text-violet-400 border border-violet-900/60 rounded-none">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-violet-950/40 text-violet-400 border border-violet-900/60 rounded-none w-fit">
           <LuMegaphone className="w-3 h-3 text-violet-400 flex-shrink-0" /> Campaign
         </span>
       );
     default:
       return (
-        <span className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/20 text-zinc-500 border border-zinc-800/60 rounded-none">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-zinc-800/20 text-zinc-500 border border-zinc-800/60 rounded-none w-fit">
           <LuGlobe className="w-3 h-3 text-zinc-500 flex-shrink-0" /> Other
         </span>
       );
@@ -633,10 +633,18 @@ export default function ClicksDashboardClient({
                     <td className="py-3.5 font-bold text-white">{proj.title}</td>
                     <td className="py-3.5 text-zinc-400">{proj.githubTotal}</td>
                     <td className="py-3.5 text-zinc-400">{proj.liveTotal}</td>
-                    <td className="py-3.5 text-[10px] text-zinc-500">
-                      <span className="text-zinc-400">Home:</span> {proj.sourceBreakdown.homepage_experiments || 0} |{" "}
-                      <span className="text-zinc-400">List:</span> {proj.sourceBreakdown.projects_list || 0} |{" "}
-                      <span className="text-zinc-400">Detail:</span> {proj.sourceBreakdown.project_detail || 0}
+                    <td className="py-3.5">
+                      <div className="flex gap-2 items-center flex-wrap">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-900/60 rounded-none w-fit">
+                          <LuSparkles className="w-2.5 h-2.5 text-emerald-400 flex-shrink-0" /> Home: {proj.sourceBreakdown.homepage_experiments || 0}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-sky-950/40 text-sky-400 border border-sky-900/60 rounded-none w-fit">
+                          <LuPanelBottom className="w-2.5 h-2.5 text-sky-400 flex-shrink-0" /> List: {proj.sourceBreakdown.projects_list || 0}
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold font-mono tracking-wider uppercase bg-violet-950/40 text-violet-400 border border-violet-900/60 rounded-none w-fit">
+                          <LuMessageSquare className="w-2.5 h-2.5 text-violet-400 flex-shrink-0" /> Detail: {proj.sourceBreakdown.project_detail || 0}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-3.5 font-bold text-amber">{proj.totalClicks}</td>
                     <td className="py-3.5 text-zinc-500">{formatShortDate(proj.lastActivity)}</td>
