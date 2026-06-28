@@ -105,15 +105,20 @@ export async function GET(
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // 5. Top Referrers
+    // 5. Top Referrers (Unique per Visitor)
     const referrers: Record<string, number> = {};
+    const seenReferrers = new Set<string>();
     events.forEach((e) => {
       if (e.referrer) {
         let domain = e.referrer;
         try {
           domain = new URL(e.referrer).hostname;
         } catch {}
-        referrers[domain] = (referrers[domain] || 0) + 1;
+        const key = `${e.visitorId}:${domain}`;
+        if (!seenReferrers.has(key)) {
+          seenReferrers.add(key);
+          referrers[domain] = (referrers[domain] || 0) + 1;
+        }
       }
     });
     const topReferrers = Object.entries(referrers)
@@ -121,15 +126,38 @@ export async function GET(
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // 6. UTM campaigns breakdown
+    // 6. UTM campaigns breakdown (Unique per Visitor)
     const utmSources: Record<string, number> = {};
     const utmMediums: Record<string, number> = {};
     const utmCampaigns: Record<string, number> = {};
 
+    const seenSources = new Set<string>();
+    const seenMediums = new Set<string>();
+    const seenCampaigns = new Set<string>();
+
     events.forEach((e) => {
-      if (e.utmSource) utmSources[e.utmSource] = (utmSources[e.utmSource] || 0) + 1;
-      if (e.utmMedium) utmMediums[e.utmMedium] = (utmMediums[e.utmMedium] || 0) + 1;
-      if (e.utmCampaign) utmCampaigns[e.utmCampaign] = (utmCampaigns[e.utmCampaign] || 0) + 1;
+      const vid = e.visitorId;
+      if (e.utmSource) {
+        const key = `${vid}:${e.utmSource}`;
+        if (!seenSources.has(key)) {
+          seenSources.add(key);
+          utmSources[e.utmSource] = (utmSources[e.utmSource] || 0) + 1;
+        }
+      }
+      if (e.utmMedium) {
+        const key = `${vid}:${e.utmMedium}`;
+        if (!seenMediums.has(key)) {
+          seenMediums.add(key);
+          utmMediums[e.utmMedium] = (utmMediums[e.utmMedium] || 0) + 1;
+        }
+      }
+      if (e.utmCampaign) {
+        const key = `${vid}:${e.utmCampaign}`;
+        if (!seenCampaigns.has(key)) {
+          seenCampaigns.add(key);
+          utmCampaigns[e.utmCampaign] = (utmCampaigns[e.utmCampaign] || 0) + 1;
+        }
+      }
     });
 
     const utmBreakdown = {

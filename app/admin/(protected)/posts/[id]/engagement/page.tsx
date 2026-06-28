@@ -215,22 +215,52 @@ export default async function AdminPostEngagementPage({ params }: Props) {
     .map(([blockId, count]) => ({ blockId, count }))
     .sort((a, b) => b.count - a.count);
 
-  // 11. Traffic Context Referrers
+  // 11. Traffic Context Referrers (Unique per Visitor)
   const referrers: Record<string, number> = {};
   const utmSources: Record<string, number> = {};
   const utmMediums: Record<string, number> = {};
   const utmCampaigns: Record<string, number> = {};
+
+  const seenReferrers = new Set<string>();
+  const seenSources = new Set<string>();
+  const seenMediums = new Set<string>();
+  const seenCampaigns = new Set<string>();
+
   events.forEach((e) => {
+    const vid = e.visitorId;
+
     if (e.referrer) {
       let host = e.referrer;
       try {
         host = new URL(e.referrer).hostname;
       } catch {}
-      referrers[host] = (referrers[host] || 0) + 1;
+      const key = `${vid}:${host}`;
+      if (!seenReferrers.has(key)) {
+        seenReferrers.add(key);
+        referrers[host] = (referrers[host] || 0) + 1;
+      }
     }
-    if (e.utmSource) utmSources[e.utmSource] = (utmSources[e.utmSource] || 0) + 1;
-    if (e.utmMedium) utmMediums[e.utmMedium] = (utmMediums[e.utmMedium] || 0) + 1;
-    if (e.utmCampaign) utmCampaigns[e.utmCampaign] = (utmCampaigns[e.utmCampaign] || 0) + 1;
+    if (e.utmSource) {
+      const key = `${vid}:${e.utmSource}`;
+      if (!seenSources.has(key)) {
+        seenSources.add(key);
+        utmSources[e.utmSource] = (utmSources[e.utmSource] || 0) + 1;
+      }
+    }
+    if (e.utmMedium) {
+      const key = `${vid}:${e.utmMedium}`;
+      if (!seenMediums.has(key)) {
+        seenMediums.add(key);
+        utmMediums[e.utmMedium] = (utmMediums[e.utmMedium] || 0) + 1;
+      }
+    }
+    if (e.utmCampaign) {
+      const key = `${vid}:${e.utmCampaign}`;
+      if (!seenCampaigns.has(key)) {
+        seenCampaigns.add(key);
+        utmCampaigns[e.utmCampaign] = (utmCampaigns[e.utmCampaign] || 0) + 1;
+      }
+    }
   });
   const topReferrers = Object.entries(referrers)
     .map(([name, count]) => ({ name, count }))
