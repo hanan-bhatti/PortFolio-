@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+
 import { useState, useTransition, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   FiMail,
@@ -12,7 +15,8 @@ import {
   FiCalendar,
   FiChevronLeft,
   FiChevronRight,
-  FiSearch
+  FiSearch,
+  FiClock
 } from "react-icons/fi";
 import { dispatchCampaignAction, deleteSubscriberAction } from "@/lib/actions";
 import EditorialModal from "./EditorialModal";
@@ -67,6 +71,7 @@ export default function NewsletterManager({
   campaigns,
   stats,
 }: NewsletterManagerProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedPost, setSelectedPost] = useState("");
   const [subject, setSubject] = useState("");
@@ -78,6 +83,12 @@ export default function NewsletterManager({
   const [subSortOrder, setSubSortOrder] = useState<"asc" | "desc">("desc");
   const [subPage, setSubPage] = useState(1);
   const subItemsPerPage = 5;
+
+  // Campaigns list states
+  const [campSortField, setCampSortField] = useState<"subject" | "post" | "date" | "receivers" | "opens" | "clicks">("date");
+  const [campSortOrder, setCampSortOrder] = useState<"asc" | "desc">("desc");
+  const [campPage, setCampPage] = useState(1);
+  const campItemsPerPage = 5;
 
   // Filter list
   const filteredSubscribers = subscribers.filter((sub) =>
@@ -97,6 +108,32 @@ export default function NewsletterManager({
     }
   });
 
+  const sortedCampaigns = [...campaigns].sort((a, b) => {
+    let valA: any = a.createdAt;
+    let valB: any = b.createdAt;
+
+    if (campSortField === "subject") {
+      valA = a.subject.toLowerCase();
+      valB = b.subject.toLowerCase();
+    } else if (campSortField === "post") {
+      valA = a.postTitle.toLowerCase();
+      valB = b.postTitle.toLowerCase();
+    } else if (campSortField === "receivers") {
+      valA = a.sentCount;
+      valB = b.sentCount;
+    } else if (campSortField === "opens") {
+      valA = a.opensCount;
+      valB = b.opensCount;
+    } else if (campSortField === "clicks") {
+      valA = a.clicksCount;
+      valB = b.clicksCount;
+    }
+
+    if (valA < valB) return campSortOrder === "asc" ? -1 : 1;
+    if (valA > valB) return campSortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
   // Reset page when search term changes
   useEffect(() => {
     setSubPage(1);
@@ -111,12 +148,29 @@ export default function NewsletterManager({
     startSubIndex + subItemsPerPage
   );
 
+  const totalCampPages = Math.ceil(sortedCampaigns.length / campItemsPerPage) || 1;
+  const activeCampPage = Math.min(campPage, totalCampPages);
+  const startCampIndex = (activeCampPage - 1) * campItemsPerPage;
+  const paginatedCampaigns = sortedCampaigns.slice(
+    startCampIndex,
+    startCampIndex + campItemsPerPage
+  );
+
   const toggleSort = (field: "email" | "joined") => {
     if (subSortField === field) {
       setSubSortOrder(subSortOrder === "asc" ? "desc" : "asc");
     } else {
       setSubSortField(field);
       setSubSortOrder("desc");
+    }
+  };
+
+  const toggleCampSort = (field: typeof campSortField) => {
+    if (campSortField === field) {
+      setCampSortOrder(campSortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setCampSortField(field);
+      setCampSortOrder("desc");
     }
   };
 
@@ -308,7 +362,11 @@ export default function NewsletterManager({
               <tbody className="divide-y divide-[#1e1e1e]">
                 {paginatedSubscribers.map((sub) => (
                   <tr key={sub.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                    <td className="py-2.5 font-bold text-white font-mono">{maskEmail(sub.email)}</td>
+                    <td className="py-2.5 font-bold text-white font-mono">
+                      <Link href={`/admin/newsletter/subscribers/${sub.id}`} className="hover:underline hover:text-amber">
+                        {maskEmail(sub.email)}
+                      </Link>
+                    </td>
                     <td className="py-2.5">
                       <span className={`px-1.5 py-0.5 border text-[9px] uppercase font-bold ${
                         sub.confirmed 
@@ -318,7 +376,7 @@ export default function NewsletterManager({
                         {sub.confirmed ? "Active" : "Pending"}
                       </span>
                     </td>
-                    <td className="py-2.5 text-zinc-500 font-mono">{new Date(sub.createdAt).toLocaleDateString()}</td>
+                    <td className="py-2.5 text-zinc-550 font-mono">{new Date(sub.createdAt).toLocaleDateString()}</td>
                     <td className="py-2.5 text-right">
                       <button
                         type="button"
@@ -366,9 +424,7 @@ export default function NewsletterManager({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Bottom Row: Campaigns History */}
+          {/* Bottom Row: Campaigns History */}
       <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
         <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
           Campaigns History & Metrics
@@ -377,39 +433,91 @@ export default function NewsletterManager({
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[#262626] text-zinc-500 text-[10px] uppercase font-bold tracking-wider">
-                <th className="pb-2">Subject</th>
-                <th className="pb-2">Blog Post</th>
-                <th className="pb-2">Date Sent</th>
-                <th className="pb-2">Receivers</th>
-                <th className="pb-2">Opens (Rate)</th>
-                <th className="pb-2">Clicks (Rate)</th>
+                <th className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleCampSort("subject")}
+                    className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                  >
+                    <FiMail className="w-3.5 h-3.5 text-zinc-500" /> Subject {campSortField === "subject" && (campSortOrder === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleCampSort("post")}
+                    className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                  >
+                    <FiEye className="w-3.5 h-3.5 text-zinc-500" /> Blog Post {campSortField === "post" && (campSortOrder === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleCampSort("date")}
+                    className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                  >
+                    <FiCalendar className="w-3.5 h-3.5 text-zinc-500" /> Date Sent {campSortField === "date" && (campSortOrder === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleCampSort("receivers")}
+                    className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                  >
+                    <FiUsers className="w-3.5 h-3.5 text-zinc-500" /> Receivers {campSortField === "receivers" && (campSortOrder === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleCampSort("opens")}
+                    className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                  >
+                    <FiActivity className="w-3.5 h-3.5 text-zinc-500" /> Opens {campSortField === "opens" && (campSortOrder === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleCampSort("clicks")}
+                    className="flex items-center gap-1 hover:text-white uppercase tracking-wider font-bold focus:outline-none"
+                  >
+                    <FiClock className="w-3.5 h-3.5 text-zinc-500" /> Clicks {campSortField === "clicks" && (campSortOrder === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1e1e1e]">
-              {campaigns.map((camp) => {
+              {paginatedCampaigns.map((camp) => {
                 const openRate = camp.sentCount > 0 ? Math.round((camp.opensCount / camp.sentCount) * 100) : 0;
                 const clickRate = camp.sentCount > 0 ? Math.round((camp.clicksCount / camp.sentCount) * 100) : 0;
 
                 return (
-                  <tr key={camp.id} className="text-zinc-300 hover:bg-white/[0.01]">
+                  <tr 
+                    key={camp.id} 
+                    onClick={() => router.push(`/admin/newsletter/campaigns/${camp.id}`)}
+                    className="text-zinc-300 hover:bg-white/[0.02] cursor-pointer transition-colors"
+                  >
                     <td className="py-3 font-bold text-white">{camp.subject}</td>
                     <td className="py-3 text-zinc-400">{camp.postTitle}</td>
-                    <td className="py-3 text-zinc-500">{new Date(camp.createdAt).toLocaleDateString()}</td>
-                    <td className="py-3 text-zinc-400">{camp.sentCount}</td>
-                    <td className="py-3 text-green font-bold">
+                    <td className="py-3 text-zinc-500 font-mono">{new Date(camp.createdAt).toLocaleDateString()}</td>
+                    <td className="py-3 text-zinc-400 font-mono">{camp.sentCount}</td>
+                    <td className="py-3 text-green font-bold font-mono">
                       {camp.opensCount}{" "}
                       <span className="text-[10px] text-zinc-550 font-normal">({openRate}%)</span>
                     </td>
-                    <td className="py-3 text-amber font-bold">
+                    <td className="py-3 text-amber font-bold font-mono">
                       {camp.clicksCount}{" "}
                       <span className="text-[10px] text-zinc-550 font-normal">({clickRate}%)</span>
                     </td>
                   </tr>
                 );
               })}
-              {campaigns.length === 0 ? (
+              {sortedCampaigns.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-zinc-550 uppercase">
+                  <td colSpan={6} className="py-8 text-center text-zinc-550 uppercase font-mono italic">
                     No campaigns sent yet
                   </td>
                 </tr>
@@ -417,7 +525,32 @@ export default function NewsletterManager({
             </tbody>
           </table>
         </div>
-      </div>
+
+        {/* Campaign Pagination Controls */}
+        {totalCampPages > 1 && (
+          <div className="flex items-center justify-between border-t border-[#262626]/45 pt-4 mt-4 text-[10px]">
+            <button
+              type="button"
+              disabled={activeCampPage === 1}
+              onClick={() => setCampPage(activeCampPage - 1)}
+              className="flex items-center gap-1 uppercase font-bold tracking-wider px-2 py-1 border border-[#262626] bg-black text-zinc-400 hover:border-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:border-[#262626] disabled:hover:text-zinc-400 transition-colors"
+            >
+              <FiChevronLeft className="w-3.5 h-3.5" /> Prev
+            </button>
+            <span className="text-zinc-550 font-bold uppercase tracking-wider">
+              Page {activeCampPage} of {totalCampPages}
+            </span>
+            <button
+              type="button"
+              disabled={activeCampPage === totalCampPages}
+              onClick={() => setCampPage(activeCampPage + 1)}
+              className="flex items-center gap-1 uppercase font-bold tracking-wider px-2 py-1 border border-[#262626] bg-black text-zinc-400 hover:border-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:border-[#262626] disabled:hover:text-zinc-400 transition-colors"
+            >
+              Next <FiChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>    </div>
 
       <EditorialModal
         isOpen={deleteTarget !== null}
