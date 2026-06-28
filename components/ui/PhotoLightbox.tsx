@@ -10,9 +10,28 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
-import { FiHeart, FiDownload, FiShare2, FiCopy, FiX } from "react-icons/fi";
+import { FiHeart, FiDownload, FiShare2, FiCopy, FiX, FiCamera, FiClock, FiLayers, FiMaximize, FiCalendar, FiSliders } from "react-icons/fi";
 import { FaLinkedinIn, FaWhatsapp, FaTwitter, FaInstagram } from "react-icons/fa";
 import { getVisitorId } from "@/lib/analytics";
+
+const getExifIcon = (label: string) => {
+  switch (label.toLowerCase()) {
+    case "device":
+      return <FiCamera className="w-3.5 h-3.5 text-amber-500" />;
+    case "aperture":
+      return <FiSliders className="w-3.5 h-3.5 text-amber-500" />;
+    case "shutter":
+      return <FiClock className="w-3.5 h-3.5 text-amber-500" />;
+    case "iso":
+      return <FiLayers className="w-3.5 h-3.5 text-amber-500" />;
+    case "focal":
+      return <FiMaximize className="w-3.5 h-3.5 text-amber-500" />;
+    case "date":
+      return <FiCalendar className="w-3.5 h-3.5 text-amber-500" />;
+    default:
+      return null;
+  }
+};
 
 interface Particle {
   id: number;
@@ -377,7 +396,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 transition-opacity duration-300"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/98 transition-opacity duration-300"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={onClose}
@@ -527,31 +546,45 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         </div>
 
         {/* Info panel below the image */}
-        <div className="w-full text-left mt-3 font-inter">
-          {currentPhoto.title && (
-            <h3 className="font-syne text-xs font-bold text-white uppercase tracking-wider">
-              {currentPhoto.title}
-            </h3>
-          )}
+        <div className="w-full mt-4 font-inter text-left space-y-3">
+          {/* Main Caption Card */}
+          <div className="space-y-1">
+            {currentPhoto.title && (
+              <h3 className="font-syne text-sm font-bold text-white uppercase tracking-wider">
+                {currentPhoto.title}
+              </h3>
+            )}
+            {currentPhoto.description && (
+              <p className="font-inter text-xs text-zinc-400 italic leading-relaxed">
+                {currentPhoto.description}
+              </p>
+            )}
+          </div>
 
-          {currentPhoto.description && (
-            <p className="font-inter text-xs text-zinc-400 mt-1 italic leading-relaxed">
-              {currentPhoto.description}
-            </p>
-          )}
-
+          {/* Camera specs grid card */}
           {hasExif && exifItems.length > 0 && (
-            <div className="flex gap-x-4 gap-y-2 flex-wrap mt-3 pt-3 border-t border-white/5">
-              {exifItems.map((item, idx) => (
-                <div key={idx} className="flex flex-col">
-                  <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-mono">
-                    {item.label}
-                  </span>
-                  <span className="text-[11px] text-zinc-300 font-medium font-mono mt-0.5">
-                    {item.value}
-                  </span>
-                </div>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-3 border-t border-white/5">
+              {exifItems.map((item, idx) => {
+                const icon = getExifIcon(item.label);
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex items-center gap-2 bg-white/[0.02] border border-white/5 px-2.5 py-1.5 hover:bg-white/[0.04] transition-colors"
+                  >
+                    <div className="p-1.5 bg-white/[0.03] border border-white/5 rounded-sm shrink-0">
+                      {icon}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[7.5px] text-zinc-500 uppercase font-mono tracking-widest leading-none">
+                        {item.label}
+                      </span>
+                      <span className="text-[10px] text-zinc-300 font-medium font-mono mt-0.5 truncate leading-tight">
+                        {item.value}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
