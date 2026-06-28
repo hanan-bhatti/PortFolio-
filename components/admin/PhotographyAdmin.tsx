@@ -85,6 +85,9 @@ export default function PhotographyAdmin({
   const [uploading, setUploading] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Tab state for the audit log
+  const [logTab, setLogTab] = useState<"timeline" | "photos" | "users">("timeline");
+
   // Real-time progress states
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [processingCount, setProcessingCount] = useState<number | null>(null);
@@ -92,6 +95,72 @@ export default function PhotographyAdmin({
 
   // drag state
   const dragIdx = useRef<number | null>(null);
+
+  // Memoized lists grouped by photo and visitor
+  const interactionsByPhoto = Object.values(
+    interactions.reduce((acc, curr) => {
+      if (!acc[curr.photoId]) {
+        acc[curr.photoId] = {
+          photoId: curr.photoId,
+          photoTitle: curr.photoTitle,
+          photoImageUrl: curr.photoImageUrl,
+          interactions: [],
+        };
+      }
+      const group = acc[curr.photoId];
+      if (group) {
+        group.interactions.push(curr);
+      }
+      return acc;
+    }, {} as Record<string, { photoId: string; photoTitle: string; photoImageUrl: string; interactions: typeof interactions }>)
+  );
+
+  const interactionsByVisitor = Object.values(
+    interactions.reduce((acc, curr) => {
+      if (!acc[curr.visitorId]) {
+        acc[curr.visitorId] = {
+          visitorId: curr.visitorId,
+          geo: curr.geo,
+          interactions: [],
+        };
+      }
+      const group = acc[curr.visitorId];
+      if (group) {
+        group.interactions.push(curr);
+      }
+      return acc;
+    }, {} as Record<string, { visitorId: string; geo: Interaction["geo"]; interactions: typeof interactions }>)
+  );
+
+  const getInteractionMeta = (type: string) => {
+    let actionText = "";
+    let actionColor = "text-zinc-400";
+    let actionIcon = null;
+
+    if (type === "like") {
+      actionText = "Liked photograph";
+      actionColor = "text-red-500";
+      actionIcon = <FiHeart className="w-3 h-3 fill-current" />;
+    } else if (type === "download") {
+      actionText = "Downloaded photograph";
+      actionColor = "text-[#10B981]";
+      actionIcon = <FiDownload className="w-3 h-3" />;
+    } else if (type.startsWith("share_")) {
+      const platform = type.split("_")[1] || "unknown";
+      actionText = `Shared to ${platform}`;
+      actionColor = "text-amber-500";
+      actionIcon = <FiShare2 className="w-3 h-3" />;
+    } else if (type.startsWith("ref_click:")) {
+      const referrerId = type.split(":")[1] || "";
+      actionText = `Opened referral link (Ref: ${referrerId.substring(0, 8)})`;
+      actionColor = "text-blue-400";
+      actionIcon = <FiGlobe className="w-3 h-3" />;
+    } else {
+      actionText = `Interacted (${type})`;
+      actionIcon = <FiTerminal className="w-3 h-3" />;
+    }
+    return { actionText, actionColor, actionIcon };
+  };
 
   // ── Settings save ─────────────────────────────────────────────────────────
   const saveSettings = async () => {
@@ -425,7 +494,7 @@ export default function PhotographyAdmin({
                   {/* Photo Engagement Analytics */}
                   <div className="flex gap-4 mb-3 font-mono text-[9px] text-zinc-400 uppercase tracking-wider items-center">
                     <span title="Likes" className="flex items-center gap-1"><FiHeart className="w-3 h-3 text-red-500 fill-current" /> {photo.likes ?? 0}</span>
-                    <span title="Downloads" className="flex items-center gap-1"><FiDownload className="w-3 h-3 text-green" /> {photo.downloads ?? 0}</span>
+                    <span title="Downloads" className="flex items-center gap-1"><FiDownload className="w-3 h-3 text-[#10B981]" /> {photo.downloads ?? 0}</span>
                     <span title="Shares" className="flex items-center gap-1"><FiShare2 className="w-3 h-3 text-amber-500" /> {photo.shares ?? 0}</span>
                   </div>
 
@@ -449,104 +518,243 @@ export default function PhotographyAdmin({
       </section>
 
       {/* ── Photo Engagement & Referral Tracking Log ── */}
-      <section className="mb-10 border border-[#262626] bg-[#0c0c0c] p-6 mt-10">
-        <div className="flex items-center gap-2 mb-6 border-b border-[#262626] pb-3">
-          <FiActivity className="w-4 h-4 text-[#F59E0B]" />
-          <h2 className="font-syne text-sm font-bold text-white uppercase tracking-wider">
-            Engagement & Referral Log
-          </h2>
+      <section className="mb-10 border border-[#262626] bg-[#0c0c0c] p-6 mt-10 font-mono">
+        <div className="flex items-center gap-2 mb-6 border-b border-[#262626] pb-3 justify-between flex-wrap">
+          <div className="flex items-center gap-2">
+            <FiActivity className="w-4 h-4 text-[#F59E0B]" />
+            <h2 className="font-syne text-sm font-bold text-white uppercase tracking-wider">
+              Engagement & Referral Log
+            </h2>
+          </div>
+
+          {/* Tab Selector */}
+          <div className="flex gap-3 mt-2 sm:mt-0">
+            {(["timeline", "photos", "users"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setLogTab(tab)}
+                className={`text-[9px] uppercase font-bold tracking-wider px-2.5 py-1 border transition-all ${
+                  logTab === tab
+                    ? "border-[#F59E0B] bg-[#F59E0B]/10 text-[#F59E0B]"
+                    : "border-[#262626] bg-black text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {tab === "timeline" ? "Feed" : tab === "photos" ? "By Photo" : "By Visitor"}
+              </button>
+            ))}
+          </div>
         </div>
 
         {interactions.length === 0 ? (
-          <p className="text-zinc-650 font-mono">No interactions recorded yet.</p>
+          <p className="text-zinc-650 font-mono text-xs">No interactions recorded yet.</p>
         ) : (
-          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-            {interactions.map((item) => {
-              // Parse platform or referral detail from type
-              let actionText = "";
-              let actionColor = "text-zinc-400";
-              let actionIcon = null;
+          <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar space-y-6">
+            {/* 1. Flat Timeline Feed */}
+            {logTab === "timeline" && (
+              <div className="space-y-4">
+                {interactions.map((item) => {
+                  const { actionText, actionColor, actionIcon } = getInteractionMeta(item.type);
+                  const formattedTime = new Date(item.createdAt).toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
 
-              if (item.type === "like") {
-                actionText = "Liked photograph";
-                actionColor = "text-red-500";
-                actionIcon = <FiHeart className="w-3.5 h-3.5 fill-current" />;
-              } else if (item.type === "download") {
-                actionText = "Downloaded photograph";
-                actionColor = "text-green-500";
-                actionIcon = <FiDownload className="w-3.5 h-3.5" />;
-              } else if (item.type.startsWith("share_")) {
-                const platform = item.type.split("_")[1] || "unknown";
-                actionText = `Shared to ${platform}`;
-                actionColor = "text-amber-500";
-                actionIcon = <FiShare2 className="w-3.5 h-3.5" />;
-              } else if (item.type.startsWith("ref_click:")) {
-                const referrerId = item.type.split(":")[1] || "";
-                actionText = `Opened shared link (Referred by user ${referrerId.substring(0, 8)}...)`;
-                actionColor = "text-blue-400";
-                actionIcon = <FiGlobe className="w-3.5 h-3.5" />;
-              } else {
-                actionText = `Interacted (${item.type})`;
-                actionIcon = <FiTerminal className="w-3.5 h-3.5" />;
-              }
+                  return (
+                    <div key={item.id} className="flex gap-4 items-start border-b border-[#262626]/40 pb-3 last:border-0 last:pb-0">
+                      <div className="relative w-11 h-11 bg-zinc-900 border border-[#262626] shrink-0">
+                        <Image
+                          src={item.photoImageUrl}
+                          alt={item.photoTitle}
+                          fill
+                          sizes="44px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
 
-              const formattedTime = new Date(item.createdAt).toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-
-              return (
-                <div key={item.id} className="flex gap-4 items-start border-b border-[#262626]/40 pb-3 last:border-0 last:pb-0 font-mono">
-                  {/* Photo Thumbnail */}
-                  <div className="relative w-12 h-12 bg-zinc-900 border border-[#262626] shrink-0">
-                    <Image
-                      src={item.photoImageUrl}
-                      alt={item.photoTitle}
-                      fill
-                      sizes="48px"
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-
-                  {/* Log Details */}
-                  <div className="flex-grow min-w-0 font-mono">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`flex items-center gap-1.5 font-bold uppercase tracking-wide text-[10px] ${actionColor}`}>
-                        {actionIcon}
-                        {actionText}
-                      </span>
-                      <span className="text-[10px] text-zinc-500">· {formattedTime}</span>
-                    </div>
-
-                    <div className="text-[11px] text-zinc-300 font-syne font-bold uppercase tracking-tight mt-1 truncate">
-                      {item.photoTitle}
-                    </div>
-
-                    {/* Visitor context */}
-                    <div className="flex gap-3 items-center text-[9px] text-zinc-500 mt-1 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <FiUser className="w-3 h-3" />
-                        {item.visitorId.substring(0, 10)}...
-                      </span>
-                      {item.geo && (
-                        <>
-                          <span className="flex items-center gap-1">
-                            <FiMapPin className="w-3 h-3 text-[#10B981]" />
-                            {item.geo.city}, {item.geo.country}
+                      <div className="flex-grow min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`flex items-center gap-1 font-bold uppercase tracking-wide text-[9px] ${actionColor}`}>
+                            {actionIcon}
+                            {actionText}
                           </span>
-                          <span className="capitalize text-zinc-600">
-                            {item.geo.device} ({item.geo.browser})
+                          <span className="text-[9px] text-zinc-500">· {formattedTime}</span>
+                        </div>
+
+                        <div className="text-[11px] text-zinc-300 font-syne font-bold uppercase tracking-tight mt-1 truncate">
+                          {item.photoTitle}
+                        </div>
+
+                        <div className="flex gap-3 items-center text-[9px] text-zinc-500 mt-1 flex-wrap">
+                          <span className="flex items-center gap-0.5">
+                            <FiUser className="w-2.5 h-2.5" />
+                            {item.visitorId.substring(0, 10)}...
                           </span>
-                        </>
-                      )}
+                          {item.geo && (
+                            <>
+                              <span className="flex items-center gap-0.5">
+                                <FiMapPin className="w-2.5 h-2.5 text-[#10B981]" />
+                                {item.geo.city}, {item.geo.country}
+                              </span>
+                              <span className="capitalize text-zinc-650">
+                                {item.geo.device} ({item.geo.browser})
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* 2. Grouped By Photo */}
+            {logTab === "photos" && (
+              <div className="space-y-6">
+                {interactionsByPhoto.map((group) => (
+                  <div key={group.photoId} className="border border-[#262626] bg-black/40 p-4">
+                    <div className="flex gap-3 items-center border-b border-[#262626] pb-3 mb-3">
+                      <div className="relative w-12 h-12 bg-zinc-900 border border-[#262626] shrink-0">
+                        <Image
+                          src={group.photoImageUrl}
+                          alt={group.photoTitle}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-syne font-bold text-white text-xs uppercase tracking-tight truncate">
+                          {group.photoTitle}
+                        </h3>
+                        <p className="text-[9px] text-zinc-500 uppercase tracking-wider mt-0.5">
+                          Total Interactions: {group.interactions.length}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pl-2 border-l border-[#262626]">
+                      {group.interactions.map((event) => {
+                        const { actionText, actionColor, actionIcon } = getInteractionMeta(event.type);
+                        const formattedTime = new Date(event.createdAt).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+
+                        return (
+                          <div key={event.id} className="text-xs">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className={`flex items-center gap-1 font-bold uppercase tracking-wide text-[9px] ${actionColor}`}>
+                                {actionIcon}
+                                {actionText}
+                              </span>
+                              <span className="text-[9px] text-zinc-500">· {formattedTime}</span>
+                            </div>
+                            <div className="flex gap-3 items-center text-[9px] text-zinc-500 mt-0.5 flex-wrap">
+                              <span className="flex items-center gap-0.5">
+                                <FiUser className="w-2.5 h-2.5" />
+                                {event.visitorId.substring(0, 10)}...
+                              </span>
+                              {event.geo && (
+                                <>
+                                  <span className="flex items-center gap-0.5">
+                                    <FiMapPin className="w-2.5 h-2.5 text-[#10B981]" />
+                                    {event.geo.city}, {event.geo.country}
+                                  </span>
+                                  <span className="capitalize text-zinc-650">
+                                    {event.geo.device} ({event.geo.browser})
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            )}
+
+            {/* 3. Grouped By Visitor */}
+            {logTab === "users" && (
+              <div className="space-y-6">
+                {interactionsByVisitor.map((group) => {
+                  const locationString = group.geo 
+                    ? `${group.geo.city}, ${group.geo.country}` 
+                    : "Unknown Location";
+                  const browserString = group.geo
+                    ? `${group.geo.device} (${group.geo.browser})`
+                    : "";
+
+                  return (
+                    <div key={group.visitorId} className="border border-[#262626] bg-black/40 p-4">
+                      <div className="border-b border-[#262626] pb-3 mb-3">
+                        <div className="flex items-center gap-2 flex-wrap text-white font-bold text-xs uppercase tracking-tight font-syne">
+                          <FiUser className="w-3.5 h-3.5 text-[#F59E0B]" />
+                          <span>Visitor: {group.visitorId.substring(0, 12)}...</span>
+                        </div>
+                        <div className="flex gap-3 items-center text-[9px] text-zinc-500 mt-1 flex-wrap">
+                          <span className="flex items-center gap-0.5">
+                            <FiMapPin className="w-2.5 h-2.5 text-[#10B981]" />
+                            {locationString}
+                          </span>
+                          {browserString && <span className="capitalize">{browserString}</span>}
+                          <span>· {group.interactions.length} Events</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3.5 pl-2 border-l border-[#262626]">
+                        {group.interactions.map((event) => {
+                          const { actionText, actionColor, actionIcon } = getInteractionMeta(event.type);
+                          const formattedTime = new Date(event.createdAt).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          });
+
+                          return (
+                            <div key={event.id} className="flex gap-3 items-start text-xs">
+                              {/* Photo thumbnail */}
+                              <div className="relative w-8 h-8 bg-zinc-900 border border-[#262626] shrink-0 mt-0.5">
+                                <Image
+                                  src={event.photoImageUrl}
+                                  alt={event.photoTitle}
+                                  fill
+                                  sizes="32px"
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className={`flex items-center gap-1 font-bold uppercase tracking-wide text-[9px] ${actionColor}`}>
+                                    {actionIcon}
+                                    {actionText}
+                                  </span>
+                                  <span className="text-[9px] text-zinc-500">· {formattedTime}</span>
+                                </div>
+                                <div className="text-[10px] text-zinc-300 font-syne font-bold uppercase tracking-tight mt-0.5 truncate">
+                                  {event.photoTitle}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </section>
