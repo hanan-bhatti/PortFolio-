@@ -111,12 +111,16 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const [canShareNative, setCanShareNative] = useState(false);
   
   const lastTapRef = useRef<number>(0);
   const heartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    if (typeof window !== "undefined" && typeof navigator.share === "function") {
+      setCanShareNative(true);
+    }
     const originalStyle = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -260,6 +264,55 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       });
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Handle native file + text share
+  const handleNativeShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentPhoto) return;
+    const visitorId = getVisitorId() || "anonymous";
+
+    try {
+      // Fetch the image file using our same-origin server proxy to prevent CORS blocking
+      const response = await fetch(`/api/photography/${currentPhoto.id}/download?visitorId=${encodeURIComponent(visitorId)}`);
+      const blob = await response.blob();
+      
+      const contentType = response.headers.get("Content-Type") || "image/jpeg";
+      const fileExt = contentType.split("/")[1] || "jpg";
+      const filename = `${(currentPhoto.title || "photo").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.${fileExt}`;
+      const file = new File([blob], filename, { type: contentType });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: currentPhoto.title || "Photograph",
+          text: `Check out this photograph: ${shareLink}`,
+        });
+        trackShare("native-file-share");
+        setShowShareModal(false);
+      } else {
+        await navigator.share({
+          title: currentPhoto.title || "Photograph",
+          text: `Check out this photograph: ${shareLink}`,
+          url: shareLink
+        });
+        trackShare("native-text-share");
+        setShowShareModal(false);
+      }
+    } catch (err) {
+      console.warn("Native file sharing failed, attempting text-only share:", err);
+      try {
+        await navigator.share({
+          title: currentPhoto.title || "Photograph",
+          text: `Check out this photograph: ${shareLink}`,
+          url: shareLink
+        });
+        trackShare("native-fallback-share");
+        setShowShareModal(false);
+      } catch (fallbackErr) {
+        console.error("Native share sheet failed completely:", fallbackErr);
+      }
     }
   };
 
@@ -610,6 +663,17 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
               Share Photograph
             </h4>
 
+            {/* Native share button if supported on device */}
+            {canShareNative && (
+              <button
+                type="button"
+                onClick={handleNativeShare}
+                className="w-full flex items-center justify-center gap-2 mb-4 p-2.5 bg-amber-500 hover:bg-amber-600 text-black text-xs font-semibold uppercase tracking-wider transition-all duration-300 active:scale-95"
+              >
+                <span>Share Image & Link</span>
+              </button>
+            )}
+
             {/* Social options */}
             <div className="grid grid-cols-4 gap-4 mb-6">
               <a 
@@ -624,7 +688,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
               </a>
               
               <a 
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this photo: ${shareLink}`)}`}
+                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this photo: "${currentPhoto.title || ""}"\nLink: ${shareLink}\nImage: ${currentPhoto.imageUrl}`)}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => trackShare("whatsapp")}
@@ -635,7 +699,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
               </a>
 
               <a 
-                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(`Check out this photo: ${currentPhoto.title || ""}`)}`}
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent(`Check out "${currentPhoto.title || ""}" - Direct image: ${currentPhoto.imageUrl}`)}`}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => trackShare("twitter")}

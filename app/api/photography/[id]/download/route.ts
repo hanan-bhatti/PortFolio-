@@ -113,7 +113,6 @@ export async function GET(
       return new Response("Failed to fetch image from host", { status: 502 });
     }
 
-    const blob = await imageResponse.blob();
     const headers = new Headers();
     const filename = photo.title
       ? `${photo.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`
@@ -123,7 +122,8 @@ export async function GET(
     headers.set("Content-Disposition", `attachment; filename="${filename}"`);
     headers.set("Cache-Control", "no-cache");
 
-    return new Response(blob, {
+    // Stream the readable body stream directly to the browser
+    return new Response(imageResponse.body, {
       status: 200,
       headers,
     });
