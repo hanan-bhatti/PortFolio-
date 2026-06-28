@@ -12,7 +12,31 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { useUploadThing } from "@/lib/uploadthing";
 import { toast } from "sonner";
-import { FiHeart, FiDownload, FiShare2, FiActivity, FiUser, FiMapPin, FiTerminal, FiGlobe } from "react-icons/fi";
+import {
+  FiHeart,
+  FiDownload,
+  FiShare2,
+  FiActivity,
+  FiUser,
+  FiMapPin,
+  FiTerminal,
+  FiGlobe,
+  FiSmartphone,
+  FiMonitor,
+  FiTablet,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight
+} from "react-icons/fi";
+import {
+  FaChrome,
+  FaSafari,
+  FaFirefox,
+  FaInstagram,
+  FaLinkedin,
+  FaFacebook,
+  FaTwitter
+} from "react-icons/fa6";
 import EditorialModal from "./EditorialModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -69,6 +93,43 @@ interface PhotographyAdminProps {
   initialDescription: string;
 }
 
+function getDeviceIcon(device: string) {
+  const dev = device.toLowerCase();
+  if (dev.includes("mobile") || dev.includes("phone")) {
+    return <FiSmartphone className="w-3 h-3 text-zinc-500 flex-shrink-0" />;
+  }
+  if (dev.includes("tablet") || dev.includes("ipad")) {
+    return <FiTablet className="w-3 h-3 text-zinc-500 flex-shrink-0" />;
+  }
+  return <FiMonitor className="w-3 h-3 text-zinc-500 flex-shrink-0" />;
+}
+
+function getBrowserIcon(browser: string) {
+  const b = browser.toLowerCase();
+  if (b.includes("instagram")) {
+    return <FaInstagram className="w-3 h-3 text-pink-500 flex-shrink-0" />;
+  }
+  if (b.includes("linkedin")) {
+    return <FaLinkedin className="w-3 h-3 text-blue-500 flex-shrink-0" style={{ color: "#0A66C2" }} />;
+  }
+  if (b.includes("facebook")) {
+    return <FaFacebook className="w-3 h-3 text-blue-500 flex-shrink-0" />;
+  }
+  if (b.includes("twitter") || b.includes("x")) {
+    return <FaTwitter className="w-3 h-3 text-sky-400 flex-shrink-0" />;
+  }
+  if (b.includes("chrome")) {
+    return <FaChrome className="w-3 h-3 text-red-400 flex-shrink-0" />;
+  }
+  if (b.includes("safari")) {
+    return <FaSafari className="w-3 h-3 text-blue-400 flex-shrink-0" />;
+  }
+  if (b.includes("firefox")) {
+    return <FaFirefox className="w-3 h-3 text-orange-400 flex-shrink-0" />;
+  }
+  return null;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function PhotographyAdmin({
   initialPhotos,
@@ -96,9 +157,48 @@ export default function PhotographyAdmin({
   // drag state
   const dragIdx = useRef<number | null>(null);
 
-  // Memoized lists grouped by photo and visitor
+  // Search, filter, and sort states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "like" | "download" | "share" | "referral">("all");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Filter list
+  const filteredInteractions = interactions.filter((item) => {
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = 
+      item.photoTitle.toLowerCase().includes(term) ||
+      item.visitorId.toLowerCase().includes(term) ||
+      item.type.toLowerCase().includes(term) ||
+      (item.geo?.city || "").toLowerCase().includes(term) ||
+      (item.geo?.country || "").toLowerCase().includes(term);
+
+    if (!matchesSearch) return false;
+
+    if (filterType === "all") return true;
+    if (filterType === "like") return item.type === "like";
+    if (filterType === "download") return item.type === "download";
+    if (filterType === "share") return item.type.startsWith("share_");
+    if (filterType === "referral") return item.type.startsWith("ref_click:");
+    return true;
+  });
+
+  // Sort list
+  const sortedInteractions = [...filteredInteractions].sort((a, b) => {
+    const timeA = new Date(a.createdAt).getTime();
+    const timeB = new Date(b.createdAt).getTime();
+    return sortOrder === "desc" ? timeB - timeA : timeA - timeB;
+  });
+
+  // Reset page when filtering or searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType]);
+
+  // Grouped lists
   const interactionsByPhoto = Object.values(
-    interactions.reduce((acc, curr) => {
+    sortedInteractions.reduce((acc, curr) => {
       if (!acc[curr.photoId]) {
         acc[curr.photoId] = {
           photoId: curr.photoId,
@@ -116,7 +216,7 @@ export default function PhotographyAdmin({
   );
 
   const interactionsByVisitor = Object.values(
-    interactions.reduce((acc, curr) => {
+    sortedInteractions.reduce((acc, curr) => {
       if (!acc[curr.visitorId]) {
         acc[curr.visitorId] = {
           visitorId: curr.visitorId,
@@ -131,6 +231,13 @@ export default function PhotographyAdmin({
       return acc;
     }, {} as Record<string, { visitorId: string; geo: Interaction["geo"]; interactions: typeof interactions }>)
   );
+
+  // Paginated flat feed
+  const totalItems = sortedInteractions.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const paginatedTimeline = sortedInteractions.slice(startIndex, startIndex + itemsPerPage);
 
   const getInteractionMeta = (type: string) => {
     let actionText = "";
@@ -546,14 +653,60 @@ export default function PhotographyAdmin({
           </div>
         </div>
 
-        {interactions.length === 0 ? (
-          <p className="text-zinc-650 font-mono text-xs">No interactions recorded yet.</p>
+        {/* Controls Bar: Search, Type Filter, Sort Order */}
+        {interactions.length > 0 && (
+          <div className="grid gap-3 md:grid-cols-4 mb-6 bg-black/40 border border-[#262626]/60 p-4 text-xs">
+            {/* Search Input */}
+            <div className="relative md:col-span-2">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FiSearch className="text-zinc-500 w-3.5 h-3.5" />
+              </span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search photo, visitor, city, country, or action..."
+                className="w-full pl-9 pr-4 py-2 border border-[#262626] bg-black text-zinc-300 placeholder-zinc-650 outline-none focus:border-[#F59E0B]/50 font-mono text-[11px] rounded-none"
+              />
+            </div>
+
+            {/* Type Filter */}
+            <div>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as any)}
+                className="w-full px-3 py-2 border border-[#262626] bg-black text-zinc-300 outline-none focus:border-[#F59E0B]/50 font-mono text-[11px] rounded-none"
+              >
+                <option value="all">All Events</option>
+                <option value="like">Likes</option>
+                <option value="download">Downloads</option>
+                <option value="share">Shares</option>
+                <option value="referral">Referrals</option>
+              </select>
+            </div>
+
+            {/* Sort Order */}
+            <div>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as any)}
+                className="w-full px-3 py-2 border border-[#262626] bg-black text-zinc-300 outline-none focus:border-[#F59E0B]/50 font-mono text-[11px] rounded-none"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {sortedInteractions.length === 0 ? (
+          <p className="text-zinc-650 font-mono text-xs italic">No matching interactions found.</p>
         ) : (
-          <div className="max-h-[500px] overflow-y-auto pr-2 custom-scrollbar space-y-6">
+          <div className="max-h-[600px] overflow-y-auto pr-2 custom-scrollbar space-y-6">
             {/* 1. Flat Timeline Feed */}
             {logTab === "timeline" && (
               <div className="space-y-4">
-                {interactions.map((item) => {
+                {paginatedTimeline.map((item) => {
                   const { actionText, actionColor, actionIcon } = getInteractionMeta(item.type);
                   const formattedTime = new Date(item.createdAt).toLocaleString("en-US", {
                     month: "short",
@@ -599,8 +752,10 @@ export default function PhotographyAdmin({
                                 <FiMapPin className="w-2.5 h-2.5 text-[#10B981]" />
                                 {item.geo.city}, {item.geo.country}
                               </span>
-                              <span className="capitalize text-zinc-650">
-                                {item.geo.device} ({item.geo.browser})
+                              <span className="flex items-center gap-1.5 capitalize text-zinc-650">
+                                {getDeviceIcon(item.geo.device)}
+                                {getBrowserIcon(item.geo.browser)}
+                                <span>{item.geo.device} ({item.geo.browser})</span>
                               </span>
                             </>
                           )}
@@ -609,6 +764,31 @@ export default function PhotographyAdmin({
                     </div>
                   );
                 })}
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-[#262626]/40 pt-4 mt-6">
+                    <button
+                      type="button"
+                      disabled={activePage === 1}
+                      onClick={() => setCurrentPage(activePage - 1)}
+                      className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 border border-[#262626] bg-black text-zinc-400 hover:border-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:border-[#262626] disabled:hover:text-zinc-400 transition-colors"
+                    >
+                      <FiChevronLeft className="w-3.5 h-3.5" /> Previous
+                    </button>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                      Page {activePage} of {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={activePage === totalPages}
+                      onClick={() => setCurrentPage(activePage + 1)}
+                      className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 border border-[#262626] bg-black text-zinc-400 hover:border-zinc-500 hover:text-white disabled:opacity-30 disabled:hover:border-[#262626] disabled:hover:text-zinc-400 transition-colors"
+                    >
+                      Next <FiChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -668,8 +848,10 @@ export default function PhotographyAdmin({
                                     <FiMapPin className="w-2.5 h-2.5 text-[#10B981]" />
                                     {event.geo.city}, {event.geo.country}
                                   </span>
-                                  <span className="capitalize text-zinc-650">
-                                    {event.geo.device} ({event.geo.browser})
+                                  <span className="flex items-center gap-1.5 capitalize text-zinc-650">
+                                    {getDeviceIcon(event.geo.device)}
+                                    {getBrowserIcon(event.geo.browser)}
+                                    <span>{event.geo.device} ({event.geo.browser})</span>
                                   </span>
                                 </>
                               )}
@@ -706,7 +888,13 @@ export default function PhotographyAdmin({
                             <FiMapPin className="w-2.5 h-2.5 text-[#10B981]" />
                             {locationString}
                           </span>
-                          {browserString && <span className="capitalize">{browserString}</span>}
+                          {group.geo && (
+                            <span className="flex items-center gap-1.5 capitalize">
+                              {getDeviceIcon(group.geo.device)}
+                              {getBrowserIcon(group.geo.browser)}
+                              <span>{browserString}</span>
+                            </span>
+                          )}
                           <span>· {group.interactions.length} Events</span>
                         </div>
                       </div>
