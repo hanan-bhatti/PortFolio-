@@ -17,6 +17,8 @@ import { classifyReferrer } from "@/lib/classify-referrer";
 
 export const dynamic = "force-dynamic";
 
+const pendingPageViews = new Map<string, Promise<any>>();
+
 export async function POST(request: NextRequest) {
   try {
     // Check if analytics is enabled
@@ -46,27 +48,40 @@ export async function POST(request: NextRequest) {
     // Normalize path (ensure consistent format: strip trailing slash except for root "/")
     const normalizedPath = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
 
-    // Verify visitor exists
-    const visitorExists = await prisma.visitor.findUnique({ where: { id: visitorId } });
-    if (!visitorExists) {
-      return NextResponse.json({ error: "Visitor not found" }, { status: 404 });
-    }
-
-    // ── Server-Side Deduplication Check ──────────────────────────────────────
-    // Check if this visitor already recorded a view for this path in the last 24h
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const existingView = await prisma.pageView.findFirst({
-      where: {
-        visitorId,
-        path: normalizedPath,
-        timestamp: { gte: twentyFourHoursAgo },
-      },
-    });
-
-    if (existingView) {
-      // Already tracked in the last 24 hours. Return early to prevent database inflation.
+    const lockKey = `${visitorId}:${normalizedPath}`;
+    if (pendingPageViews.has(lockKey)) {
+      await pendingPageViews.get(lockKey);
       return NextResponse.json({ success: true, tracked: false });
     }
+
+    let resolvePromise: any;
+    const lockPromise = new Promise((resolve) => {
+      resolvePromise = resolve;
+    });
+    pendingPageViews.set(lockKey, lockPromise);
+
+    try {
+      // Verify visitor exists
+      const visitorExists = await prisma.visitor.findUnique({ where: { id: visitorId } });
+      if (!visitorExists) {
+        return NextResponse.json({ error: "Visitor not found" }, { status: 404 });
+      }
+
+      // ── Server-Side Deduplication Check ──────────────────────────────────────
+      // Check if this visitor already recorded a view for this path in the last 24h
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const existingView = await prisma.pageView.findFirst({
+        where: {
+          visitorId,
+          path: normalizedPath,
+          timestamp: { gte: twentyFourHoursAgo },
+        },
+      });
+
+      if (existingView) {
+        // Already tracked in the last 24 hours. Return early to prevent database inflation.
+        return NextResponse.json({ success: true, tracked: false });
+      }
 
     // ── Classify referrer server-side using the library ─────────────────────
     const classified = classifyReferrer(referrer);
@@ -108,7 +123,11 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true, tracked: true });
+      return NextResponse.json({ success: true, tracked: true });
+    } finally {
+      pendingPageViews.delete(lockKey);
+      resolvePromise();
+    }
   } catch (error) {
     console.error("PageView POST failed:", error);
     return NextResponse.json({ success: false }, { status: 500 });
