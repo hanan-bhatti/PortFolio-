@@ -462,100 +462,99 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           })}
         </div>
 
-        {/* Social Metrics Bar */}
-        <div className="flex justify-center items-center gap-6 mt-4 pb-2 border-b border-white/10 w-full max-w-[400px]">
-          <button 
-            onClick={handleLike} 
-            className="flex items-center gap-1.5 font-inter text-[13px] text-white/80 hover:text-red-400 transition-colors"
-          >
-            <FiHeart className={`w-5 h-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-            <span>{likes}</span>
-          </button>
-          
-          <button 
-            onClick={handleDownload} 
-            className="flex items-center gap-1.5 font-inter text-[13px] text-white/80 hover:text-green transition-colors"
-          >
-            <FiDownload className="w-5 h-5" />
-            <span>{downloads}</span>
-          </button>
+        {/* Bottom actions & indicators bar */}
+        <div className="flex items-center justify-between mt-4 w-full border-b border-white/5 pb-3">
+          {/* Actions on the left */}
+          <div className="flex items-center gap-5">
+            <button 
+              onClick={handleLike} 
+              className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-red-450 transition-colors"
+            >
+              <FiHeart className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+              <span>{likes}</span>
+            </button>
+            
+            <button 
+              onClick={handleDownload} 
+              className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-[#10B981] transition-colors"
+            >
+              <FiDownload className="w-4 h-4" />
+              <span>{downloads}</span>
+            </button>
 
-          <button 
-            onClick={() => setShowShareModal(true)} 
-            className="flex items-center gap-1.5 font-inter text-[13px] text-white/80 hover:text-amber-500 transition-colors"
-          >
-            <FiShare2 className="w-5 h-5" />
-            <span>{shares}</span>
-          </button>
+            <button 
+              onClick={() => setShowShareModal(true)} 
+              className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-amber-500 transition-colors"
+            >
+              <FiShare2 className="w-4 h-4" />
+              <span>{shares}</span>
+            </button>
+          </div>
+
+          {/* Instagram style pagination dots with sliding window */}
+          <div className="flex items-center gap-1 select-none">
+            {photos.map((_, i) => {
+              const distance = Math.abs(i - currentIndex);
+              if (distance >= 3) return null; // Show only active bar, neighbors, and fading dots
+              
+              if (distance === 0) {
+                // Wide bar for current image
+                return (
+                  <span 
+                    key={i} 
+                    className="w-4 h-1 rounded-full bg-amber-500 transition-all duration-300"
+                  />
+                );
+              } else if (distance === 1) {
+                // Neighbors
+                return (
+                  <span 
+                    key={i} 
+                    className="w-1.5 h-1.5 rounded-full bg-white/70 transition-all duration-300"
+                  />
+                );
+              } else {
+                // Edge fading dots
+                return (
+                  <span 
+                    key={i} 
+                    className="w-1 h-1 rounded-full bg-white/30 transition-all duration-300"
+                  />
+                );
+              }
+            })}
+          </div>
         </div>
 
         {/* Info panel below the image */}
-        {currentPhoto.title && (
-          <h3 className="mt-4 text-center font-syne text-lg font-bold text-white tracking-tight">
-            {currentPhoto.title}
-          </h3>
-        )}
+        <div className="w-full text-left mt-3 font-inter">
+          {currentPhoto.title && (
+            <h3 className="font-syne text-xs font-bold text-white uppercase tracking-wider">
+              {currentPhoto.title}
+            </h3>
+          )}
 
-        {currentPhoto.description && (
-          <p
-            className="text-center font-inter text-[13px] leading-relaxed text-white/50 italic"
-            style={{
-              maxWidth: "600px",
-              margin: "0.5rem auto 0",
-              fontWeight: 400,
-            }}
-          >
-            {currentPhoto.description}
-          </p>
-        )}
+          {currentPhoto.description && (
+            <p className="font-inter text-xs text-zinc-400 mt-1 italic leading-relaxed">
+              {currentPhoto.description}
+            </p>
+          )}
 
-        {hasExif && exifItems.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              gap: "1.5rem",
-              justifyContent: "center",
-              flexWrap: "wrap",
-              marginTop: "1rem",
-              padding: "0.75rem 1rem",
-              borderTop: "1px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            {exifItems.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "2px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "10px",
-                    color: "rgba(255,255,255,0.3)",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    fontFamily: "Inter, sans-serif",
-                  }}
-                >
-                  {item.label}
-                </span>
-                <span
-                  style={{
-                    fontSize: "13px",
-                    color: "rgba(255,255,255,0.7)",
-                    fontFamily: "Inter, sans-serif",
-                    fontWeight: 500,
-                  }}
-                >
-                  {item.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+          {hasExif && exifItems.length > 0 && (
+            <div className="flex gap-x-4 gap-y-2 flex-wrap mt-3 pt-3 border-t border-white/5">
+              {exifItems.map((item, idx) => (
+                <div key={idx} className="flex flex-col">
+                  <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-mono">
+                    {item.label}
+                  </span>
+                  <span className="text-[11px] text-zinc-300 font-medium font-mono mt-0.5">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Share Modal */}
@@ -658,7 +657,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           e.stopPropagation();
           handlePrev();
         }}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center border border-white/10 bg-black/40 text-white transition hover:bg-white/10 hover:border-white/20 active:scale-95 z-10"
+        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 hidden md:flex h-12 w-12 items-center justify-center border border-white/10 bg-black/40 text-white transition hover:bg-white/10 hover:border-white/20 active:scale-95 z-10"
         aria-label="Previous photo"
         style={{ borderRadius: "0px" }}
       >
@@ -672,7 +671,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           e.stopPropagation();
           handleNext();
         }}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center border border-white/10 bg-black/40 text-white transition hover:bg-white/10 hover:border-white/20 active:scale-95 z-10"
+        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 hidden md:flex h-12 w-12 items-center justify-center border border-white/10 bg-black/40 text-white transition hover:bg-white/10 hover:border-white/20 active:scale-95 z-10"
         aria-label="Next photo"
         style={{ borderRadius: "0px" }}
       >
