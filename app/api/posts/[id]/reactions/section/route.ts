@@ -44,6 +44,31 @@ export async function POST(
       return NextResponse.json({ error: "Section reactions are disabled for this post." }, { status: 403 });
     }
 
+    const existing = await prisma.postSectionReaction.findFirst({
+      where: {
+        postId,
+        visitorId,
+        sectionId,
+      },
+    });
+
+    if (existing) {
+      if (existing.emoji === emoji) {
+        // Toggle OFF: if they click the same emoji again, delete it
+        await prisma.postSectionReaction.delete({
+          where: { id: existing.id },
+        });
+        return NextResponse.json({ success: true, toggledOff: true }, { status: 200 });
+      } else {
+        // Update: if they click a different emoji, change it
+        const updated = await prisma.postSectionReaction.update({
+          where: { id: existing.id },
+          data: { emoji },
+        });
+        return NextResponse.json(updated, { status: 200 });
+      }
+    }
+
     const reaction = await prisma.postSectionReaction.create({
       data: {
         postId,
