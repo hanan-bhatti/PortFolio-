@@ -13,6 +13,7 @@ import Image from "next/image";
 import { getSiteSettings } from "@/lib/settings";
 import ContactForm from "@/components/forms/ContactForm";
 import { SocialRow, type SocialItem } from "@/components/ui/SocialRow";
+import { getOrCreateShortLink } from "@/lib/shortener";
 
 export const dynamic = "force-dynamic";
 

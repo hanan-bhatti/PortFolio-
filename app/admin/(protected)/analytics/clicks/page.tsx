@@ -131,11 +131,7 @@ export default async function AnalyticsInteractionsPage() {
         }
       }
 
-      if (source in sourceBreakdown) {
-        sourceBreakdown[source] += clicksCount;
-      } else {
-        sourceBreakdown[source] = (sourceBreakdown[source] || 0) + clicksCount;
-      }
+      sourceBreakdown[source] = (sourceBreakdown[source] ?? 0) + clicksCount;
     });
 
     const totalClicks = githubTotal + liveTotal;
@@ -414,7 +410,7 @@ export default async function AnalyticsInteractionsPage() {
                     if (match && match[1]) {
                       sourceLabel = ` (${match[1].charAt(0).toUpperCase() + match[1].slice(1)})`;
                     }
-                    baseTargetUrl = link.targetUrl.split("?")[0];
+                    baseTargetUrl = link.targetUrl.split("?")[0] || link.targetUrl;
                   }
                 }
 
@@ -425,7 +421,7 @@ export default async function AnalyticsInteractionsPage() {
                   : baseTargetUrl.includes("twitter.com") || baseTargetUrl.includes("x.com")
                   ? `Twitter / X Profile${sourceLabel}`
                   : baseTargetUrl.includes("mailto:")
-                  ? `Email Link (${baseTargetUrl.replace("mailto:", "").split("?")[0]})${sourceLabel}`
+                  ? `Email Link (${(baseTargetUrl.replace("mailto:", "").split("?")[0]) || ""})${sourceLabel}`
                   : `${baseTargetUrl}${sourceLabel}`;
 
                 const lastClickTime = link.clicks.length > 0
