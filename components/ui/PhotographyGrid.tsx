@@ -128,44 +128,20 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
     const visitorId = getVisitorId() || "anonymous";
 
     try {
-      // Fetch the image as a blob
-      try {
-        const response = await fetch(photo.imageUrl);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = photo.title
-          ? `${photo.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`
-          : `photo-${photo.id}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-      } catch (corsErr) {
-        console.warn("Direct blob download failed, falling back to new tab:", corsErr);
-        const link = document.createElement("a");
-        link.href = photo.imageUrl;
-        link.download = photo.title || `photo-${photo.id}`;
-        link.target = "_blank";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+      // Trigger browser download via our server proxy GET route
+      const downloadUrl = `/api/photography/${photo.id}/download?visitorId=${encodeURIComponent(visitorId)}`;
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       // Increment count locally
       setPhotos((prev) =>
         prev.map((p) => (p.id === photoId ? { ...p, downloads: p.downloads + 1 } : p))
       );
-
-      await fetch(`/api/photography/${photoId}/download`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitorId }),
-      });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to initiate proxy download:", err);
     }
   };
 

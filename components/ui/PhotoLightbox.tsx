@@ -108,6 +108,9 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
   const [particles, setParticles] = useState<Particle[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   
   const lastTapRef = useRef<number>(0);
   const heartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -123,6 +126,9 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
 
   // Sync state with current photo
   useEffect(() => {
+    setIsImageLoading(true);
+    setImageError(false);
+    setRetryKey(0);
     if (currentPhoto) {
       setLikes(currentPhoto.likes || 0);
       setDownloads(currentPhoto.downloads || 0);
@@ -226,43 +232,18 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
     const visitorId = getVisitorId() || "anonymous";
 
     try {
-      // Fetch the image as a blob to bypass cross-origin browser download restrictions
-      try {
-        const response = await fetch(currentPhoto.imageUrl);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
+      // Trigger browser download via our server proxy GET route
+      const downloadUrl = `/api/photography/${currentPhoto.id}/download?visitorId=${encodeURIComponent(visitorId)}`;
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = currentPhoto.title
-          ? `${currentPhoto.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.jpg`
-          : `photo-${currentPhoto.id}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-      } catch (corsErr) {
-        // Fallback for CORS block: open in a new tab
-        console.warn("Direct blob download failed, falling back to new tab:", corsErr);
-        const link = document.createElement("a");
-        link.href = currentPhoto.imageUrl;
-        link.download = currentPhoto.title || `photo-${currentPhoto.id}`;
-        link.target = "_blank";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      // Increment locally
+      // Increment count locally
       setDownloads((prev) => prev + 1);
-
-      await fetch(`/api/photography/${currentPhoto.id}/download`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitorId }),
-      });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to initiate proxy download:", err);
     }
   };
 
@@ -421,14 +402,43 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           className="relative w-full h-full flex items-center justify-center select-none cursor-pointer overflow-hidden group/image"
           onClick={handleImageClick}
         >
+          {isImageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/40 animate-pulse z-[5] pointer-events-none">
+              <div className="w-8 h-8 border-2 border-white/10 border-t-white/80 rounded-full animate-spin" />
+            </div>
+          )}
+
+          {imageError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 z-10 gap-3">
+              <span className="text-xs text-white/50 font-inter">Failed to load photograph</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImageError(false);
+                  setIsImageLoading(true);
+                  setRetryKey((prev) => prev + 1);
+                }}
+                className="px-4 py-1.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white text-xs font-medium font-inter transition-all"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
           <Image
-            src={currentPhoto.imageUrl}
+            src={retryKey > 0 ? `${currentPhoto.imageUrl}?retry=${retryKey}` : currentPhoto.imageUrl}
             alt={currentPhoto.title ?? "Photo"}
             fill
             className="object-contain transition-all duration-300 w-full h-full max-h-full min-h-0"
             sizes="(max-width: 768px) 100vw, 80vw"
             priority
             unoptimized
+            onLoad={() => setIsImageLoading(false)}
+            onError={() => {
+              setImageError(true);
+              setIsImageLoading(false);
+            }}
           />
 
           {/* Custom drawing heart that scales */}
