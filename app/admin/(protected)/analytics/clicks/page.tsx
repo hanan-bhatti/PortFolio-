@@ -1,17 +1,13 @@
 /**
  * @file app/admin/(protected)/analytics/clicks/page.tsx
  * @description Admin page for post-wise grouped interaction metrics, link clicks, shares, and code copy statistics.
- * 
- * @exports
- * - AnalyticsInteractionsPage (default): Main React component
- * - dynamic: Constant / Helper
  */
 
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/admin/PageHeader";
-import { formatDate } from "@/lib/utils";
 import AnalyticsChart from "@/components/admin/AnalyticsChart";
+import ClicksDashboardClient from "./ClicksDashboardClient";
 
 export const dynamic = "force-dynamic";
 
@@ -81,8 +77,6 @@ export default async function AnalyticsInteractionsPage() {
     include: { clicks: true },
   });
 
-  const orphanClicks = orphanShortLinks.reduce((sum, l) => sum + l.clicks.length, 0);
-
   // Grouped project clicks
   const projectsWithClicks = await prisma.project.findMany({
     select: {
@@ -145,7 +139,11 @@ export default async function AnalyticsInteractionsPage() {
       githubTotal,
       liveTotal,
       totalClicks,
-      sourceBreakdown,
+      sourceBreakdown: {
+        homepage_experiments: sourceBreakdown.homepage_experiments ?? 0,
+        projects_list: sourceBreakdown.projects_list ?? 0,
+        project_detail: sourceBreakdown.project_detail ?? 0,
+      },
       lastActivity,
     };
   });
@@ -267,6 +265,77 @@ export default async function AnalyticsInteractionsPage() {
     },
   };
 
+  // Map datasets to client serializable formats
+  const postsClientStats = postsWithStats.map((p) => ({
+    id: p.id,
+    title: p.title,
+    slug: p.slug,
+    linkClicks: p.linkClicks,
+    shareClicks: p.shareClicks,
+    codeCopies: p.codeCopies,
+    totalInteractions: p.totalInteractions,
+    lastActivity: p.lastActivity ? p.lastActivity.toISOString() : null,
+  }));
+
+  const shortLinksClientStats = orphanShortLinks.map((link) => {
+    let sourceLabel = "";
+    let baseTargetUrl = link.targetUrl;
+    try {
+      const url = new URL(link.targetUrl);
+      const utmSource = url.searchParams.get("utm_source");
+      if (utmSource) {
+        sourceLabel = ` (${utmSource.charAt(0).toUpperCase() + utmSource.slice(1)})`;
+      }
+      if (url.protocol === "mailto:") {
+        baseTargetUrl = `mailto:${url.pathname}`;
+      } else {
+        baseTargetUrl = url.origin + url.pathname;
+      }
+    } catch {
+      if (link.targetUrl.includes("utm_source=")) {
+        const match = link.targetUrl.match(/utm_source=([^&]+)/);
+        if (match && match[1]) {
+          sourceLabel = ` (${match[1].charAt(0).toUpperCase() + match[1].slice(1)})`;
+        }
+        baseTargetUrl = link.targetUrl.split("?")[0] || link.targetUrl;
+      }
+    }
+
+    const targetDisplay = baseTargetUrl.includes("github.com")
+      ? `GitHub Profile${sourceLabel}`
+      : baseTargetUrl.includes("linkedin.com")
+      ? `LinkedIn Profile${sourceLabel}`
+      : baseTargetUrl.includes("twitter.com") || baseTargetUrl.includes("x.com")
+      ? `Twitter / X Profile${sourceLabel}`
+      : baseTargetUrl.includes("mailto:")
+      ? `Email Link (${(baseTargetUrl.replace("mailto:", "").split("?")[0]) || ""})${sourceLabel}`
+      : `${baseTargetUrl}${sourceLabel}`;
+
+    const lastClickTime = link.clicks.length > 0
+      ? new Date(Math.max(...link.clicks.map((c) => c.createdAt.getTime())))
+      : null;
+
+    return {
+      id: link.id,
+      code: link.code,
+      targetUrl: link.targetUrl,
+      targetDisplay,
+      clicksCount: link.clicks.length,
+      lastClickTime: lastClickTime ? lastClickTime.toISOString() : null,
+    };
+  });
+
+  const projectsClientStats = projectsStats.map((pr) => ({
+    id: pr.id,
+    title: pr.title,
+    slug: pr.slug,
+    githubTotal: pr.githubTotal,
+    liveTotal: pr.liveTotal,
+    totalClicks: pr.totalClicks,
+    sourceBreakdown: pr.sourceBreakdown,
+    lastActivity: pr.lastActivity ? pr.lastActivity.toISOString() : null,
+  }));
+
   return (
     <div className="space-y-8 pb-12">
       <PageHeader
@@ -347,165 +416,12 @@ export default async function AnalyticsInteractionsPage() {
         </div>
       )}
 
-      {/* Post-wise Grouped Table */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
-        <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
-          Post Interactions Summary
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left font-mono text-xs">
-            <thead>
-              <tr className="border-b border-[#262626] text-zinc-500">
-                <th className="pb-3 font-bold uppercase tracking-wider">Post Title</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Link Clicks</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Share Clicks</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Code Copies</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Total</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Last Activity</th>
-                <th className="pb-3 text-right font-bold uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1e1e1e]">
-              {postsWithStats.map((post) => (
-                <tr key={post.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                  <td className="py-3.5 max-w-[280px] truncate font-bold text-white">
-                    <Link href={`/admin/analytics/clicks/${post.id}`} className="hover:text-amber hover:underline">
-                      {post.title}
-                    </Link>
-                  </td>
-                  <td className="py-3.5 text-zinc-400">{post.linkClicks}</td>
-                  <td className="py-3.5 text-zinc-400">{post.shareClicks}</td>
-                  <td className="py-3.5 text-zinc-400">{post.codeCopies}</td>
-                  <td className="py-3.5 font-bold text-amber">{post.totalInteractions}</td>
-                  <td className="py-3.5 text-zinc-500">
-                    {post.lastActivity ? formatDate(post.lastActivity) : "—"}
-                  </td>
-                  <td className="py-3.5 text-right">
-                    <Link
-                      href={`/admin/analytics/clicks/${post.id}`}
-                      className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer"
-                    >
-                      VIEW DETAILS →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {orphanShortLinks.map((link) => {
-                let sourceLabel = "";
-                let baseTargetUrl = link.targetUrl;
-                try {
-                  const url = new URL(link.targetUrl);
-                  const utmSource = url.searchParams.get("utm_source");
-                  if (utmSource) {
-                    sourceLabel = ` (${utmSource.charAt(0).toUpperCase() + utmSource.slice(1)})`;
-                  }
-                  if (url.protocol === "mailto:") {
-                    baseTargetUrl = `mailto:${url.pathname}`;
-                  } else {
-                    baseTargetUrl = url.origin + url.pathname;
-                  }
-                } catch {
-                  if (link.targetUrl.includes("utm_source=")) {
-                    const match = link.targetUrl.match(/utm_source=([^&]+)/);
-                    if (match && match[1]) {
-                      sourceLabel = ` (${match[1].charAt(0).toUpperCase() + match[1].slice(1)})`;
-                    }
-                    baseTargetUrl = link.targetUrl.split("?")[0] || link.targetUrl;
-                  }
-                }
-
-                const targetDisplay = baseTargetUrl.includes("github.com")
-                  ? `GitHub Profile${sourceLabel}`
-                  : baseTargetUrl.includes("linkedin.com")
-                  ? `LinkedIn Profile${sourceLabel}`
-                  : baseTargetUrl.includes("twitter.com") || baseTargetUrl.includes("x.com")
-                  ? `Twitter / X Profile${sourceLabel}`
-                  : baseTargetUrl.includes("mailto:")
-                  ? `Email Link (${(baseTargetUrl.replace("mailto:", "").split("?")[0]) || ""})${sourceLabel}`
-                  : `${baseTargetUrl}${sourceLabel}`;
-
-                const lastClickTime = link.clicks.length > 0
-                  ? new Date(Math.max(...link.clicks.map((c) => c.createdAt.getTime())))
-                  : null;
-
-                return (
-                  <tr key={link.id} className="text-zinc-300 hover:bg-white/[0.01] bg-black/10">
-                    <td className="py-3.5 max-w-[280px] truncate font-bold text-zinc-400">
-                      <div>{targetDisplay}</div>
-                      <div className="text-[10px] text-zinc-500 font-normal mt-0.5">/s/{link.code}</div>
-                    </td>
-                    <td className="py-3.5 text-zinc-400">{link.clicks.length}</td>
-                    <td className="py-3.5 text-zinc-500">—</td>
-                    <td className="py-3.5 text-zinc-500">—</td>
-                    <td className="py-3.5 font-bold text-amber">{link.clicks.length}</td>
-                    <td className="py-3.5 text-zinc-500">
-                      {lastClickTime ? formatDate(lastClickTime) : "—"}
-                    </td>
-                    <td className="py-3.5 text-right">
-                      <a
-                        href={link.targetUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="border border-[#262626] bg-black/40 px-2.5 py-1 text-[10px] font-bold text-zinc-400 hover:border-amber hover:text-amber transition-colors rounded-none cursor-pointer inline-block"
-                      >
-                        VISIT LINK →
-                      </a>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Project-wise Grouped Table */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
-        <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-zinc-400">
-          Project Link Clicks Summary
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left font-mono text-xs">
-            <thead>
-              <tr className="border-b border-[#262626] text-zinc-500">
-                <th className="pb-3 font-bold uppercase tracking-wider">Project</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">GitHub Clicks</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Live Clicks</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Source Breakdown</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Total</th>
-                <th className="pb-3 font-bold uppercase tracking-wider">Last Click</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1e1e1e]">
-              {projectsStats.map((proj) => (
-                <tr key={proj.id} className="text-zinc-300 hover:bg-white/[0.01]">
-                  <td className="py-3.5 font-bold text-white">
-                    {proj.title}
-                  </td>
-                  <td className="py-3.5 text-zinc-400">{proj.githubTotal}</td>
-                  <td className="py-3.5 text-zinc-400">{proj.liveTotal}</td>
-                  <td className="py-3.5 text-[10px] text-zinc-500">
-                    <span className="text-zinc-400">Home:</span> {proj.sourceBreakdown.homepage_experiments} |{" "}
-                    <span className="text-zinc-400">List:</span> {proj.sourceBreakdown.projects_list} |{" "}
-                    <span className="text-zinc-400">Detail:</span> {proj.sourceBreakdown.project_detail}
-                  </td>
-                  <td className="py-3.5 font-bold text-amber">{proj.totalClicks}</td>
-                  <td className="py-3.5 text-zinc-500">
-                    {proj.lastActivity ? formatDate(proj.lastActivity) : "—"}
-                  </td>
-                </tr>
-              ))}
-              {projectsStats.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-zinc-550 uppercase">
-                    No projects found
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Dynamic Clicks & Interactions Client grids */}
+      <ClicksDashboardClient
+        initialPosts={postsClientStats}
+        initialShortLinks={shortLinksClientStats}
+        initialProjects={projectsClientStats}
+      />
     </div>
   );
 }
