@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { FiHeart, FiDownload, FiShare2, FiCopy, FiX, FiCamera, FiClock, FiLayers, FiMaximize, FiCalendar, FiSliders } from "react-icons/fi";
 import { FaLinkedinIn, FaWhatsapp, FaTwitter, FaInstagram } from "react-icons/fa";
@@ -394,7 +395,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
     }
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/98 transition-opacity duration-300"
       onTouchStart={handleTouchStart}
@@ -561,27 +562,19 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             )}
           </div>
 
-          {/* Camera specs grid card */}
+          {/* Camera specs inline flex tags */}
           {hasExif && exifItems.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-3 border-t border-white/5">
+            <div className="flex flex-wrap gap-1.5 pt-3 border-t border-white/5 w-full">
               {exifItems.map((item, idx) => {
                 const icon = getExifIcon(item.label);
                 return (
                   <div 
                     key={idx} 
-                    className="flex items-center gap-2 bg-white/[0.02] border border-white/5 px-2.5 py-1.5 hover:bg-white/[0.04] transition-colors"
+                    className="flex items-center gap-1 bg-white/[0.02] border border-white/5 px-2 py-0.5 text-[9px] text-zinc-400 font-mono"
+                    title={item.label}
                   >
-                    <div className="p-1.5 bg-white/[0.03] border border-white/5 rounded-sm shrink-0">
-                      {icon}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[7.5px] text-zinc-500 uppercase font-mono tracking-widest leading-none">
-                        {item.label}
-                      </span>
-                      <span className="text-[10px] text-zinc-300 font-medium font-mono mt-0.5 truncate leading-tight">
-                        {item.value}
-                      </span>
-                    </div>
+                    {icon}
+                    <span>{item.value}</span>
                   </div>
                 );
               })}
@@ -760,6 +753,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
           animation: particle-burst-out var(--duration) cubic-bezier(0.15, 0.85, 0.3, 1) var(--delay) forwards;
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
