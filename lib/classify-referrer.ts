@@ -85,7 +85,16 @@ function lookupReferer(refHost: string, refPath: string, includePath: boolean): 
 export function classifyReferrer(rawReferrer: string | null | undefined): ReferrerResult {
   if (!rawReferrer || rawReferrer.trim() === "") return DIRECT;
 
-  const ref = rawReferrer.trim();
+  let ref = rawReferrer.trim();
+
+  // Dynamic protocol recovery for hostnames/packages without schemes
+  if (!ref.includes("://")) {
+    if (ref.startsWith("com.") || ref.startsWith("org.")) {
+      ref = "android-app://" + ref;
+    } else {
+      ref = "https://" + ref;
+    }
+  }
 
   // ── Android deep-link app scheme: android-app://com.linkedin.android/ ──────
   if (ref.startsWith("android-app://")) {
