@@ -178,38 +178,48 @@ export default function PostsTable({ posts }: { posts: AdminPostRow[] }) {
           {posts.map((post) => (
             <div
               key={post.id}
-              className="border border-[#262626] bg-[#0c0c0c] p-5 flex flex-col justify-between font-mono text-xs"
+              className="border border-[#262626] bg-[#0c0c0c] p-5 flex flex-col justify-between font-mono text-xs hover:-translate-y-1 hover:border-amber/50 hover:shadow-[0_4px_20px_-4px_rgba(245,158,11,0.08)] transition-all duration-300 group"
             >
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-2 border-b border-[#262626] pb-2">
-                  <h4 className="font-bold text-white text-sm line-clamp-2">{post.title}</h4>
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-3 border-b border-[#262626]/60 pb-2.5">
+                  <h4 className="font-bold text-white text-sm line-clamp-2 leading-snug group-hover:text-amber transition-colors">
+                    {post.title}
+                  </h4>
                   <PublishToggle id={post.id} published={post.published} />
                 </div>
-                <p className="text-[10px] text-[#F59E0B] truncate">/{post.slug}</p>
-                <div className="flex justify-between items-center text-[10px] text-zinc-500 mt-2">
+                <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center justify-between">
+                  <span className="text-amber">/{post.slug}</span>
+                  <span className={cn(
+                    "px-1.5 py-0.5 text-[8px] font-bold border uppercase shrink-0",
+                    post.published ? "border-[#10B981] bg-[#10B981]/5 text-[#10B981]" : "border-zinc-700 bg-zinc-800/40 text-zinc-400"
+                  )}>
+                    {post.published ? "Published" : "Draft"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-[10px] text-zinc-500 pt-1">
                   <span>{formatDate(post.createdAt)}</span>
-                  <span className="flex items-center gap-1">
-                    <FiEye className="h-3.5 w-3.5" />
-                    <span className="font-bold">{post.views}</span>
+                  <span className="flex items-center gap-1 bg-black/40 px-2 py-0.5 border border-[#262626] text-white">
+                    <FiEye className="h-3 w-3 text-amber shrink-0 animate-pulse" />
+                    <span className="font-bold">{post.views} views</span>
                   </span>
                 </div>
               </div>
-
+ 
               <div className="mt-6 grid grid-cols-2 gap-2 font-bold uppercase tracking-wider text-[10px] text-center">
                 <Link
                   href={`/admin/posts/${post.id}/edit`}
                   className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/30 py-2 text-zinc-300 hover:border-[#F59E0B] hover:text-[#F59E0B] transition-colors"
                 >
-                  <FiEdit3 className="h-3 w-3" />
+                  <FiEdit3 className="h-3 w-3 shrink-0" />
                   <span>Edit</span>
                 </Link>
                 <button
                   type="button"
                   disabled={isPending}
                   onClick={() => setDeleteTarget({ id: post.id, title: post.title })}
-                  className="flex items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/5 py-2 text-red-450 hover:border-red-550 hover:bg-red-550/15 transition-colors disabled:opacity-30"
+                  className="flex items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/5 py-2 text-red-400 hover:border-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-30"
                 >
-                  <FiTrash2 className="h-3 w-3" />
+                  <FiTrash2 className="h-3 w-3 shrink-0" />
                   <span>Delete</span>
                 </button>
               </div>

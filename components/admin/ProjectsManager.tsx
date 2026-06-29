@@ -231,23 +231,30 @@ export default function ProjectsManager({ initial }: { initial: AdminProjectRow[
           {items.map((project) => (
             <div
               key={project.id}
-              className="border border-[#262626] bg-[#0c0c0c] p-5 flex flex-col justify-between font-mono text-xs"
+              className={cn(
+                "border border-[#262626] bg-[#0c0c0c] p-5 flex flex-col justify-between font-mono text-xs hover:-translate-y-1 transition-all duration-300 group",
+                project.featured
+                  ? "border-[#F59E0B]/35 hover:border-[#F59E0B]/70 hover:shadow-[0_4px_25px_-5px_rgba(245,158,11,0.12)]"
+                  : "hover:border-zinc-500/60 hover:shadow-[0_4px_20px_-5px_rgba(255,255,255,0.03)]"
+              )}
             >
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-bold text-white text-sm line-clamp-1">{project.title}</h4>
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-3 border-b border-[#262626]/60 pb-2.5">
+                  <h4 className="font-bold text-white text-sm line-clamp-1 leading-snug group-hover:text-amber transition-colors">
+                    {project.title}
+                  </h4>
                   {project.featured && (
-                    <span className="border border-[#F59E0B] bg-[#F59E0B]/10 px-1.5 py-0.5 text-[8px] font-bold text-[#F59E0B] uppercase shrink-0">
+                    <span className="border border-[#F59E0B] bg-[#F59E0B]/10 px-1.5 py-0.5 text-[8px] font-bold text-[#F59E0B] uppercase shrink-0 tracking-wider">
                       Featured
                     </span>
                   )}
                 </div>
-                <p className="text-[10px] text-zinc-500">/{project.slug}</p>
-                <div className="flex flex-wrap gap-1 mt-2">
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">/{project.slug}</p>
+                <div className="flex flex-wrap gap-1 pt-1">
                   {project.techStack.map((tech) => (
                     <span
                       key={tech}
-                      className="border border-zinc-800 bg-zinc-900/60 px-1.5 py-0.5 text-[9px] text-zinc-400"
+                      className="border border-[#262626] bg-black/45 px-1.5 py-0.5 text-[9px] text-zinc-400 font-bold uppercase tracking-wide"
                     >
                       {tech}
                     </span>
@@ -260,7 +267,7 @@ export default function ProjectsManager({ initial }: { initial: AdminProjectRow[
                   href={`/admin/projects/${project.id}/edit`}
                   className="flex items-center justify-center gap-1.5 border border-[#262626] bg-black/30 py-2 text-zinc-300 hover:border-[#F59E0B] hover:text-[#F59E0B] transition-colors"
                 >
-                  <FiEdit3 className="h-3 w-3" />
+                  <FiEdit3 className="h-3 w-3 shrink-0" />
                   <span>Edit</span>
                 </Link>
                 <button
@@ -269,7 +276,7 @@ export default function ProjectsManager({ initial }: { initial: AdminProjectRow[
                   onClick={() => setDeleteTarget({ id: project.id, title: project.title })}
                   className="flex items-center justify-center gap-1.5 border border-red-500/30 bg-red-500/5 py-2 text-red-450 hover:border-red-550 hover:bg-red-550/15 transition-colors disabled:opacity-30"
                 >
-                  <FiTrash2 className="h-3 w-3" />
+                  <FiTrash2 className="h-3 w-3 shrink-0" />
                   <span>Delete</span>
                 </button>
               </div>
