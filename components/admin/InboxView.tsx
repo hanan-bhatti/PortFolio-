@@ -283,9 +283,17 @@ export default function InboxView({ initialThreads }: { initialThreads: MessageT
               <div className="flex-1">
                 <textarea
                   rows={3}
-                  placeholder={`Send an email reply to ${selectedThread.name}...`}
+                  placeholder={`Send an email reply to ${selectedThread.name}... (Ctrl + Enter to send)`}
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      if (replyMessage.trim() && !isPending) {
+                        e.currentTarget.form?.requestSubmit();
+                      }
+                    }
+                  }}
                   className="w-full border border-[#262626] bg-[#090909] px-3.5 py-3 text-xs text-white placeholder-zinc-500 outline-none focus:border-amber transition-colors rounded-none resize-none"
                   required
                 />

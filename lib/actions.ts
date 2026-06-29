@@ -252,10 +252,92 @@ export async function sendReplyAction(email: string, replyMessage: string): Prom
       }
     });
 
+    // Formatted HTML Email template matching developer portfolio brand identity
+    const formattedHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Response to your message</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #050505;
+      color: #e4e4e7;
+      margin: 0;
+      padding: 0;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #050505;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #0c0c0c;
+      border: 1px solid #262626;
+      padding: 32px;
+      box-sizing: border-box;
+    }
+    .header {
+      border-bottom: 1px solid #262626;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .brand {
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .brand-accent {
+      color: #F59E0B;
+    }
+    .content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #d4d4d8;
+      white-space: pre-line;
+    }
+    .footer {
+      border-top: 1px solid #262626;
+      padding-top: 16px;
+      margin-top: 32px;
+      font-size: 11px;
+      color: #71717a;
+      line-height: 1.5;
+    }
+    .footer a {
+      color: #F59E0B;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <span class="brand">Hanan<span class="brand-accent">.Bhatti</span></span>
+      </div>
+      <div class="content">
+        ${replyMessage}
+      </div>
+      <div class="footer">
+        This is a response to your inquiry on the <a href="https://hananbhatti.com">Hanan Bhatti Portfolio</a>.<br>
+        © 2026 Abdul Hannan Bhatti. All rights reserved.
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
     await sendEmail({
       to: email,
-      subject: `RE: Your message on Hanan's Portfolio`,
+      subject: `Response to your inquiry - Hanan Bhatti`,
       text: replyMessage,
+      html: formattedHtml,
     });
 
     revalidatePath("/admin/messages");
