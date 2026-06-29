@@ -296,13 +296,6 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                   priority={index < 3}
                 />
 
-                {/* EXIF Overlay Pill inside bottom-left of image wrapper */}
-                {photo.exif_data && (
-                  <div className="absolute bottom-2 left-2 z-25 bg-black/60 backdrop-blur-sm text-amber-400 text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/5 pointer-events-none uppercase tracking-wide">
-                    EXIF
-                  </div>
-                )}
-
                 {/* Double click scaling heart overlay */}
                 {anim.visible && (
                   <div 
@@ -349,7 +342,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
               {/* Minimalist Card details footer body underneath the photo card */}
               <div className="p-3 border-t border-white/5 bg-[#080808]/90 flex items-center justify-between font-mono text-[10px]">
                 {photo.title ? (
-                  <h3 className="font-syne text-xs font-bold text-white uppercase tracking-tight truncate pr-4">
+                  <h3 className="font-syne text-xs font-bold text-white uppercase tracking-tight line-clamp-1 pr-4 w-full text-left">
                     {photo.title}
                   </h3>
                 ) : (
