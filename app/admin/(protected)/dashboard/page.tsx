@@ -214,7 +214,6 @@ export default async function DashboardPage() {
           unreadMessages,
         }}
         recentMessages={recentMessages}
-        recentPosts={recentPosts}
         recentVisitors={recentVisitors}
         topPages={topPages}
         sparklineData={sparklineData}

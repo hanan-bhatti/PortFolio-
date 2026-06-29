@@ -410,3 +410,44 @@ model EmailOpen {
   userAgent   String?
   openedAt    DateTime @default(now())
 }
+
+model DashboardProject {
+  id          String   @id @default(cuid())
+  title       String
+  status      String   // "backlog" | "in_progress" | "completed" | "cancelled"
+  description String?  @db.Text
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  milestones  DashboardMilestone[]
+  tasks       DashboardTask[]
+}
+
+model DashboardMilestone {
+  id          String   @id @default(cuid())
+  title       String
+  projectId   String
+  project     DashboardProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  dueDate     DateTime?
+  status      String   // "pending" | "completed"
+  createdAt   DateTime @default(now())
+  
+  tasks       DashboardTask[]
+}
+
+model DashboardTask {
+  id          String   @id @default(cuid())
+  title       String
+  projectId   String?
+  project     DashboardProject? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  milestoneId String?
+  milestone   DashboardMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  type        String   // "task" | "blog"
+  blogId      String?  // Optional reference to a Post ID if type is "blog"
+  status      String   // "backlog" | "todo" | "in_progress" | "done"
+  priority    String   // "low" | "medium" | "high" | "urgent"
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
