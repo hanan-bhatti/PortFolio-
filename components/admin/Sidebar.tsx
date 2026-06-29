@@ -92,11 +92,14 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
 
   // Load initial collapse state from localStorage client-side
   useEffect(() => {
-    const saved = localStorage.getItem("admin_sidebar_collapsed");
-    if (saved === "true") {
+    const isWorkspaceRoute = pathname.startsWith("/admin/workspace");
+    if (isWorkspaceRoute) {
       setIsCollapsed(true);
+    } else {
+      const saved = localStorage.getItem("admin_sidebar_collapsed");
+      setIsCollapsed(saved === "true");
     }
-  }, []);
+  }, [pathname]);
 
   const toggleCollapse = () => {
     const nextState = !isCollapsed;
