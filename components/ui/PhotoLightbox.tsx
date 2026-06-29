@@ -497,7 +497,38 @@ const focal = exif && exif.focalLength !== undefined && exif.focalLength !== nul
         className="w-full max-w-4xl mx-auto flex flex-col shrink-0 mt-4 select-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Heart/Download/Share Actions: Left-aligned, own row above title */}
+        {/* Pagination dots: centered, directly below the image */}
+        <div className="flex justify-center items-center gap-1 select-none mt-3 mb-2 shrink-0">
+          {photos.map((_, i) => {
+            const distance = Math.abs(i - currentIndex);
+            if (distance >= 3) return null;
+            
+            if (distance === 0) {
+              return (
+                <span 
+                  key={i} 
+                  className="w-4 h-1 rounded-full bg-amber-500 transition-all duration-300"
+                />
+              );
+            } else if (distance === 1) {
+              return (
+                <span 
+                  key={i} 
+                  className="w-1.5 h-1.5 rounded-full bg-white/70 transition-all duration-300"
+                />
+              );
+            } else {
+              return (
+                <span 
+                  key={i} 
+                  className="w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300"
+                />
+              );
+            }
+          })}
+        </div>
+
+        {/* Heart/Download/Share Actions: Left-aligned */}
         <div className="flex items-center gap-5 py-2 border-b border-white/5 shrink-0">
           <button 
             onClick={handleLike} 
@@ -590,37 +621,6 @@ const focal = exif && exif.focalLength !== undefined && exif.focalLength !== nul
               )}
             </div>
           )}
-        </div>
-
-        {/* Pagination dots: centered, in a separate row below the actions & description */}
-        <div className="flex justify-center items-center gap-1 select-none py-3 border-t border-white/5 mt-2 shrink-0">
-          {photos.map((_, i) => {
-            const distance = Math.abs(i - currentIndex);
-            if (distance >= 3) return null;
-            
-            if (distance === 0) {
-              return (
-                <span 
-                  key={i} 
-                  className="w-4 h-1 rounded-full bg-amber-500 transition-all duration-300"
-                />
-              );
-            } else if (distance === 1) {
-              return (
-                <span 
-                  key={i} 
-                  className="w-1.5 h-1.5 rounded-full bg-white/70 transition-all duration-300"
-                />
-              );
-            } else {
-              return (
-                <span 
-                  key={i} 
-                  className="w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300"
-                />
-              );
-            }
-          })}
         </div>
       </div>
 
