@@ -438,7 +438,7 @@ export default function WorkspaceLayout() {
   const projectPages = pages.filter((p) => p.type === "project").map((p) => ({ id: p.id, title: p.title }));
 
   return (
-    <div className="h-full flex flex-col bg-black">
+    <div className="h-[calc(100vh-4rem)] md:h-screen w-auto -m-4 sm:-m-6 md:-m-8 border-none bg-black overflow-hidden relative">
       {/* Mobile Laptop Banner enforcement */}
       <div className="md:hidden fixed inset-0 z-50 bg-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center select-none font-mono">
         <FiMonitor className="h-10 w-10 text-amber animate-bounce mb-3" />
