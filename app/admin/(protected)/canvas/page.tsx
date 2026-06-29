@@ -14,13 +14,20 @@ export default function CanvasPage() {
   const [isLoading, setIsLoading] = useState(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load saved canvas on mount
+  // Load saved canvas and library on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("excalidraw_canvas_data");
-      if (saved) {
-        setInitialData(JSON.parse(saved));
-      }
+      const savedCanvas = localStorage.getItem("excalidraw_canvas_data");
+      const savedLibrary = localStorage.getItem("excalidraw_library_items");
+      
+      let parsedCanvas = savedCanvas ? JSON.parse(savedCanvas) : {};
+      let parsedLibrary = savedLibrary ? JSON.parse(savedLibrary) : [];
+
+      setInitialData({
+        elements: parsedCanvas.elements || [],
+        appState: parsedCanvas.appState || {},
+        libraryItems: parsedLibrary
+      });
     } catch (e) {
       console.error("Failed to load excalidraw cache:", e);
     } finally {
@@ -28,9 +35,8 @@ export default function CanvasPage() {
     }
   }, []);
 
-  // Debounced auto-save to localStorage
+  // Debounced auto-save elements and appState to localStorage
   const handleCanvasChange = (elements: readonly any[], appState: any) => {
-    // Excalidraw fires onChange frequently, so we filter deleted elements and debounce
     const activeElements = elements.filter((el) => !el.isDeleted);
     
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -49,7 +55,16 @@ export default function CanvasPage() {
       } catch (e) {
         console.error("Failed to save excalidraw cache:", e);
       }
-    }, 1000); // 1-second debounce to keep UI fast
+    }, 1000);
+  };
+
+  // Persist imported/updated shape library items
+  const handleLibraryChange = (items: readonly any[]) => {
+    try {
+      localStorage.setItem("excalidraw_library_items", JSON.stringify(items));
+    } catch (e) {
+      console.error("Failed to save excalidraw library items:", e);
+    }
   };
 
   return (
@@ -67,6 +82,7 @@ export default function CanvasPage() {
           <ExcalidrawWrapper
             initialData={initialData}
             onChange={handleCanvasChange}
+            onLibraryChange={handleLibraryChange}
           />
         )}
       </div>
