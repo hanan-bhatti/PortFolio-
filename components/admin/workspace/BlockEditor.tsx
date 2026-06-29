@@ -16,6 +16,19 @@ import LinkPreviewNode from "./LinkPreviewNode";
 import SlashCommandExtension from "./SlashCommandExtension";
 import React, { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
+import {
+  FiFileText,
+  FiType,
+  FiList,
+  FiCheckSquare,
+  FiCode,
+  FiMessageSquare,
+  FiMinus,
+  FiAlertTriangle,
+  FiInfo,
+  FiXCircle,
+  FiLink
+} from "react-icons/fi";
 
 interface BlockEditorProps {
   initialContent: string;
@@ -24,21 +37,21 @@ interface BlockEditorProps {
 }
 
 const COMMANDS = [
-  { label: "Text", desc: "Start writing plain paragraph text", action: (editor: any) => editor.chain().focus().clearNodes().run() },
-  { label: "Heading 1", desc: "Large page heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 1 }).run() },
-  { label: "Heading 2", desc: "Medium section heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-  { label: "Heading 3", desc: "Small section heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-  { label: "Bullet List", desc: "Simple bulleted list", action: (editor: any) => editor.chain().focus().toggleBulletList().run() },
-  { label: "Numbered List", desc: "Sequential numbered list", action: (editor: any) => editor.chain().focus().toggleOrderedList().run() },
-  { label: "To-do List", desc: "Checkbox task list", action: (editor: any) => editor.chain().focus().toggleTaskList().run() },
-  { label: "Code Block", desc: "Preformatted code snippet", action: (editor: any) => editor.chain().focus().toggleCodeBlock().run() },
-  { label: "Blockquote", desc: "Capture block quotes", action: (editor: any) => editor.chain().focus().toggleBlockquote().run() },
-  { label: "Divider", desc: "Horizontal divider line", action: (editor: any) => editor.chain().focus().setHorizontalRule().run() },
-  { label: "💡 Tip Callout", desc: "Highlight amber tip box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "tip" } }).run() },
-  { label: "⚠️ Warning Callout", desc: "Highlight warning alert box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "warning" } }).run() },
-  { label: "ℹ️ Info Callout", desc: "Highlight blue information box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "info" } }).run() },
-  { label: "❌ Error Callout", desc: "Highlight red error alert box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "error" } }).run() },
-  { label: "Embed Link Preview", desc: "Rich preview card from URL", action: (editor: any) => {
+  { label: "Paragraph", icon: FiFileText, iconColor: "text-zinc-550", desc: "Start writing plain paragraph text", action: (editor: any) => editor.chain().focus().clearNodes().run() },
+  { label: "Heading 1", icon: FiType, iconColor: "text-amber", desc: "Large page heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+  { label: "Heading 2", icon: FiType, iconColor: "text-amber/80", desc: "Medium section heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+  { label: "Heading 3", icon: FiType, iconColor: "text-amber/60", desc: "Small section heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+  { label: "Bullet List", icon: FiList, iconColor: "text-sky-400", desc: "Simple bulleted list", action: (editor: any) => editor.chain().focus().toggleBulletList().run() },
+  { label: "Numbered List", icon: FiList, iconColor: "text-sky-400", desc: "Sequential numbered list", action: (editor: any) => editor.chain().focus().toggleOrderedList().run() },
+  { label: "To-do List", icon: FiCheckSquare, iconColor: "text-[#16A34A]", desc: "Checkbox task list", action: (editor: any) => editor.chain().focus().toggleTaskList().run() },
+  { label: "Code Block", icon: FiCode, iconColor: "text-[#16A34A]", desc: "Preformatted code snippet", action: (editor: any) => editor.chain().focus().toggleCodeBlock().run() },
+  { label: "Blockquote", icon: FiMessageSquare, iconColor: "text-zinc-500", desc: "Capture block quotes", action: (editor: any) => editor.chain().focus().toggleBlockquote().run() },
+  { label: "Divider", icon: FiMinus, iconColor: "text-zinc-650", desc: "Horizontal divider line", action: (editor: any) => editor.chain().focus().setHorizontalRule().run() },
+  { label: "Tip Callout", icon: FiInfo, iconColor: "text-[#F59E0B]", desc: "Highlight amber tip box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "tip" } }).run() },
+  { label: "Warning Callout", icon: FiAlertTriangle, iconColor: "text-[#D97706]", desc: "Highlight warning alert box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "warning" } }).run() },
+  { label: "Info Callout", icon: FiInfo, iconColor: "text-blue-500", desc: "Highlight blue information box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "info" } }).run() },
+  { label: "Error Callout", icon: FiXCircle, iconColor: "text-red-500", desc: "Highlight red error alert box", action: (editor: any) => editor.chain().focus().insertContent({ type: "callout", attrs: { type: "error" } }).run() },
+  { label: "Embed Link Preview", icon: FiLink, iconColor: "text-pink-500", desc: "Rich preview card from URL", action: (editor: any) => {
       const url = prompt("Enter URL to embed:");
       if (url) {
         editor.chain().focus().insertContent({ type: "linkPreview", attrs: { url } }).run();
@@ -173,39 +186,45 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
       {slashPosition && (
         <div
           ref={slashMenuRef}
-          className="absolute z-50 bg-[#0c0c0c] border border-[#262626] w-[280px] max-h-[250px] overflow-y-auto shadow-2xl p-1 animate-fadeIn select-none rounded-none"
+          className="fixed z-50 bg-[#0c0c0c] border border-[#262626] w-[280px] max-h-[250px] overflow-y-auto shadow-2xl p-1 animate-fadeIn select-none rounded-none"
           style={{
-            top: `${slashPosition.top - 80}px`,
+            top: `${slashPosition.top}px`,
             left: `${slashPosition.left}px`,
           }}
         >
-          <div className="px-2 py-1.5 border-b border-[#262626] font-mono text-[8px] font-bold text-zinc-550 uppercase tracking-widest">
+          <div className="px-2 py-1.5 border-b border-[#262626] font-mono text-[8px] font-bold text-zinc-555 uppercase tracking-widest">
             Workspace blocks
           </div>
           <div className="space-y-0.5 mt-1">
-            {COMMANDS.map((cmd, idx) => (
-              <button
-                key={cmd.label}
-                onClick={() => {
-                  if (editor) {
-                    const { state } = editor;
-                    const { from } = state.selection;
-                    editor.chain().focus().deleteRange({ from: from - 1, to: from }).run();
-                    cmd.action(editor);
-                    setSlashPosition(null);
-                  }
-                }}
-                className={cn(
-                  "w-full text-left px-2.5 py-1.5 flex flex-col transition-colors rounded-none outline-none",
-                  selectedIndex === idx ? "bg-amber/15 text-white" : "hover:bg-zinc-900/60"
-                )}
-              >
-                <span className={cn("font-mono text-[10px] font-bold", selectedIndex === idx ? "text-amber" : "text-zinc-200")}>
-                  {cmd.label}
-                </span>
-                <span className="text-[8px] text-zinc-500 font-sans tracking-wide mt-0.5">{cmd.desc}</span>
-              </button>
-            ))}
+            {COMMANDS.map((cmd, idx) => {
+              const CmdIcon = cmd.icon;
+              return (
+                <button
+                  key={cmd.label}
+                  onClick={() => {
+                    if (editor) {
+                      const { state } = editor;
+                      const { from } = state.selection;
+                      editor.chain().focus().deleteRange({ from: from - 1, to: from }).run();
+                      cmd.action(editor);
+                      setSlashPosition(null);
+                    }
+                  }}
+                  className={cn(
+                    "w-full text-left px-2.5 py-1.5 flex items-start gap-3 transition-colors rounded-none outline-none",
+                    selectedIndex === idx ? "bg-amber/15 text-white" : "hover:bg-zinc-900/60"
+                  )}
+                >
+                  <CmdIcon className={cn("h-3.5 w-3.5 mt-0.5 shrink-0", cmd.iconColor)} />
+                  <div className="flex-1 min-w-0">
+                    <span className={cn("font-mono text-[10px] font-bold block", selectedIndex === idx ? "text-amber" : "text-zinc-200")}>
+                      {cmd.label}
+                    </span>
+                    <span className="text-[8px] text-zinc-500 font-sans tracking-wide mt-0.5 block truncate">{cmd.desc}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

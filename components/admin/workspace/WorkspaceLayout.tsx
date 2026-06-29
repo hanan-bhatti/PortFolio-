@@ -7,6 +7,7 @@ import BlogStatusBar from "./BlogStatusBar";
 import KanbanBoard from "./KanbanBoard";
 import BookmarkGrid from "./BookmarkGrid";
 import QuickCaptureModal from "./QuickCaptureModal";
+import IconPicker from "./IconPicker";
 import { toast } from "sonner";
 import {
   FiMonitor,
@@ -73,6 +74,10 @@ export default function WorkspaceLayout() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Fast title renaming state
+  const [titleInput, setTitleInput] = useState("");
+  const titleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Fetch all pages
   const fetchPages = useCallback(async () => {
     try {
@@ -99,6 +104,7 @@ export default function WorkspaceLayout() {
     try {
       const page = pages.find((p) => p.id === pageId);
       if (page) {
+        setTitleInput(page.title);
         if (page.type === "project") {
           const res = await fetch(`/api/admin/workspace/pages/${pageId}/tasks`);
           if (res.ok) {
@@ -157,33 +163,40 @@ export default function WorkspaceLayout() {
     }
   };
 
-  // Rename page handler
-  const handleRenamePage = async (id: string, newTitle: string) => {
-    try {
-      const res = await fetch(`/api/admin/workspace/pages/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle })
-      });
-      if (res.ok) {
-        fetchPages();
+  // Debounced title save
+  const saveTitleDebounced = useCallback((id: string, newTitle: string) => {
+    if (titleTimeoutRef.current) clearTimeout(titleTimeoutRef.current);
+    
+    // Update local list instantly so sidebar updates fast
+    setPages((prev) => prev.map((p) => p.id === id ? { ...p, title: newTitle } : p));
+
+    titleTimeoutRef.current = setTimeout(async () => {
+      try {
+        await fetch(`/api/admin/workspace/pages/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: newTitle })
+        });
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
-    }
+    }, 800); // 800ms debounce
+  }, []);
+
+  const handleRenamePage = async (id: string, newTitle: string) => {
+    setTitleInput(newTitle);
+    saveTitleDebounced(id, newTitle);
   };
 
-  // Edit emoji picker handler
+  // Edit icon picker handler
   const handleEmojiSelect = async (id: string, emoji: string) => {
+    setPages((prev) => prev.map((p) => p.id === id ? { ...p, emoji } : p));
     try {
-      const res = await fetch(`/api/admin/workspace/pages/${id}`, {
+      await fetch(`/api/admin/workspace/pages/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emoji })
       });
-      if (res.ok) {
-        fetchPages();
-      }
     } catch (e) {
       console.error(e);
     }
@@ -498,26 +511,14 @@ export default function WorkspaceLayout() {
               <div className="max-w-[760px] mx-auto space-y-6">
                 
                 {/* Title and Icon Controls */}
-                <div className="flex items-center gap-3 border-b border-[#262626]/40 pb-4 select-none">
-                  {(() => {
-                    switch (activePage.type) {
-                      case "note":
-                        return <FiFileText className="h-6 w-6 text-zinc-550 shrink-0" />;
-                      case "project":
-                        return <FiFolder className="h-6 w-6 text-[#F59E0B] shrink-0" />;
-                      case "blog-idea":
-                        return <FiEdit className="h-6 w-6 text-sky-500 shrink-0" />;
-                      case "snippet":
-                        return <FiTerminal className="h-6 w-6 text-[#16A34A] shrink-0" />;
-                      case "bookmark-collection":
-                        return <FiBookmark className="h-6 w-6 text-pink-500 shrink-0" />;
-                      default:
-                        return <FiFileText className="h-6 w-6 text-zinc-550 shrink-0" />;
-                    }
-                  })()}
+                <div className="flex items-center gap-3 border-b border-[#262626]/40 pb-4">
+                  <IconPicker
+                    currentIcon={activePage.emoji}
+                    onSelect={(iconName) => handleEmojiSelect(activePage.id, iconName)}
+                  />
                   <input
                     type="text"
-                    value={activePage.title}
+                    value={titleInput}
                     onChange={(e) => handleRenamePage(activePage.id, e.target.value)}
                     className="flex-1 bg-transparent text-2xl font-syne font-extrabold text-white outline-none border-none uppercase tracking-tight py-1 placeholder-zinc-800"
                   />

@@ -17,6 +17,7 @@ import {
   FiArrowLeft
 } from "react-icons/fi";
 import { cn } from "@/lib/utils";
+import { ICON_MAP } from "./IconPicker";
 
 interface PageItem {
   id: string;
@@ -107,6 +108,14 @@ export default function WorkspaceSidebar({
     }
   };
 
+  const getPageIcon = (page: PageItem) => {
+    if (page.emoji && ICON_MAP[page.emoji]) {
+      const CustomIcon = ICON_MAP[page.emoji];
+      return <CustomIcon className="h-3.5 w-3.5 shrink-0 text-zinc-400" />;
+    }
+    return getTypeIcon(page.type);
+  };
+
   // Build tree client-side
   const renderPageItem = (page: PageItem, depth = 0) => {
     const hasChildren = pages.some((p) => p.parentId === page.id);
@@ -141,7 +150,7 @@ export default function WorkspaceSidebar({
               <span className="w-4 shrink-0" />
             )}
 
-            {getTypeIcon(page.type)}
+            {getPageIcon(page)}
 
             {renamingPageId === page.id ? (
               <input

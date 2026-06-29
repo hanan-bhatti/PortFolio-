@@ -412,13 +412,14 @@ body {
 .prose-blog iframe { width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; margin: 1.4em 0; }
 .prose-blog mark { background: rgba(217, 174, 148, 0.35); color: #fff; border-radius: 2px; padding: 0 2px; }
 
-/* lowlight syntax highlighting (basic dark theme) */
-.hljs-keyword, .hljs-selector-tag { color: #c792ea; }
-.hljs-string, .hljs-attr { color: #c3e88d; }
-.hljs-number, .hljs-literal { color: #f78c6c; }
-.hljs-comment { color: #5c6370; font-style: italic; }
-.hljs-function, .hljs-title { color: #82aaff; }
-.hljs-built_in, .hljs-type { color: #ffcb6b; }
+/* lowlight syntax highlighting (basic dark theme) with prose overrides */
+.hljs-keyword, .hljs-selector-tag, .prose pre code .hljs-keyword, .prose pre code .hljs-selector-tag { color: #c792ea !important; }
+.hljs-string, .hljs-attr, .prose pre code .hljs-string, .prose pre code .hljs-attr { color: #c3e88d !important; }
+.hljs-number, .hljs-literal, .prose pre code .hljs-number, .prose pre code .hljs-literal { color: #f78c6c !important; }
+.hljs-comment, .prose pre code .hljs-comment { color: #5c6370 !important; font-style: italic; }
+.hljs-function, .hljs-title, .prose pre code .hljs-function, .prose pre code .hljs-title { color: #82aaff !important; }
+.hljs-built_in, .hljs-type, .prose pre code .hljs-built_in, .prose pre code .hljs-type { color: #ffcb6b !important; }
+.hljs-params, .prose pre code .hljs-params { color: #abb2bf !important; }
 
 /* Redesign Animations */
 @keyframes marquee-scroll {
