@@ -612,18 +612,14 @@ export async function dispatchCampaignAction(
         const htmlBody = `
           <div style="background-color: #0c0c0c; color: #ffffff; font-family: sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; border: 1px solid #262626;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h2 style="font-weight: 800; letter-spacing: 0.1em; color: #F59E0B; margin: 0; font-family: 'Syne', sans-serif;">NEWSLETTER</h2>
+              <h2 style="font-weight: 800; letter-spacing: 0.1em; color: #F59E0B; margin: 0; font-family: 'Syne', sans-serif;">NEW BLOG POST</h2>
             </div>
-            ${parsedCustomHtml ? `
-              <div style="margin-bottom: 30px;">
-                ${parsedCustomHtml}
-              </div>
-            ` : `
-              ${post.coverImage ? `<div style="margin-bottom: 25px; border: 1px solid #262626; overflow: hidden;"><img src="${post.coverImage}" alt="${post.title}" style="width: 100%; height: auto; display: block;" /></div>` : ''}
-              <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #ffffff;">${post.title}</h1>
-              ${post.subtitle ? `<h3 style="font-size: 16px; font-weight: normal; color: #a1a1aa; margin-top: 0; margin-bottom: 20px;">${post.subtitle}</h3>` : ''}
-              <p style="font-size: 14px; line-height: 1.6; color: #a1a1aa; margin-bottom: 30px;">${post.excerpt || 'Read the latest post on my portfolio.'}</p>
-            `}
+            ${post.coverImage ? `<div style="margin-bottom: 25px; border: 1px solid #262626; overflow: hidden;"><img src="${post.coverImage}" alt="${post.title}" style="width: 100%; height: auto; display: block;" /></div>` : ''}
+            <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #ffffff;">${post.title}</h1>
+            ${post.subtitle ? `<h3 style="font-size: 16px; font-weight: normal; color: #a1a1aa; margin-top: 0; margin-bottom: 20px;">${post.subtitle}</h3>` : ''}
+            <div style="margin-bottom: 30px; font-size: 14px; line-height: 1.6; color: #a1a1aa;">
+              ${parsedCustomHtml || `<p style="font-size: 14px; line-height: 1.6; color: #a1a1aa; margin: 0;">${post.excerpt || 'Read the latest post on my portfolio.'}</p>`}
+            </div>
             <div style="text-align: center; margin-bottom: 40px;">
               <a href="${readMoreUrl}" style="display: inline-block; background-color: #F59E0B; color: #000000; text-decoration: none; padding: 12px 30px; font-weight: bold; font-size: 13px; letter-spacing: 0.1em; border: 1px solid #F59E0B;">READ MORE →</a>
             </div>

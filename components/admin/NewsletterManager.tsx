@@ -353,15 +353,30 @@ export default function NewsletterManager({
                 <div className="border border-[#262626] p-4 bg-[#0a0a0a] overflow-y-auto max-h-[350px] font-sans">
                   <div className="bg-[#0c0c0c] border border-[#262626] p-6 max-w-xl mx-auto text-left text-white">
                     <div className="text-center pb-4 border-b border-[#262626]/40 mb-6">
-                      <h2 className="text-[#F59E0B] font-bold text-xs uppercase tracking-widest font-mono">NEWSLETTER</h2>
+                      <h2 className="text-[#F59E0B] font-bold text-xs uppercase tracking-widest font-mono">NEW BLOG POST</h2>
                     </div>
-                    {bodyMarkdown.trim() ? (
-                      <div className="prose prose-invert prose-xs max-w-none text-zinc-300 font-sans space-y-4">
-                        <ReactMarkdown>{bodyMarkdown}</ReactMarkdown>
+                    {/* Simulated Cover, Title & Subtitle */}
+                    <div className="mb-4">
+                      <div className="w-full h-32 bg-zinc-900 border border-[#262626] flex items-center justify-center text-zinc-500 text-[10px] uppercase font-mono tracking-widest select-none">
+                        [Cover Image Banner Placeholder]
                       </div>
-                    ) : (
-                      <p className="text-zinc-600 text-xs italic font-mono uppercase tracking-wider text-center py-6">No preview content. Write something first.</p>
-                    )}
+                      <h1 className="text-lg font-bold mt-4 text-white font-sans">
+                        {posts.find((p) => p.id === selectedPost)?.title || "Post Title Preview"}
+                      </h1>
+                      <div className="w-24 h-0.5 bg-amber my-2" />
+                    </div>
+                    <div className="prose prose-invert prose-xs max-w-none text-zinc-300 font-sans space-y-4">
+                      {bodyMarkdown.trim() ? (
+                        <ReactMarkdown>{bodyMarkdown}</ReactMarkdown>
+                      ) : (
+                        <p className="text-zinc-650 text-xs italic font-mono uppercase tracking-wider text-center py-6">No preview content. Write something first.</p>
+                      )}
+                    </div>
+                    <div className="text-center mt-6 pt-4">
+                      <span className="inline-block bg-[#F59E0B] text-black text-[10px] font-bold px-4 py-2 uppercase tracking-wider select-none font-mono">
+                        READ MORE →
+                      </span>
+                    </div>
                     <div className="text-center pt-6 border-t border-[#262626]/40 mt-8 text-[10px] text-zinc-500 font-mono">
                       <p>You received this because you subscribed to updates on my portfolio site.</p>
                       <p>&copy; {new Date().getFullYear()} Hanan Bhatti. All rights reserved.</p>

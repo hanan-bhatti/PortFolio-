@@ -72,8 +72,8 @@ export default function GithubActivity({ socialGithub, statsCommits, socialGithu
 
   const githubUrl = socialGithubLink || socialGithub || `https://github.com/${githubUsername}`;
 
-  const card1Url = `https://github-readme-stats-eight.vercel.app/api?username=${githubUsername}&show_icons=true&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&icon_color=16A34A&text_color=6B7280&ring_color=F59E0B&include_all_commits=true&count_private=true`;
-  const card2Url = `https://github-readme-stats-eight.vercel.app/api/top-langs/?username=${githubUsername}&layout=compact&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&text_color=6B7280&langs_count=8`;
+  const card1Url = `https://github-readme-stats.hanan-bhatti.site/api?username=${githubUsername}&show_icons=true&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&icon_color=16A34A&text_color=6B7280&ring_color=F59E0B&include_all_commits=true&count_private=true`;
+  const card2Url = `https://github-readme-stats.hanan-bhatti.site/api/top-langs/?username=${githubUsername}&layout=compact&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&text_color=6B7280&langs_count=8`;
   const cardStreakUrl = `https://streak-stats.demolab.com?user=${githubUsername}&theme=dark&hide_border=true&background=0a0a0a&ring=F59E0B&fire=F59E0B&currStreakLabel=F59E0B&sideLabels=6B7280&dates=6B7280`;
 
   return (
