@@ -451,3 +451,50 @@ model DashboardTask {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model WorkspacePage {
+  id        String   @id @default(cuid())
+  title     String   @default("Untitled")
+  emoji     String   @default("📄")
+  type      String   @default("note") // note | project | blog-idea | snippet | bookmark-collection
+  parentId  String?
+  parent    WorkspacePage?  @relation("PageChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  WorkspacePage[] @relation("PageChildren")
+  content   Json     @default("[]")
+  meta      Json     @default("{}")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks     WorkspaceTask[]
+  bookmarks WorkspaceBookmark[]
+}
+
+model WorkspaceTask {
+  id        String   @id @default(cuid())
+  pageId    String
+  page      WorkspacePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  title     String
+  status    String   @default("backlog") // backlog | todo | in-progress | done
+  priority  String   @default("medium") // low | medium | high | urgent
+  dueDate   DateTime?
+  notes     String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkspaceBookmark {
+  id          String   @id @default(cuid())
+  pageId      String?
+  page        WorkspacePage? @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  url         String
+  title       String
+  description String?
+  category    String   @default("general")
+  favicon     String?
+  ogImage     String?   // og:image for preview card
+  ogTitle     String?   // og:title
+  ogDesc      String?   // og:description
+  createdAt   DateTime @default(now())
+}
