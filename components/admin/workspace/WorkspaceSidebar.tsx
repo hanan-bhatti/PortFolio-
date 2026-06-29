@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   FiChevronDown,
   FiChevronRight,
@@ -12,7 +13,8 @@ import {
   FiBookmark,
   FiLayout,
   FiSettings,
-  FiTerminal
+  FiTerminal,
+  FiArrowLeft
 } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
@@ -36,11 +38,11 @@ interface WorkspaceSidebarProps {
 }
 
 const CATEGORIES = [
-  { type: "note", label: "Notes", icon: "📝" },
-  { type: "project", label: "Projects", icon: "🚀" },
-  { type: "blog-idea", label: "Blog Ideas", icon: "✍️" },
-  { type: "snippet", label: "Snippets", icon: "💻" },
-  { type: "bookmark-collection", label: "Bookmarks", icon: "🔗" }
+  { type: "note", label: "Notes", icon: <FiFileText className="h-3.5 w-3.5 text-zinc-550 shrink-0" /> },
+  { type: "project", label: "Projects", icon: <FiFolder className="h-3.5 w-3.5 text-[#F59E0B] shrink-0" /> },
+  { type: "blog-idea", label: "Blog Ideas", icon: <FiEdit className="h-3.5 w-3.5 text-sky-500 shrink-0" /> },
+  { type: "snippet", label: "Snippets", icon: <FiTerminal className="h-3.5 w-3.5 text-[#16A34A] shrink-0" /> },
+  { type: "bookmark-collection", label: "Bookmarks", icon: <FiBookmark className="h-3.5 w-3.5 text-pink-500 shrink-0" /> }
 ];
 
 export default function WorkspaceSidebar({
@@ -88,6 +90,23 @@ export default function WorkspaceSidebar({
     setRenamingPageId(null);
   };
 
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case "note":
+        return <FiFileText className="h-3.5 w-3.5 text-zinc-550 shrink-0" />;
+      case "project":
+        return <FiFolder className="h-3.5 w-3.5 text-[#F59E0B] shrink-0" />;
+      case "blog-idea":
+        return <FiEdit className="h-3.5 w-3.5 text-sky-500 shrink-0" />;
+      case "snippet":
+        return <FiTerminal className="h-3.5 w-3.5 text-[#16A34A] shrink-0" />;
+      case "bookmark-collection":
+        return <FiBookmark className="h-3.5 w-3.5 text-pink-500 shrink-0" />;
+      default:
+        return <FiFileText className="h-3.5 w-3.5 text-zinc-550 shrink-0" />;
+    }
+  };
+
   // Build tree client-side
   const renderPageItem = (page: PageItem, depth = 0) => {
     const hasChildren = pages.some((p) => p.parentId === page.id);
@@ -122,7 +141,7 @@ export default function WorkspaceSidebar({
               <span className="w-4 shrink-0" />
             )}
 
-            <span className="text-xs shrink-0">{page.emoji}</span>
+            {getTypeIcon(page.type)}
 
             {renamingPageId === page.id ? (
               <input
@@ -193,7 +212,15 @@ export default function WorkspaceSidebar({
 
   return (
     <aside className="w-[240px] bg-[#0c0c0c] border-r border-[#262626] h-full flex flex-col justify-between shrink-0 p-4 select-none">
-      <div className="space-y-6">
+      <div className="space-y-5">
+        {/* Back Link */}
+        <Link
+          href="/admin/dashboard"
+          className="flex items-center gap-1.5 font-mono text-[9px] font-bold text-zinc-550 uppercase tracking-widest hover:text-amber transition-colors outline-none pb-2 border-b border-[#262626]/60"
+        >
+          <FiArrowLeft className="h-3 w-3" /> Back to Dashboard
+        </Link>
+
         {/* Quick Capture Button */}
         <button
           onClick={onTriggerQuickCapture}
@@ -215,9 +242,9 @@ export default function WorkspaceSidebar({
                 <div className="flex items-center justify-between border-b border-[#262626]/60 pb-1 font-mono text-[9px] font-bold text-zinc-550 uppercase tracking-widest">
                   <button
                     onClick={() => toggleCategory(cat.type)}
-                    className="flex items-center gap-1 hover:text-white"
+                    className="flex items-center gap-1.5 hover:text-white"
                   >
-                    <span>{cat.icon}</span>
+                    {cat.icon}
                     <span>{cat.label}</span>
                   </button>
                   <button

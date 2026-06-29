@@ -7,7 +7,6 @@ import BlogStatusBar from "./BlogStatusBar";
 import KanbanBoard from "./KanbanBoard";
 import BookmarkGrid from "./BookmarkGrid";
 import QuickCaptureModal from "./QuickCaptureModal";
-import EmojiPicker from "./EmojiPicker";
 import { toast } from "sonner";
 import {
   FiMonitor,
@@ -19,7 +18,9 @@ import {
   FiSettings,
   FiBookmark,
   FiTerminal,
-  FiList
+  FiList,
+  FiFileText,
+  FiFolder
 } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
@@ -496,12 +497,24 @@ export default function WorkspaceLayout() {
             {activePage ? (
               <div className="max-w-[760px] mx-auto space-y-6">
                 
-                {/* Title and Emoji Controls */}
-                <div className="flex items-start gap-3 border-b border-[#262626]/40 pb-4">
-                  <EmojiPicker
-                    currentEmoji={activePage.emoji}
-                    onSelect={(emoji) => handleEmojiSelect(activePage.id, emoji)}
-                  />
+                {/* Title and Icon Controls */}
+                <div className="flex items-center gap-3 border-b border-[#262626]/40 pb-4 select-none">
+                  {(() => {
+                    switch (activePage.type) {
+                      case "note":
+                        return <FiFileText className="h-6 w-6 text-zinc-550 shrink-0" />;
+                      case "project":
+                        return <FiFolder className="h-6 w-6 text-[#F59E0B] shrink-0" />;
+                      case "blog-idea":
+                        return <FiEdit className="h-6 w-6 text-sky-500 shrink-0" />;
+                      case "snippet":
+                        return <FiTerminal className="h-6 w-6 text-[#16A34A] shrink-0" />;
+                      case "bookmark-collection":
+                        return <FiBookmark className="h-6 w-6 text-pink-500 shrink-0" />;
+                      default:
+                        return <FiFileText className="h-6 w-6 text-zinc-550 shrink-0" />;
+                    }
+                  })()}
                   <input
                     type="text"
                     value={activePage.title}
