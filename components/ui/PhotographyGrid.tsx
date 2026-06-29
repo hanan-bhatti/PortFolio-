@@ -272,9 +272,8 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
 
   return (
     <>
-      <div className="columns-2 lg:columns-3 gap-4 md:gap-6 [column-fill:_balance] space-y-4 md:space-y-6 w-full relative z-10">
+      <div className="columns-2 md:columns-3 gap-[8px] [column-fill:_balance] space-y-[8px] w-full relative z-10">
         {photos.map((photo, index) => {
-          const isLkd = photo.isLiked;
           const anim = heartAnim[photo.id] || { key: 0, visible: false };
           const pList = particles[photo.id] || [];
 
@@ -282,7 +281,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
             <div
               key={photo.id}
               onClick={() => handleCardClick(photo.id, index)}
-              className="break-inside-avoid-column group relative overflow-hidden border border-white/10 bg-[#0c0c0c] cursor-pointer transition-all duration-300 hover:border-amber-500/40 hover:scale-[1.01] flex flex-col select-none mb-4 md:mb-6"
+              className="break-inside-avoid-column group relative overflow-hidden border border-white/10 bg-[#0c0c0c] cursor-pointer transition-all duration-300 hover:border-amber-500/40 hover:scale-[1.01] flex flex-col select-none mb-[8px]"
               style={{ borderRadius: "0px" }}
             >
               {/* Image Wrapper */}
@@ -296,6 +295,13 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                   className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                   priority={index < 3}
                 />
+
+                {/* EXIF Overlay Pill inside bottom-left of image wrapper */}
+                {photo.exif_data && (
+                  <div className="absolute bottom-2 left-2 z-25 bg-black/60 backdrop-blur-sm text-amber-400 text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/5 pointer-events-none uppercase tracking-wide">
+                    EXIF
+                  </div>
+                )}
 
                 {/* Double click scaling heart overlay */}
                 {anim.visible && (
@@ -338,109 +344,20 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                     </svg>
                   </div>
                 ))}
-                
-                {/* Desktop Overlay: Hover triggered, absolutely positioned */}
-                <div className="absolute inset-0 bg-black/75 flex flex-col justify-end p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-20 hidden md:flex">
-                  <span className="font-syne text-[10px] uppercase tracking-widest text-amber-500 font-bold mb-1">
-                    #{String(index + 1).padStart(2, "0")}
-                  </span>
-                  {photo.title && (
-                    <h3 className="font-syne text-sm font-bold text-white uppercase tracking-tight">
-                      {photo.title}
-                    </h3>
-                  )}
-                  {photo.description && (
-                    <p className="font-inter text-[11px] text-zinc-400 mt-1 line-clamp-2 italic">
-                      {photo.description}
-                    </p>
-                  )}
-
-                  {/* Counts / Interactions Bar */}
-                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/10 font-inter text-xs text-white/70">
-                    <button
-                      onClick={(e) => handleLikeDirect(e, photo.id)}
-                      className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
-                        isLkd ? "text-red-500 font-bold" : "hover:text-red-400"
-                      }`}
-                      title={isLkd ? "Unlike" : "Like"}
-                    >
-                      <FiHeart className={`w-3.5 h-3.5 ${isLkd ? "fill-current" : ""}`} />
-                      {photo.likes ?? 0}
-                    </button>
-                    
-                    <button
-                      onClick={(e) => handleDownloadDirect(e, photo.id)}
-                      className="flex items-center gap-1.5 hover:text-[#10B981] transition-colors cursor-pointer"
-                      title="Download photograph"
-                    >
-                      <FiDownload className="w-3.5 h-3.5" />
-                      {photo.downloads ?? 0}
-                    </button>
-                    
-                    <button
-                      onClick={(e) => handleShareDirect(e, photo.id)}
-                      className="flex items-center gap-1.5 hover:text-amber-500 transition-colors cursor-pointer"
-                      title="Copy referral link to share"
-                    >
-                      <FiShare2 className="w-3.5 h-3.5" />
-                      {photo.shares ?? 0}
-                    </button>
-                  </div>
-                </div>
               </div>
 
-              {/* Mobile details footer body (rendered underneath the photo card) */}
-              <div className="p-4 border-t border-white/5 bg-[#080808]/90 flex flex-col justify-between md:hidden">
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-mono text-[9px] font-bold text-amber-500 uppercase tracking-widest">
-                      #{String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className="text-[10px] text-zinc-650 font-mono">EXIF AVAILABLE</span>
-                  </div>
-                  {photo.title && (
-                    <h3 className="font-syne text-xs font-bold text-white uppercase tracking-tight leading-normal">
-                      {photo.title}
-                    </h3>
-                  )}
-                  {photo.description && (
-                    <p className="font-inter text-[10px] text-zinc-400 mt-1 line-clamp-3 italic leading-relaxed">
-                      {photo.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Counts / Interactions Bar (Clean styled pill-like icons) */}
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5 font-inter text-[11px] text-zinc-400">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={(e) => handleLikeDirect(e, photo.id)}
-                      className={cn(
-                        "flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 transition-colors rounded-none",
-                        isLkd ? "text-red-500 border-red-500/20 bg-red-500/5 font-bold" : "active:bg-white/10"
-                      )}
-                    >
-                      <FiHeart className={cn("w-3 h-3", isLkd && "fill-current")} />
-                      <span>{photo.likes ?? 0}</span>
-                    </button>
-                    
-                    <button
-                      onClick={(e) => handleDownloadDirect(e, photo.id)}
-                      className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 text-zinc-350 transition-colors active:bg-white/10 rounded-none"
-                    >
-                      <FiDownload className="w-3 h-3 text-[#10B981]" />
-                      <span>{photo.downloads ?? 0}</span>
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={(e) => handleShareDirect(e, photo.id)}
-                    className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 text-zinc-350 transition-colors active:bg-white/10 rounded-none"
-                  >
-                    <FiShare2 className="w-3 h-3 text-amber-500" />
-                    <span>{photo.shares ?? 0}</span>
-                  </button>
-                </div>
+              {/* Minimalist Card details footer body underneath the photo card */}
+              <div className="p-3 border-t border-white/5 bg-[#080808]/90 flex items-center justify-between font-mono text-[10px]">
+                {photo.title ? (
+                  <h3 className="font-syne text-xs font-bold text-white uppercase tracking-tight truncate pr-4">
+                    {photo.title}
+                  </h3>
+                ) : (
+                  <span className="text-zinc-650 italic">Untitled</span>
+                )}
+                <span className="text-amber-500 font-bold shrink-0">
+                  #{String(index + 1).padStart(2, "0")}
+                </span>
               </div>
             </div>
           );
