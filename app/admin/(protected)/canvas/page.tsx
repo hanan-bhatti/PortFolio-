@@ -68,7 +68,7 @@ export default function CanvasPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] w-full border border-[#262626] bg-[#0c0c0c] rounded-none overflow-hidden relative">
+    <div className="flex flex-col h-[calc(100vh-4rem)] md:h-screen w-auto -m-4 sm:-m-6 md:-m-8 border-none bg-[#0c0c0c] overflow-hidden relative">
       <div className="border-b border-[#262626] px-6 py-4 bg-[#0c0c0c] flex items-center justify-between select-none">
         <h1 className="font-syne font-extrabold text-lg text-white uppercase tracking-tight">
           Excalidraw Canvas
