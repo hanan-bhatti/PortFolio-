@@ -11,6 +11,7 @@
 import { useTransition, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -93,6 +94,76 @@ const SOCIAL_FIELDS: Array<{ name: keyof SettingsInput; label: string; placehold
   { name: "socialLinkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/in/username" },
   { name: "socialTwitter", label: "Twitter / X URL", placeholder: "https://x.com/username" },
 ];
+
+interface MarkdownTextareaProps {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+  label: React.ReactNode;
+}
+
+function MarkdownTextarea({
+  value,
+  onChange,
+  placeholder,
+  rows = 5,
+  label,
+}: MarkdownTextareaProps) {
+  const [mode, setMode] = useState<"write" | "preview">("write");
+
+  return (
+    <div className="space-y-1.5 w-full">
+      <div className="flex items-center justify-between border-b border-[#262626]/60 pb-1.5">
+        <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+          {label}
+        </label>
+        <div className="flex gap-1 bg-black/45 p-0.5 border border-[#262626] font-mono text-[9px] font-bold uppercase">
+          <button
+            type="button"
+            onClick={() => setMode("write")}
+            className={cn("px-2 py-0.5 cursor-pointer transition-colors", mode === "write" ? "bg-amber text-black" : "text-zinc-400 hover:text-zinc-200")}
+          >
+            Write
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("preview")}
+            className={cn("px-2 py-0.5 cursor-pointer transition-colors", mode === "preview" ? "bg-amber text-black" : "text-zinc-400 hover:text-zinc-200")}
+          >
+            Preview
+          </button>
+        </div>
+      </div>
+      {mode === "write" ? (
+        <div className="relative">
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={rows}
+            className="w-full border border-[#262626] bg-black/40 px-4 py-2.5 font-mono text-xs text-white placeholder-zinc-650 outline-none focus:border-amber transition-colors rounded-none resize-y min-h-[100px]"
+          />
+          <div className="absolute bottom-2 right-2 text-[9px] font-mono text-zinc-550 bg-black/80 px-1.5 py-0.5 border border-[#262626]">
+            {value?.length || 0} chars
+          </div>
+        </div>
+      ) : (
+        <div className="w-full border border-[#262626] bg-black/20 px-4 py-3 min-h-[100px] max-h-[250px] overflow-y-auto text-xs text-zinc-300 font-sans whitespace-pre-wrap leading-relaxed">
+          {value ? (
+            <div className="prose prose-invert prose-xs max-w-none">
+              <ReactMarkdown>
+                {value}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <span className="italic text-zinc-550 font-mono">Nothing to preview.</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SettingsForm({
   initial,
@@ -399,8 +470,13 @@ export default function SettingsForm({
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">Cookie Banner Consent Text</label>
-                <textarea {...register("cookie_consent_text")} placeholder="We use cookies..." rows={1} className={inputClass} />
+                <MarkdownTextarea
+                  label="Cookie Banner Consent Text"
+                  value={watch("cookie_consent_text") || ""}
+                  onChange={(v) => setValue("cookie_consent_text", v, { shouldDirty: true })}
+                  placeholder="We use cookies..."
+                  rows={2}
+                />
               </div>
             </div>
           </div>
@@ -492,21 +568,35 @@ export default function SettingsForm({
               {errors.heroTagline ? <p className="font-mono text-[10px] text-red-400">{errors.heroTagline?.message}</p> : null}
             </div>
 
-            {/* About Bio */}
+             {/* About Bio */}
             <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                <FiTerminal className="w-3.5 h-3.5 text-zinc-550" /> About Bio
-              </label>
-              <textarea {...register("aboutBio")} placeholder="Tell visitors about yourself..." rows={5} className={inputClass} />
+              <MarkdownTextarea
+                label={
+                  <span className="flex items-center gap-1.5">
+                    <FiTerminal className="w-3.5 h-3.5 text-zinc-550" /> About Bio
+                  </span>
+                }
+                value={watch("aboutBio") || ""}
+                onChange={(v) => setValue("aboutBio", v, { shouldDirty: true })}
+                placeholder="Tell visitors about yourself..."
+                rows={6}
+              />
               {errors.aboutBio ? <p className="font-mono text-[10px] text-red-400">{errors.aboutBio?.message}</p> : null}
             </div>
 
             {/* Marquee Skills */}
             <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                <FiCpu className="w-3.5 h-3.5 text-zinc-550" /> Marquee Skills (comma-separated)
-              </label>
-              <textarea {...register("marqueeSkills")} placeholder="FULL STACK, DEVOPS, C++" rows={3} className={inputClass} />
+              <MarkdownTextarea
+                label={
+                  <span className="flex items-center gap-1.5">
+                    <FiCpu className="w-3.5 h-3.5 text-zinc-550" /> Marquee Skills (comma-separated)
+                  </span>
+                }
+                value={watch("marqueeSkills") || ""}
+                onChange={(v) => setValue("marqueeSkills", v, { shouldDirty: true })}
+                placeholder="FULL STACK, DEVOPS, C++"
+                rows={3}
+              />
               {errors.marqueeSkills ? <p className="font-mono text-[10px] text-red-400">{errors.marqueeSkills?.message}</p> : null}
             </div>
 

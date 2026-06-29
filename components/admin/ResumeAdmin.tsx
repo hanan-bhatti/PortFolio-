@@ -12,6 +12,7 @@ import { useState, useTransition, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import SkillIcon from "@/components/ui/SkillIcon";
+import ReactMarkdown from "react-markdown";
 import EditorialModal from "./EditorialModal";
 import {
   FiArrowUp,
@@ -60,6 +61,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
@@ -184,6 +186,76 @@ function SortableCertRow({
         <button className="resume-btn-ghost" onClick={() => onEdit(item)}>Edit</button>
         <button className="resume-btn-danger" onClick={() => onDelete(item.id)}>Delete</button>
       </div>
+    </div>
+  );
+}
+
+interface MarkdownTextareaProps {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  rows?: number;
+  label: React.ReactNode;
+}
+
+function MarkdownTextarea({
+  value,
+  onChange,
+  placeholder,
+  rows = 5,
+  label,
+}: MarkdownTextareaProps) {
+  const [mode, setMode] = useState<"write" | "preview">("write");
+
+  return (
+    <div className="space-y-1.5 w-full">
+      <div className="flex items-center justify-between border-b border-[#262626]/60 pb-1.5">
+        <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+          {label}
+        </label>
+        <div className="flex gap-1 bg-black/45 p-0.5 border border-[#262626] font-mono text-[9px] font-bold uppercase">
+          <button
+            type="button"
+            onClick={() => setMode("write")}
+            className={cn("px-2 py-0.5 cursor-pointer transition-colors", mode === "write" ? "bg-amber text-black" : "text-zinc-450 hover:text-zinc-200")}
+          >
+            Write
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("preview")}
+            className={cn("px-2 py-0.5 cursor-pointer transition-colors", mode === "preview" ? "bg-amber text-black" : "text-zinc-450 hover:text-zinc-200")}
+          >
+            Preview
+          </button>
+        </div>
+      </div>
+      {mode === "write" ? (
+        <div className="relative">
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            rows={rows}
+            className="w-full border border-[#262626] bg-[#050505] px-4 py-2.5 font-mono text-xs text-white placeholder-zinc-650 outline-none focus:border-amber transition-colors rounded-none resize-y min-h-[100px]"
+          />
+          <div className="absolute bottom-2 right-2 text-[9px] font-mono text-zinc-550 bg-black/80 px-1.5 py-0.5 border border-[#262626]">
+            {value?.length || 0} chars
+          </div>
+        </div>
+      ) : (
+        <div className="w-full border border-[#262626] bg-[#0c0c0c]/40 px-4 py-3 min-h-[100px] max-h-[250px] overflow-y-auto text-xs text-zinc-300 font-sans whitespace-pre-wrap leading-relaxed">
+          {value ? (
+            <div className="prose prose-invert prose-xs max-w-none">
+              <ReactMarkdown>
+                {value}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <span className="italic text-zinc-550 font-mono">Nothing to preview.</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -343,13 +415,13 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
         </div>
 
         {/* Row 3: Professional Summary */}
-        <div className="resume-field">
-          <label className="resume-label">Professional Summary</label>
-          <textarea
-            className="resume-input"
-            rows={5}
+        <div className="resume-field mt-3">
+          <MarkdownTextarea
+            label="Professional Summary"
             value={form.resume_summary ?? ""}
-            onChange={(e) => setForm((p) => ({ ...p, resume_summary: e.target.value }))}
+            onChange={(val) => setForm((p) => ({ ...p, resume_summary: val }))}
+            placeholder="Summarize your professional experience..."
+            rows={6}
           />
         </div>
       </div>
