@@ -374,64 +374,16 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
       exif.dateTimeOriginal)
   );
 
-  interface ExifItem {
-    label: string;
-    value: React.ReactNode;
-  }
-
-  const exifItems: ExifItem[] = [];
-  if (exif) {
-    if (exif.make || exif.model) {
-      exifItems.push({
-        label: "DEVICE",
-        value: [exif.make, exif.model].filter(Boolean).join(" "),
-      });
-    }
-    if (exif.fNumber !== undefined && exif.fNumber !== null) {
-      exifItems.push({
-        label: "APERTURE",
-        value: formatFNumber(exif.fNumber),
-      });
-    }
-    if (exif.exposureTime !== undefined && exif.exposureTime !== null) {
-      exifItems.push({
-        label: "SHUTTER",
-        value: formatShutter(exif.exposureTime),
-      });
-    }
-    if (exif.iso !== undefined && exif.iso !== null) {
-      exifItems.push({
-        label: "ISO",
-        value: exif.iso.toString(),
-      });
-    }
-    if (exif.focalLength !== undefined && exif.focalLength !== null) {
-      exifItems.push({
-        label: "FOCAL",
-        value: formatFocal(exif.focalLength),
-      });
-    }
-    if (exif.locationName) {
-      exifItems.push({
-        label: "LOCATION",
-        value: (
-          <span className="flex items-center gap-1">
-            <span style={{ color: "var(--green)" }}>📍</span> {exif.locationName}
-          </span>
-        ),
-      });
-    }
-    if (exif.dateTimeOriginal) {
-      exifItems.push({
-        label: "DATE",
-        value: formatDate(exif.dateTimeOriginal),
-      });
-    }
-  }
+  const model = exif ? [exif.make, exif.model].filter(Boolean).join(" ") : "";
+  const aperture = exif && exif.fNumber !== undefined && exif.fNumber !== null ? formatFNumber(exif.fNumber) : "";
+  const shutter = exif && exif.exposureTime !== undefined && exif.exposureTime !== null ? formatShutter(exif.exposureTime) : "";
+  const iso = exif && exif.iso !== undefined && exif.iso !== null ? `ISO ${exif.iso}` : "";
+const focal = exif && exif.focalLength !== undefined && exif.focalLength !== null ? formatFocal(exif.focalLength) : "";
+  const date = exif && exif.dateTimeOriginal ? formatDate(exif.dateTimeOriginal) : "";
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex flex-col justify-between p-4 md:p-6 bg-black/98 transition-opacity duration-300 overflow-hidden h-[100dvh]"
+      className="fixed inset-0 z-[9999] flex flex-col justify-center p-4 md:p-6 bg-black/98 transition-opacity duration-300 overflow-y-auto h-[100dvh]"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={onClose}
@@ -446,9 +398,9 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         <FiX className="w-5 h-5" />
       </button>
 
-      {/* Main Image Container - Flex-1, expands, shrinks to fit viewport */}
+      {/* Main Image Container - Capped at max-height 65vh */}
       <div
-        className="flex-1 min-h-[50dvh] w-full max-w-4xl mx-auto relative flex items-center justify-center overflow-hidden"
+        className="w-full max-w-4xl mx-auto relative flex items-center justify-center overflow-hidden h-[55vh] max-h-[65vh] flex-shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
         <div 
@@ -483,7 +435,7 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             src={retryKey > 0 ? `${currentPhoto.imageUrl}?retry=${retryKey}` : currentPhoto.imageUrl}
             alt={currentPhoto.title ?? "Photo"}
             fill
-            className="object-contain transition-all duration-300 w-full h-full max-h-full min-h-0"
+            className="object-contain transition-all duration-300 w-full h-full max-h-[65vh] min-h-0"
             sizes="(max-width: 768px) 100vw, 80vw"
             priority
             unoptimized
@@ -540,74 +492,40 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
         </div>
       </div>
 
-      {/* Info & Metadata Panel - Locked at bottom */}
+      {/* Info & Metadata Panel - Placed below the centered image */}
       <div 
-        className="w-full max-w-4xl mx-auto flex flex-col shrink-0"
+        className="w-full max-w-4xl mx-auto flex flex-col shrink-0 mt-4 select-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Action Row - Fixed height strip ~40px */}
-        <div className="h-10 flex items-center justify-between border-b border-white/5 shrink-0">
-          {/* Actions on the left */}
-          <div className="flex items-center gap-5">
-            <button 
-              onClick={handleLike} 
-              className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-red-450 transition-colors"
-            >
-              <FiHeart className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-              <span>{likes}</span>
-            </button>
-            
-            <button 
-              onClick={handleDownload} 
-              className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-[#10B981] transition-colors"
-            >
-              <FiDownload className="w-4 h-4" />
-              <span>{downloads}</span>
-            </button>
+        {/* Heart/Download/Share Actions: Left-aligned, own row above title */}
+        <div className="flex items-center gap-5 py-2 border-b border-white/5 shrink-0">
+          <button 
+            onClick={handleLike} 
+            className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-red-450 transition-colors"
+          >
+            <FiHeart className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+            <span>{likes}</span>
+          </button>
+          
+          <button 
+            onClick={handleDownload} 
+            className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-[#10B981] transition-colors"
+          >
+            <FiDownload className="w-4 h-4" />
+            <span>{downloads}</span>
+          </button>
 
-            <button 
-              onClick={() => setShowShareModal(true)} 
-              className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-amber-500 transition-colors"
-            >
-              <FiShare2 className="w-4 h-4" />
-              <span>{shares}</span>
-            </button>
-          </div>
-
-          {/* Instagram style pagination dots with sliding window */}
-          <div className="flex items-center gap-1 select-none">
-            {photos.map((_, i) => {
-              const distance = Math.abs(i - currentIndex);
-              if (distance >= 3) return null;
-              
-              if (distance === 0) {
-                return (
-                  <span 
-                    key={i} 
-                    className="w-4 h-1 rounded-full bg-amber-500 transition-all duration-300"
-                  />
-                );
-              } else if (distance === 1) {
-                return (
-                  <span 
-                    key={i} 
-                    className="w-1.5 h-1.5 rounded-full bg-white/70 transition-all duration-300"
-                  />
-                );
-              } else {
-                return (
-                  <span 
-                    key={i} 
-                    className="w-1 h-1 rounded-full bg-white/30 transition-all duration-300"
-                  />
-                );
-              }
-            })}
-          </div>
+          <button 
+            onClick={() => setShowShareModal(true)} 
+            className="flex items-center gap-1.5 font-inter text-xs text-white/80 hover:text-amber-500 transition-colors"
+          >
+            <FiShare2 className="w-4 h-4" />
+            <span>{shares}</span>
+          </button>
         </div>
 
-        {/* Text descriptions and EXIF tags */}
-        <div className="w-full text-left mt-2 select-text">
+        {/* Text descriptions, Title and EXIF row details */}
+        <div className="w-full text-left mt-2 select-text overflow-y-auto max-h-[22vh] pr-1">
           {currentPhoto.title && (
             <h3 className="text-base font-semibold text-white uppercase tracking-wider">
               {currentPhoto.title}
@@ -620,24 +538,89 @@ export default function PhotoLightbox({ photos, initialIndex, onClose }: PhotoLi
             </p>
           )}
 
-          {/* Camera specs inline flex tags - Footnotes style, no backgrounds/borders */}
-          {hasExif && exifItems.length > 0 && (
-            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-              {exifItems.map((item, idx) => {
-                const icon = getExifIcon(item.label);
-                return (
-                  <div 
-                    key={idx} 
-                    className="flex items-center gap-1 text-[11px] text-white/40 font-mono font-light"
-                    title={item.label}
-                  >
-                    {icon}
-                    <span>{item.value}</span>
-                  </div>
-                );
-              })}
+          {/* EXIF metadata row: presented on two separate lines */}
+          {hasExif && (
+            <div className="mt-3 space-y-1.5 border-t border-white/5 pt-2">
+              {/* Line 1: Camera model + aperture + shutter speed */}
+              {(model || aperture || shutter) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-white/50 font-mono">
+                  {model && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      <FiCamera className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{model}</span>
+                    </span>
+                  )}
+                  {aperture && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      <FiSliders className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{aperture}</span>
+                    </span>
+                  )}
+                  {shutter && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      <FiClock className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{shutter}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Line 2: ISO + focal length + date */}
+              {(iso || focal || date) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-white/50 font-mono">
+                  {iso && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      <FiLayers className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{iso}</span>
+                    </span>
+                  )}
+                  {focal && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      <FiMaximize className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{focal}</span>
+                    </span>
+                  )}
+                  {date && (
+                    <span className="flex items-center gap-1 shrink-0">
+                      <FiCalendar className="w-3.5 h-3.5 text-amber-500" />
+                      <span>{date}</span>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           )}
+        </div>
+
+        {/* Pagination dots: centered, in a separate row below the actions & description */}
+        <div className="flex justify-center items-center gap-1 select-none py-3 border-t border-white/5 mt-2 shrink-0">
+          {photos.map((_, i) => {
+            const distance = Math.abs(i - currentIndex);
+            if (distance >= 3) return null;
+            
+            if (distance === 0) {
+              return (
+                <span 
+                  key={i} 
+                  className="w-4 h-1 rounded-full bg-amber-500 transition-all duration-300"
+                />
+              );
+            } else if (distance === 1) {
+              return (
+                <span 
+                  key={i} 
+                  className="w-1.5 h-1.5 rounded-full bg-white/70 transition-all duration-300"
+                />
+              );
+            } else {
+              return (
+                <span 
+                  key={i} 
+                  className="w-1.5 h-1.5 rounded-full bg-white/30 transition-all duration-300"
+                />
+              );
+            }
+          })}
         </div>
       </div>
 
