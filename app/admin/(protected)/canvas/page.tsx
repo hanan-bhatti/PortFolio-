@@ -4,8 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import "@excalidraw/excalidraw/index.css";
 
-const Excalidraw = dynamic(
-  async () => (await import("@excalidraw/excalidraw")).Excalidraw,
+const ExcalidrawWrapper = dynamic(
+  async () => await import("@/components/admin/ExcalidrawWrapper"),
   { ssr: false }
 );
 
@@ -64,8 +64,7 @@ export default function CanvasPage() {
       </div>
       <div className="flex-1 w-full bg-black relative">
         {!isLoading && (
-          <Excalidraw
-            theme="dark"
+          <ExcalidrawWrapper
             initialData={initialData}
             onChange={handleCanvasChange}
           />
