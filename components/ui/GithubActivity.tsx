@@ -23,22 +23,42 @@ interface GithubCardProps {
 
 function GithubCard({ src, alt }: GithubCardProps) {
   const [hasError, setHasError] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const handleRetry = () => {
+    setHasError(false);
+    setKey((prev) => prev + 1);
+  };
 
   return (
     <div
       style={{
         border: "1px solid var(--border)",
-        display: hasError ? "none" : "block",
+        minHeight: "170px"
       }}
-      className="bg-[#0a0a0a] overflow-hidden w-full"
+      className="bg-[#0a0a0a] overflow-hidden w-full flex items-center justify-center relative"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        onError={() => setHasError(true)}
-        className="w-full h-auto object-contain block select-none pointer-events-auto"
-      />
+      {hasError ? (
+        <div className="flex flex-col items-center justify-center p-6 text-center gap-3 font-mono">
+          <span className="text-[10px] text-zinc-500 uppercase tracking-widest">Failed to load statistics card</span>
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="px-3 py-1.5 text-[9px] bg-transparent border border-[#262626] text-amber hover:bg-amber hover:text-black transition-all cursor-pointer font-bold uppercase tracking-widest"
+          >
+            Retry Loading
+          </button>
+        </div>
+      ) : (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          key={key}
+          src={src}
+          alt={alt}
+          onError={() => setHasError(true)}
+          className="w-full h-auto object-contain block select-none pointer-events-auto animate-fadeIn"
+        />
+      )}
     </div>
   );
 }
