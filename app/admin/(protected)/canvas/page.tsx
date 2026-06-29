@@ -86,6 +86,17 @@ export default function CanvasPage() {
           />
         )}
       </div>
+      <div className="border-t border-[#262626] px-6 py-2.5 bg-[#0c0c0c] flex items-center justify-between select-none font-mono text-[9px] text-zinc-500">
+        <span>Integrated open-source Excalidraw library</span>
+        <a 
+          href="https://github.com/excalidraw/excalidraw" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-amber hover:text-amber/80 transition-colors uppercase tracking-widest"
+        >
+          GitHub Repo →
+        </a>
+      </div>
     </div>
   );
 }
