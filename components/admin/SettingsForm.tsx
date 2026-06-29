@@ -27,6 +27,7 @@ import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import { cn, formatDate } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
+import ScrollingMarquee from "@/components/ui/ScrollingMarquee";
 import {
   FiGlobe,
   FiTag,
@@ -101,6 +102,7 @@ interface MarkdownTextareaProps {
   placeholder?: string;
   rows?: number;
   label: React.ReactNode;
+  customPreview?: React.ReactNode;
 }
 
 function MarkdownTextarea({
@@ -109,6 +111,7 @@ function MarkdownTextarea({
   placeholder,
   rows = 5,
   label,
+  customPreview,
 }: MarkdownTextareaProps) {
   const [mode, setMode] = useState<"write" | "preview">("write");
 
@@ -150,7 +153,9 @@ function MarkdownTextarea({
         </div>
       ) : (
         <div className="w-full border border-[#262626] bg-black/20 px-4 py-3 min-h-[100px] max-h-[250px] overflow-y-auto text-xs text-zinc-300 font-sans whitespace-pre-wrap leading-relaxed">
-          {value ? (
+          {customPreview ? (
+            customPreview
+          ) : value ? (
             <div className="prose prose-invert prose-xs max-w-none">
               <ReactMarkdown>
                 {value}
@@ -596,6 +601,11 @@ export default function SettingsForm({
                 onChange={(v) => setValue("marqueeSkills", v, { shouldDirty: true })}
                 placeholder="FULL STACK, DEVOPS, C++"
                 rows={3}
+                customPreview={
+                  <div className="w-full pointer-events-none opacity-90 py-1 bg-black/40 border border-[#262626]">
+                    <ScrollingMarquee skills={watch("marqueeSkills") || ""} />
+                  </div>
+                }
               />
               {errors.marqueeSkills ? <p className="font-mono text-[10px] text-red-400">{errors.marqueeSkills?.message}</p> : null}
             </div>
