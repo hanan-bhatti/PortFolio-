@@ -62,8 +62,9 @@ export default async function PhotographyPage() {
         key={idx}
         style={{
           color: isAmber ? "var(--amber)" : "#fff",
-          transform: offset !== "0" ? `translateX(${offset})` : undefined,
-        }}
+          transform: offset !== "0" ? "translateX(var(--tx-offset))" : undefined,
+          "--tx-offset": offset,
+        } as React.CSSProperties}
       >
         {word}
       </div>

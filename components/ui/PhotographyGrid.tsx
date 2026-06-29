@@ -15,6 +15,7 @@ import { FiHeart, FiDownload, FiShare2 } from "react-icons/fi";
 import { toast } from "sonner";
 import PhotoLightbox from "./PhotoLightbox";
 import { getVisitorId } from "@/lib/analytics";
+import { cn } from "@/lib/utils";
 
 interface Photo {
   id: string;
@@ -281,7 +282,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
             <div
               key={photo.id}
               onClick={() => handleCardClick(photo.id, index)}
-              className="break-inside-avoid-column group relative overflow-hidden border border-white/10 bg-white/[0.02] cursor-pointer transition-all duration-300 hover:border-amber-500/40 hover:scale-[1.01] flex flex-col select-none"
+              className="break-inside-avoid-column group relative overflow-hidden border border-white/10 bg-[#0c0c0c] cursor-pointer transition-all duration-300 hover:border-amber-500/40 hover:scale-[1.01] flex flex-col select-none mb-4 md:mb-6"
               style={{ borderRadius: "0px" }}
             >
               {/* Image Wrapper */}
@@ -303,7 +304,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                     className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 animate-instagram-heart"
                   >
                     <svg
-                      className="w-20 h-20 text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] fill-current"
+                      className="w-16 h-16 text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] fill-current"
                       viewBox="0 0 24 24"
                     >
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -330,7 +331,7 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                   >
                     <svg 
                       viewBox="0 0 24 24" 
-                      className="w-full h-full fill-current drop-shadow-[0_0_3px_rgba(0,0,0,0.3)]"
+                      className="w-full h-full fill-current"
                       style={{ color: p.color }}
                     >
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -338,9 +339,9 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                   </div>
                 ))}
                 
-                {/* Overlay: always visible on mobile, hover-triggered on desktop */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent md:bg-black/0 md:transition-colors md:duration-300 md:group-hover:bg-black/70 flex flex-col justify-end p-5 opacity-100 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100 z-20">
-                  <span className="font-syne text-xs uppercase tracking-widest text-amber-500 font-bold mb-1">
+                {/* Desktop Overlay: Hover triggered, absolutely positioned */}
+                <div className="absolute inset-0 bg-black/75 flex flex-col justify-end p-5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 z-20 hidden md:flex">
+                  <span className="font-syne text-[10px] uppercase tracking-widest text-amber-500 font-bold mb-1">
                     #{String(index + 1).padStart(2, "0")}
                   </span>
                   {photo.title && (
@@ -385,6 +386,60 @@ function GridContent({ photos: initialPhotos }: PhotographyGridProps) {
                       {photo.shares ?? 0}
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Mobile details footer body (rendered underneath the photo card) */}
+              <div className="p-4 border-t border-white/5 bg-[#080808]/90 flex flex-col justify-between md:hidden">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-mono text-[9px] font-bold text-amber-500 uppercase tracking-widest">
+                      #{String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="text-[10px] text-zinc-650 font-mono">EXIF AVAILABLE</span>
+                  </div>
+                  {photo.title && (
+                    <h3 className="font-syne text-xs font-bold text-white uppercase tracking-tight leading-normal">
+                      {photo.title}
+                    </h3>
+                  )}
+                  {photo.description && (
+                    <p className="font-inter text-[10px] text-zinc-400 mt-1 line-clamp-3 italic leading-relaxed">
+                      {photo.description}
+                    </p>
+                  )}
+                </div>
+
+                {/* Counts / Interactions Bar (Clean styled pill-like icons) */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5 font-inter text-[11px] text-zinc-400">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={(e) => handleLikeDirect(e, photo.id)}
+                      className={cn(
+                        "flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 transition-colors rounded-none",
+                        isLkd ? "text-red-500 border-red-500/20 bg-red-500/5 font-bold" : "active:bg-white/10"
+                      )}
+                    >
+                      <FiHeart className={cn("w-3 h-3", isLkd && "fill-current")} />
+                      <span>{photo.likes ?? 0}</span>
+                    </button>
+                    
+                    <button
+                      onClick={(e) => handleDownloadDirect(e, photo.id)}
+                      className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 text-zinc-350 transition-colors active:bg-white/10 rounded-none"
+                    >
+                      <FiDownload className="w-3 h-3 text-[#10B981]" />
+                      <span>{photo.downloads ?? 0}</span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={(e) => handleShareDirect(e, photo.id)}
+                    className="flex items-center gap-1.5 bg-white/5 border border-white/10 px-2.5 py-1.5 text-zinc-350 transition-colors active:bg-white/10 rounded-none"
+                  >
+                    <FiShare2 className="w-3 h-3 text-amber-500" />
+                    <span>{photo.shares ?? 0}</span>
+                  </button>
                 </div>
               </div>
             </div>
