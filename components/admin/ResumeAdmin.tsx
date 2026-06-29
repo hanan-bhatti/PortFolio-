@@ -34,6 +34,16 @@ import {
   FiInfo,
 } from "react-icons/fi";
 import {
+  FaWindows,
+  FaApple,
+  FaLinux,
+  FaAndroid,
+  FaChrome,
+  FaSafari,
+  FaFirefox,
+  FaEdge,
+} from "react-icons/fa6";
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -770,6 +780,58 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
   const deviceColor = (t: string | null) =>
     t === "mobile" ? "border-amber/20 bg-amber/5 text-amber" : t === "tablet" ? "border-green/20 bg-green/5 text-green" : "border-zinc-800 bg-zinc-900 text-zinc-400";
 
+  const getOSIcon = (osName: string | null) => {
+    if (!osName) return <FiMonitor className="w-3.5 h-3.5 text-zinc-500" />;
+    const name = osName.toLowerCase();
+    if (name.includes("windows")) return <FaWindows className="w-3.5 h-3.5 text-sky-400" />;
+    if (name.includes("mac") || name.includes("ios") || name.includes("os x") || name.includes("darwin")) return <FaApple className="w-3.5 h-3.5 text-zinc-200" />;
+    if (name.includes("linux")) return <FaLinux className="w-3.5 h-3.5 text-orange-400" />;
+    if (name.includes("android")) return <FaAndroid className="w-3.5 h-3.5 text-green" />;
+    return <FiMonitor className="w-3.5 h-3.5 text-zinc-500" />;
+  };
+
+  const getBrowserIcon = (browserName: string | null) => {
+    if (!browserName) return <FiGlobe className="w-3.5 h-3.5 text-zinc-500" />;
+    const name = browserName.toLowerCase();
+    if (name.includes("chrome")) return <FaChrome className="w-3.5 h-3.5 text-red-400" />;
+    if (name.includes("safari")) return <FaSafari className="w-3.5 h-3.5 text-blue-400" />;
+    if (name.includes("firefox")) return <FaFirefox className="w-3.5 h-3.5 text-orange-450" />;
+    if (name.includes("edge")) return <FaEdge className="w-3.5 h-3.5 text-sky-400" />;
+    return <FiGlobe className="w-3.5 h-3.5 text-zinc-500" />;
+  };
+
+  const getCountryFlagUrl = (countryName: string | null) => {
+    if (!countryName) return null;
+    const name = countryName.toLowerCase().trim();
+    const codes: Record<string, string> = {
+      india: "in",
+      pakistan: "pk",
+      "united states": "us",
+      "united kingdom": "gb",
+      germany: "de",
+      france: "fr",
+      canada: "ca",
+      australia: "au",
+      singapore: "sg",
+      netherlands: "nl",
+      ireland: "ie",
+      sweden: "se",
+      finland: "fi",
+      norway: "no",
+      denmark: "dk",
+      china: "cn",
+      japan: "jp",
+      "south korea": "kr",
+      brazil: "br",
+      russia: "ru",
+    };
+    const code = codes[name] || null;
+    if (code) {
+      return `https://flagcdn.com/16x12/${code}.png`;
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -798,6 +860,7 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
           const isOpen = expanded === d.id;
           const verifyFirst = fmt(d.verifiedAt);
           const dt = d.deviceType ?? "desktop";
+          const flagUrl = getCountryFlagUrl(d.country);
 
           return (
             <div key={d.id} className={`border transition-colors ${isOpen ? "border-zinc-700 bg-zinc-900/25" : "border-[#262626] bg-[#0c0c0c] hover:border-zinc-700"}`}>
@@ -809,7 +872,7 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
               >
                 {/* Date */}
                 <span className="text-zinc-500 flex items-center gap-1.5 text-[11px] font-mono">
-                  <FiCalendar className="w-3.5 h-3.5 text-zinc-700" />
+                  <FiCalendar className="w-3.5 h-3.5 text-zinc-750" />
                   {new Date(d.downloadedAt).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
                 </span>
 
@@ -819,8 +882,12 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                 </span>
 
                 {/* Location */}
-                <span className="text-zinc-455 flex items-center gap-1.5 truncate max-w-[200px]" title={[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}>
-                  <FiMapPin className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+                <span className="text-zinc-400 flex items-center gap-1.5 truncate max-w-[200px]" title={[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}>
+                  {flagUrl ? (
+                    <img src={flagUrl} alt="" className="w-4 h-3 object-contain shrink-0" />
+                  ) : (
+                    <FiMapPin className="w-3.5 h-3.5 text-zinc-650 flex-shrink-0" />
+                  )}
                   <span className="truncate">{[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}</span>
                 </span>
 
@@ -864,7 +931,12 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                           ["IP", <span key="ip" className="font-bold text-white font-mono">{d.visitorIp ?? "—"}</span>],
                           ["City", d.city ?? "—"],
                           ["Region", d.region ?? "—"],
-                          ["Country", d.country ?? "—"],
+                          ["Country", (
+                            <span key="country" className="inline-flex items-center gap-1.5">
+                              {flagUrl && <img src={flagUrl} alt="" className="w-4 h-3 object-contain shrink-0" />}
+                              <span>{d.country ?? "—"}</span>
+                            </span>
+                          )],
                           ["Timezone", d.timezone ?? "—"],
                           ["ISP / Org", d.isp ?? "—"],
                           ["Coordinates", d.lat && d.lng
@@ -875,10 +947,10 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                           ],
                         ].map(([label, value]) => (
                           <tr key={String(label)} className="border-b border-[#262626]/20">
-                            <td className="py-2.5 text-zinc-500 font-bold uppercase tracking-widest text-[9px] w-[35%] align-top">
+                            <td className="py-2 text-zinc-500 font-bold uppercase tracking-widest text-[9px] w-[35%] align-middle">
                               {label}
                             </td>
-                            <td className="py-2.5 pl-3 text-zinc-350 text-[11px]">
+                            <td className="py-2 pl-3 text-zinc-350 text-[11px] align-middle">
                               {value}
                             </td>
                           </tr>
@@ -895,19 +967,34 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                     <table className="w-full border-collapse">
                       <tbody>
                         {[
-                          ["Type", <span key="type" className="font-bold text-white uppercase">{getDeviceLabel(dt)}</span>],
+                          ["Type", (
+                            <span key="type" className="inline-flex items-center gap-1.5">
+                              {getDeviceIcon(dt)}
+                              <span className="font-bold text-white uppercase">{getDeviceLabel(dt)}</span>
+                            </span>
+                          )],
                           ["Vendor", d.deviceVendor ?? "—"],
                           ["Model", d.deviceModel ?? "—"],
-                          ["Browser", d.browserName && d.browserVersion ? `${d.browserName} ${d.browserVersion}` : d.browserName ?? "—"],
-                          ["OS", d.osName && d.osVersion ? `${d.osName} ${d.osVersion}` : d.osName ?? "—"],
+                          ["Browser", (
+                            <span key="browser" className="inline-flex items-center gap-1.5">
+                              {getBrowserIcon(d.browserName)}
+                              <span className="text-white">{d.browserName && d.browserVersion ? `${d.browserName} ${d.browserVersion}` : d.browserName ?? "—"}</span>
+                            </span>
+                          )],
+                          ["OS", (
+                            <span key="os" className="inline-flex items-center gap-1.5">
+                              {getOSIcon(d.osName)}
+                              <span className="text-white">{d.osName && d.osVersion ? `${d.osName} ${d.osVersion}` : d.osName ?? "—"}</span>
+                            </span>
+                          )],
                           ["CPU Arch", d.cpuArch ?? "—"],
                           ["Raw UA", <span key="ua" title={d.userAgent ?? ""} className="text-[10px] text-zinc-600 font-mono break-all line-clamp-2 leading-relaxed">{d.userAgent ?? "—"}</span>],
                         ].map(([label, value]) => (
                           <tr key={String(label)} className="border-b border-[#262626]/20">
-                            <td className="py-2.5 text-zinc-500 font-bold uppercase tracking-widest text-[9px] w-[35%] align-top">
+                            <td className="py-2 text-zinc-500 font-bold uppercase tracking-widest text-[9px] w-[35%] align-middle">
                               {label}
                             </td>
-                            <td className="py-2.5 pl-3 text-zinc-350 text-[11px]">
+                            <td className="py-2 pl-3 text-zinc-350 text-[11px] align-middle">
                               {value}
                             </td>
                           </tr>
