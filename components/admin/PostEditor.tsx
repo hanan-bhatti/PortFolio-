@@ -11,8 +11,8 @@
 
 import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-// @ts-ignore
-import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import type { JSONContent } from "@tiptap/core";
 import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -335,7 +335,6 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
             {editor && (
               <BubbleMenu
                 editor={editor}
-                tippyOptions={{ duration: 100 }}
                 shouldShow={({ editor }: { editor: any }) => editor.isActive("image")}
               >
                 <div className="flex items-center gap-1 border border-[#262626] bg-[#0c0c0c] p-1 font-mono text-xs shadow-lg">
@@ -378,7 +377,6 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
             {editor && (
               <BubbleMenu
                 editor={editor}
-                tippyOptions={{ duration: 100 }}
                 shouldShow={({ editor }: { editor: any }) => editor.isActive("table")}
               >
                 <div className="flex flex-wrap items-center gap-1 border border-[#262626] bg-[#0c0c0c] p-1 font-mono text-xs shadow-lg max-w-sm sm:max-w-md">
