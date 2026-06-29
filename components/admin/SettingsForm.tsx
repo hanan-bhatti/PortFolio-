@@ -22,6 +22,7 @@ import {
   disable2FAAction,
   revokeSessionAction,
   changePasswordAction,
+  logoutAction,
 } from "@/lib/actions";
 import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
@@ -351,13 +352,22 @@ export default function SettingsForm({
   const handleRevokeSession = async () => {
     if (!revokeTarget) return;
     const toastId = toast.loading("Terminating session...");
+    const currentSession = activeSessions.find(s => s.token === currentSessionToken);
+    const isCurrent = revokeTarget === currentSession?.id;
+
     const res = await revokeSessionAction(revokeTarget);
     setRevokeTarget(null);
     if (res.error) {
       toast.error(res.error, { id: toastId });
     } else {
       toast.success("Session terminated", { id: toastId });
-      router.refresh();
+      if (isCurrent) {
+        toast.info("Your session was terminated. Redirecting to login...", { id: toastId });
+        await logoutAction();
+        window.location.href = "/admin/login";
+      } else {
+        router.refresh();
+      }
     }
   };
 
@@ -965,8 +975,14 @@ export default function SettingsForm({
                           </span>
                         </div>
                         <div>
-                          <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Session Established</span>
-                          <span className="text-zinc-450 block mt-1">{formatDate(session.createdAt)}</span>
+                          <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Established & Expiry</span>
+                          <span className="text-zinc-300 block mt-1">
+                            {formatDate(session.createdAt)}
+                          </span>
+                          <span className="text-[10px] text-zinc-500 block mt-0.5">
+                            Expires: {formatDate(new Date(new Date(session.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000))}
+                            {" "}(in {Math.max(0, Math.ceil((new Date(session.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000 - Date.now()) / (24 * 60 * 60 * 1000)))} days)
+                          </span>
                         </div>
                         {session.userAgent && (
                           <div className="md:col-span-2 lg:col-span-4 border-t border-[#262626]/50 pt-2.5">
