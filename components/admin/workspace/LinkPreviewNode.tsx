@@ -1,7 +1,7 @@
 "use client";
 
 import { Node } from "@tiptap/core";
-import { ReactNodeViewRenderer } from "@tiptap/react";
+import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import LinkPreviewCard from "./LinkPreviewCard";
 import React, { useEffect, useState } from "react";
 
@@ -41,9 +41,9 @@ function PreviewNodeView(props: any) {
   }, [url]);
 
   return (
-    <div className="my-4 select-none cursor-pointer" contentEditable={false}>
+    <NodeViewWrapper className="my-4 select-none cursor-pointer" contentEditable={false}>
       <LinkPreviewCard data={data} loading={loading} error={error} />
-    </div>
+    </NodeViewWrapper>
   );
 }
 
