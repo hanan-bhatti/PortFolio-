@@ -48,11 +48,23 @@ import {
   FiCheckSquare,
   FiAward,
   FiShield,
+  FiSmartphone,
+  FiTablet,
+  FiChevronUp,
+  FiChevronDown,
 } from "react-icons/fi";
 import {
   FaGithub,
   FaLinkedin,
   FaTwitter,
+  FaWindows,
+  FaApple,
+  FaLinux,
+  FaAndroid,
+  FaChrome,
+  FaSafari,
+  FaFirefox,
+  FaEdge,
 } from "react-icons/fa6";
 
 interface SessionData {
@@ -63,6 +75,8 @@ interface SessionData {
   deviceType: string | null;
   browser: string | null;
   os: string | null;
+  country: string | null;
+  city: string | null;
   active: boolean;
   lastUsedAt: Date;
   createdAt: Date;
@@ -170,6 +184,31 @@ function MarkdownTextarea({
   );
 }
 
+function getOSIcon(os: string | null) {
+  const name = (os || "").toLowerCase();
+  if (name.includes("win")) return <FaWindows className="w-3.5 h-3.5 text-blue-400" />;
+  if (name.includes("mac") || name.includes("ios") || name.includes("apple")) return <FaApple className="w-3.5 h-3.5 text-zinc-300" />;
+  if (name.includes("linux")) return <FaLinux className="w-3.5 h-3.5 text-amber" />;
+  if (name.includes("android")) return <FaAndroid className="w-3.5 h-3.5 text-emerald-400" />;
+  return <FiCpu className="w-3.5 h-3.5 text-zinc-550" />;
+}
+
+function getBrowserIcon(browser: string | null) {
+  const name = (browser || "").toLowerCase();
+  if (name.includes("chrome")) return <FaChrome className="w-3.5 h-3.5 text-red-400" />;
+  if (name.includes("safari")) return <FaSafari className="w-3.5 h-3.5 text-blue-400" />;
+  if (name.includes("firefox")) return <FaFirefox className="w-3.5 h-3.5 text-amber" />;
+  if (name.includes("edge")) return <FaEdge className="w-3.5 h-3.5 text-cyan-400" />;
+  return <FiGlobe className="w-3.5 h-3.5 text-zinc-550" />;
+}
+
+function getDeviceIcon(device: string | null) {
+  const name = (device || "").toLowerCase();
+  if (name === "mobile") return <FiSmartphone className="w-4 h-4 text-zinc-400" />;
+  if (name === "tablet") return <FiTablet className="w-4 h-4 text-zinc-400" />;
+  return <FiMonitor className="w-4 h-4 text-zinc-400" />;
+}
+
 export default function SettingsForm({
   initial,
   twoFactorEnabled,
@@ -193,6 +232,7 @@ export default function SettingsForm({
 
   // Modal State for session revocation
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   // 2FA forms
   const [code2fa, setCode2fa] = useState("");
@@ -811,9 +851,7 @@ export default function SettingsForm({
             )}
           </div>
         </div>
-      )}
-
-      {/* SESSIONS & DEVICES TAB */}
+      )}      {/* SESSIONS & DEVICES TAB */}
       {activeTab === "sessions" && (
         <div className="max-w-4xl space-y-6">
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
@@ -827,65 +865,127 @@ export default function SettingsForm({
               </p>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left font-mono text-xs">
-                <thead>
-                  <tr className="border-b border-[#262626] text-zinc-500 uppercase tracking-widest text-[9px] font-bold">
-                    <th className="py-3 px-2">Device & OS</th>
-                    <th className="py-3 px-2">Browser</th>
-                    <th className="py-3 px-2">IP Address</th>
-                    <th className="py-3 px-2">Last Active</th>
-                    <th className="py-3 px-2 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#262626]">
-                  {activeSessions.map((session) => {
-                    const isCurrent = session.token === currentSessionToken;
-                    return (
-                      <tr key={session.id} className={cn("hover:bg-white/[0.01]", !session.active && "opacity-35")}>
-                        <td className="py-3 px-2 font-medium text-white flex items-center gap-2">
-                          <FiMonitor className="w-3.5 h-3.5 text-zinc-500" />
-                          <span className="capitalize">{session.deviceType || "unknown"}</span>
-                          <span className="text-[10px] text-zinc-500 uppercase">({session.os || "unknown"})</span>
-                        </td>
-                        <td className="py-3 px-2 text-zinc-300">{session.browser || "unknown"}</td>
-                        <td className="py-3 px-2 text-zinc-400">{session.ipAddress || "127.0.0.1"}</td>
-                        <td className="py-3 px-2 text-zinc-500">
-                          {isCurrent ? (
-                            <span className="border border-[#10B981] bg-[#10B981]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#10B981] uppercase tracking-wide">
-                              Active Now
+            <div className="space-y-3">
+              {activeSessions.map((session) => {
+                const isCurrent = session.token === currentSessionToken;
+                const isExpanded = expandedSession === session.id;
+                
+                return (
+                  <div
+                    key={session.id}
+                    className={cn(
+                      "border border-[#262626] bg-black/30 transition-all",
+                      !session.active && "opacity-40"
+                    )}
+                  >
+                    {/* Header Row */}
+                    <div
+                      onClick={() => setExpandedSession(isExpanded ? null : session.id)}
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/[0.02] select-none"
+                    >
+                      <div className="flex items-center gap-3">
+                        {getDeviceIcon(session.deviceType)}
+                        <div className="font-mono text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-white uppercase tracking-wider">
+                              {session.deviceType || "unknown device"}
                             </span>
-                          ) : (
-                            formatDate(session.lastUsedAt)
-                          )}
-                        </td>
-                        <td className="py-3 px-2 text-right">
-                          {isCurrent ? (
-                            <span className="text-[10px] text-[#10B981] font-bold uppercase tracking-wider pr-2">Current</span>
-                          ) : session.active ? (
+                            {isCurrent && (
+                              <span className="border border-[#10B981] bg-[#10B981]/15 px-1.5 py-0.5 text-[9px] font-bold text-[#10B981] uppercase tracking-wide">
+                                Current Session
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-zinc-550 mt-0.5 flex items-center gap-1.5">
+                            <span>IP: {session.ipAddress || "127.0.0.1"}</span>
+                            <span>·</span>
+                            <span>{isCurrent ? "Active Now" : formatDate(session.lastUsedAt)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        {session.active ? (
+                          !isCurrent && (
                             <button
                               type="button"
-                              onClick={() => setRevokeTarget(session.id)}
-                              className="border border-red-500 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/25 transition-all cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRevokeTarget(session.id);
+                              }}
+                              className="border border-red-500 bg-red-500/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/25 transition-all cursor-pointer"
                             >
                               Revoke
                             </button>
-                          ) : (
-                            <span className="text-[10px] text-zinc-650 font-bold uppercase tracking-wider pr-2">Revoked</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {activeSessions.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-zinc-550 font-mono text-xs uppercase">
-                        No sessions recorded
-                      </td>
-                    </tr>
-                  ) : null}
-                </tbody>
-              </table>
+                          )
+                        ) : (
+                          <span className="text-[10px] text-zinc-650 font-bold uppercase tracking-wider pr-1">Revoked</span>
+                        )}
+                        <span className="text-zinc-550">
+                          {isExpanded ? <FiChevronUp className="w-4 h-4" /> : <FiChevronDown className="w-4 h-4" />}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Expandable Details Grid */}
+                    {isExpanded && (
+                      <div className="border-t border-[#262626] bg-[#0c0c0c]/80 p-4 font-mono text-[11px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                          <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Operating System</span>
+                          <span className="flex items-center gap-1.5 text-zinc-300 mt-1">
+                            {getOSIcon(session.os)}
+                            <span className="capitalize">{session.os || "unknown"}</span>
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Browser Agent</span>
+                          <span className="flex items-center gap-1.5 text-zinc-300 mt-1">
+                            {getBrowserIcon(session.browser)}
+                            <span className="capitalize">{session.browser || "unknown"}</span>
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Geo Location</span>
+                          <span className="flex items-center gap-1.5 text-zinc-300 mt-1">
+                            {session.country ? (
+                              <>
+                                <img
+                                  src={`https://flagcdn.com/16x12/${session.country.toLowerCase()}.png`}
+                                  alt={session.country}
+                                  className="w-4 h-3 object-cover shrink-0 border border-zinc-700/60"
+                                />
+                                <span>{session.city ? `${session.city}, ` : ""}{session.country.toUpperCase()}</span>
+                              </>
+                            ) : (
+                              <>
+                                <FiGlobe className="w-3.5 h-3.5 text-zinc-550" />
+                                <span className="italic text-zinc-500">Unknown Location</span>
+                              </>
+                            )}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Session Established</span>
+                          <span className="text-zinc-450 block mt-1">{formatDate(session.createdAt)}</span>
+                        </div>
+                        {session.userAgent && (
+                          <div className="md:col-span-2 lg:col-span-4 border-t border-[#262626]/50 pt-2.5">
+                            <span className="block text-[9px] font-bold text-zinc-550 uppercase tracking-widest">Raw User Agent String</span>
+                            <span className="text-zinc-500 text-[10px] break-all block mt-1 leading-normal">
+                              {session.userAgent}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {activeSessions.length === 0 ? (
+                <div className="py-8 text-center text-zinc-550 font-mono text-xs uppercase border border-[#262626] bg-black/10">
+                  No sessions recorded
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
