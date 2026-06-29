@@ -26,6 +26,32 @@ import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import { cn, formatDate } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
+import {
+  FiGlobe,
+  FiTag,
+  FiMail,
+  FiMapPin,
+  FiClock,
+  FiSettings,
+  FiActivity,
+  FiUser,
+  FiShare2,
+  FiLock,
+  FiMonitor,
+  FiCpu,
+  FiKey,
+  FiTerminal,
+  FiBriefcase,
+  FiCalendar,
+  FiCheckSquare,
+  FiAward,
+  FiShield,
+} from "react-icons/fi";
+import {
+  FaGithub,
+  FaLinkedin,
+  FaTwitter,
+} from "react-icons/fa6";
 
 interface SessionData {
   id: string;
@@ -264,26 +290,61 @@ export default function SettingsForm({
 
       {/* GENERAL TAB */}
       {activeTab === "general" && (
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-6" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl space-y-6" noValidate>
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
-            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4">
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiSettings className="w-4 h-4 text-amber" />
               General Settings
             </h3>
-            {GENERAL_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  {field.label}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiGlobe className="w-3.5 h-3.5 text-zinc-550" /> Site Name
                 </label>
-                <input {...register(field.name)} placeholder={field.placeholder} className={inputClass} />
-                {errors[field.name] ? <p className="font-mono text-[10px] text-red-400">{errors[field.name]?.message}</p> : null}
+                <input {...register("siteName")} placeholder="Hanan Bhatti" className={inputClass} />
+                {errors.siteName ? <p className="font-mono text-[10px] text-red-400">{errors.siteName?.message}</p> : null}
               </div>
-            ))}
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiTag className="w-3.5 h-3.5 text-zinc-550" /> Tagline
+                </label>
+                <input {...register("tagline")} placeholder="Full-Stack Developer" className={inputClass} />
+                {errors.tagline ? <p className="font-mono text-[10px] text-red-400">{errors.tagline?.message}</p> : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiMail className="w-3.5 h-3.5 text-zinc-550" /> Public Email
+                </label>
+                <input {...register("socialEmail")} placeholder="you@example.com" className={inputClass} />
+                {errors.socialEmail ? <p className="font-mono text-[10px] text-red-400">{errors.socialEmail?.message}</p> : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiMapPin className="w-3.5 h-3.5 text-zinc-550" /> Footer Location
+                </label>
+                <input {...register("footerLocation")} placeholder="Lahore, Pakistan" className={inputClass} />
+                {errors.footerLocation ? <p className="font-mono text-[10px] text-red-400">{errors.footerLocation?.message}</p> : null}
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiClock className="w-3.5 h-3.5 text-zinc-550" /> Footer Timezone / Awake Info
+                </label>
+                <input {...register("footerTimezone")} placeholder="GMT+5 · Usually awake at 2am" className={inputClass} />
+                {errors.footerTimezone ? <p className="font-mono text-[10px] text-red-400">{errors.footerTimezone?.message}</p> : null}
+              </div>
+            </div>
           </div>
 
           {/* Sync Stats */}
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
             <div className="flex items-center justify-between border-b border-[#262626] pb-3 mb-2">
-              <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest">
+              <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest flex items-center gap-1.5">
+                <FiActivity className="w-4 h-4 text-amber" />
                 GitHub Statistics
               </h3>
               <button
@@ -295,21 +356,29 @@ export default function SettingsForm({
                 {isSyncing ? "Syncing..." : "Sync from GitHub"}
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Years Experience</label>
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiCalendar className="w-3.5 h-3.5 text-zinc-550" /> Experience
+                </label>
                 <input {...register("statsYears")} placeholder="3+" className={inputClass} />
               </div>
               <div className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Projects Built</label>
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiBriefcase className="w-3.5 h-3.5 text-zinc-550" /> Projects
+                </label>
                 <input {...register("statsProjects")} placeholder="20+" className={inputClass} />
               </div>
               <div className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Contributions</label>
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiActivity className="w-3.5 h-3.5 text-zinc-550" /> Contributions
+                </label>
                 <input {...register("statsContributions")} placeholder="500+" className={inputClass} />
               </div>
               <div className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">GitHub Commits</label>
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiCheckSquare className="w-3.5 h-3.5 text-zinc-550" /> Commits
+                </label>
                 <input {...register("statsCommits")} placeholder="1200+" className={inputClass} />
               </div>
             </div>
@@ -317,26 +386,29 @@ export default function SettingsForm({
 
           {/* Analytics Settings */}
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
-            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4">
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiMonitor className="w-4 h-4 text-amber" />
               Analytics Settings
             </h3>
-            <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Enable Visitor Tracking</label>
-              <select {...register("analytics_enabled")} className={inputClass}>
-                <option value="true">Enabled</option>
-                <option value="false">Disabled</option>
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Cookie Banner Consent Text</label>
-              <textarea {...register("cookie_consent_text")} placeholder="We use cookies..." rows={3} className={inputClass} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">Enable Visitor Tracking</label>
+                <select {...register("analytics_enabled")} className={inputClass}>
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">Cookie Banner Consent Text</label>
+                <textarea {...register("cookie_consent_text")} placeholder="We use cookies..." rows={1} className={inputClass} />
+              </div>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={isPending || !isDirty}
-            className="border border-[#F59E0B] bg-[#F59E0B]/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 disabled:opacity-30 transition-all"
+            className="border border-[#F59E0B] bg-[#F59E0B]/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 disabled:opacity-30 transition-all cursor-pointer"
           >
             {isPending ? "Saving..." : "Save Settings"}
           </button>
@@ -345,82 +417,105 @@ export default function SettingsForm({
 
       {/* HERO & BIO TAB */}
       {activeTab === "hero-bio" && (
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-6" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl space-y-6" noValidate>
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
-            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4">
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiUser className="w-4 h-4 text-amber" />
               Hero & Biography Settings
             </h3>
 
-            {/* Profile Photo URL */}
-            <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Profile Photo URL</label>
-              <input {...register("profilePhotoUrl")} placeholder="https://..." className={inputClass} />
-              {profilePhotoUrl && (
-                <div className="relative mt-2 h-16 w-16 border border-[#262626] bg-black/40">
-                  <Image src={profilePhotoUrl} alt="Profile preview" fill className="object-cover" />
-                </div>
-              )}
-            </div>
-
-            {/* Hero Photo - UploadThing */}
-            <div className="border border-[#262626] bg-black/20 p-4 space-y-3">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Hero Photo Banner</label>
-              {heroPhotoUrl ? (
-                <div className="relative h-40 w-full border border-[#262626] bg-black/30">
-                  <Image src={heroPhotoUrl} alt="Hero banner preview" fill className="object-contain" />
-                  <button
-                    type="button"
-                    onClick={() => setValue("heroPhotoUrl", "", { shouldDirty: true })}
-                    className="absolute top-2 right-2 border border-red-500 bg-red-500/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/25 transition-all"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <div className="flex h-20 items-center justify-center border border-dashed border-[#262626] font-mono text-[10px] text-zinc-600 uppercase tracking-wider">
-                  No photo uploaded
-                </div>
-              )}
-              <div className="flex justify-start">
-                <UploadButton
-                  endpoint="imageUploader"
-                  onBeforeUploadBegin={async (files: File[]) => {
-                    toast.loading("Compressing and uploading photo...", { id: "settings-photo-upload" });
-                    return compressImages(files);
-                  }}
-                  onClientUploadComplete={(res) => {
-                    const url = res[0]?.ufsUrl ?? res[0]?.url;
-                    if (url) {
-                      setValue("heroPhotoUrl", url, { shouldDirty: true });
-                      toast.success("Hero photo uploaded", { id: "settings-photo-upload" });
-                    }
-                  }}
-                  onUploadError={(error: Error) => {
-                    toast.error(`Upload failed: ${error.message}`, { id: "settings-photo-upload" });
-                  }}
-                />
-              </div>
-            </div>
-
-            {HERO_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  {field.label}
+            {/* Profile Photo & Hero Photo Banner */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 border border-[#262626] bg-black/20">
+              {/* Profile Photo URL */}
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiUser className="w-3.5 h-3.5 text-zinc-550" /> Profile Photo URL
                 </label>
-                {field.textarea ? (
-                  <textarea {...register(field.name)} placeholder={field.placeholder} rows={5} className={inputClass} />
-                ) : (
-                  <input {...register(field.name)} placeholder={field.placeholder} className={inputClass} />
+                <input {...register("profilePhotoUrl")} placeholder="https://..." className={inputClass} />
+                {profilePhotoUrl && (
+                  <div className="relative mt-2 h-16 w-16 border border-[#262626] bg-black/40">
+                    <Image src={profilePhotoUrl} alt="Profile preview" fill className="object-cover" />
+                  </div>
                 )}
-                {errors[field.name] ? <p className="font-mono text-[10px] text-red-400">{errors[field.name]?.message}</p> : null}
               </div>
-            ))}
+
+              {/* Hero Photo - UploadThing */}
+              <div className="space-y-3">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiAward className="w-3.5 h-3.5 text-zinc-550" /> Hero Photo Banner
+                </label>
+                {heroPhotoUrl ? (
+                  <div className="relative h-24 w-full border border-[#262626] bg-black/30">
+                    <Image src={heroPhotoUrl} alt="Hero banner preview" fill className="object-contain" />
+                    <button
+                      type="button"
+                      onClick={() => setValue("heroPhotoUrl", "", { shouldDirty: true })}
+                      className="absolute top-2 right-2 border border-red-500 bg-red-500/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/25 transition-all cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex h-16 items-center justify-center border border-dashed border-[#262626] font-mono text-[10px] text-zinc-650 uppercase tracking-wider">
+                    No photo uploaded
+                  </div>
+                )}
+                <div className="flex justify-start">
+                  <UploadButton
+                    endpoint="imageUploader"
+                    onBeforeUploadBegin={async (files: File[]) => {
+                      toast.loading("Compressing and uploading photo...", { id: "settings-photo-upload" });
+                      return compressImages(files);
+                    }}
+                    onClientUploadComplete={(res) => {
+                      const url = res[0]?.ufsUrl ?? res[0]?.url;
+                      if (url) {
+                        setValue("heroPhotoUrl", url, { shouldDirty: true });
+                        toast.success("Hero photo uploaded", { id: "settings-photo-upload" });
+                      }
+                    }}
+                    onUploadError={(error: Error) => {
+                      toast.error(`Upload failed: ${error.message}`, { id: "settings-photo-upload" });
+                    }}
+                    appearance={{ button: { background: "var(--amber)", color: "#000", fontWeight: 700, fontSize: 11, padding: "6px 12px", border: "none", cursor: "pointer" }, allowedContent: { display: "none" } }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Hero Tagline */}
+            <div className="space-y-1.5">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <FiTag className="w-3.5 h-3.5 text-zinc-550" /> Hero Tagline
+              </label>
+              <input {...register("heroTagline")} placeholder="Engineer by logic. Designer by obsession." className={inputClass} />
+              {errors.heroTagline ? <p className="font-mono text-[10px] text-red-400">{errors.heroTagline?.message}</p> : null}
+            </div>
+
+            {/* About Bio */}
+            <div className="space-y-1.5">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <FiTerminal className="w-3.5 h-3.5 text-zinc-550" /> About Bio
+              </label>
+              <textarea {...register("aboutBio")} placeholder="Tell visitors about yourself..." rows={5} className={inputClass} />
+              {errors.aboutBio ? <p className="font-mono text-[10px] text-red-400">{errors.aboutBio?.message}</p> : null}
+            </div>
+
+            {/* Marquee Skills */}
+            <div className="space-y-1.5">
+              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <FiCpu className="w-3.5 h-3.5 text-zinc-550" /> Marquee Skills (comma-separated)
+              </label>
+              <textarea {...register("marqueeSkills")} placeholder="FULL STACK, DEVOPS, C++" rows={3} className={inputClass} />
+              {errors.marqueeSkills ? <p className="font-mono text-[10px] text-red-400">{errors.marqueeSkills?.message}</p> : null}
+            </div>
+
           </div>
 
           <button
             type="submit"
             disabled={isPending || !isDirty}
-            className="border border-[#F59E0B] bg-[#F59E0B]/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 disabled:opacity-30 transition-all"
+            className="border border-[#F59E0B] bg-[#F59E0B]/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 disabled:opacity-30 transition-all cursor-pointer"
           >
             {isPending ? "Saving..." : "Save Settings"}
           </button>
@@ -429,26 +524,44 @@ export default function SettingsForm({
 
       {/* SOCIAL LINKS TAB */}
       {activeTab === "social" && (
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-6" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl space-y-6" noValidate>
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
-            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4">
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiShare2 className="w-4 h-4 text-amber" />
               Social Links
             </h3>
-            {SOCIAL_FIELDS.map((field) => (
-              <div key={field.name} className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                  {field.label}
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FaGithub className="w-3.5 h-3.5 text-zinc-550" /> GitHub URL
                 </label>
-                <input {...register(field.name)} placeholder={field.placeholder} className={inputClass} />
-                {errors[field.name] ? <p className="font-mono text-[10px] text-red-400">{errors[field.name]?.message}</p> : null}
+                <input {...register("socialGithub")} placeholder="https://github.com/username" className={inputClass} />
+                {errors.socialGithub ? <p className="font-mono text-[10px] text-red-400">{errors.socialGithub?.message}</p> : null}
               </div>
-            ))}
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FaLinkedin className="w-3.5 h-3.5 text-zinc-550" /> LinkedIn URL
+                </label>
+                <input {...register("socialLinkedin")} placeholder="https://linkedin.com/in/username" className={inputClass} />
+                {errors.socialLinkedin ? <p className="font-mono text-[10px] text-red-400">{errors.socialLinkedin?.message}</p> : null}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FaTwitter className="w-3.5 h-3.5 text-zinc-550" /> Twitter / X URL
+                </label>
+                <input {...register("socialTwitter")} placeholder="https://x.com/username" className={inputClass} />
+                {errors.socialTwitter ? <p className="font-mono text-[10px] text-red-400">{errors.socialTwitter?.message}</p> : null}
+              </div>
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={isPending || !isDirty}
-            className="border border-[#F59E0B] bg-[#F59E0B]/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 disabled:opacity-30 transition-all"
+            className="border border-[#F59E0B] bg-[#F59E0B]/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 disabled:opacity-30 transition-all cursor-pointer"
           >
             {isPending ? "Saving..." : "Save Settings"}
           </button>
@@ -457,45 +570,56 @@ export default function SettingsForm({
 
       {/* SECURITY & 2FA TAB */}
       {activeTab === "security" && (
-        <div className="max-w-xl space-y-6">
+        <div className="max-w-4xl space-y-6">
           {/* Change Password */}
-          <form onSubmit={handleChangePassword} className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
-            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4">
+          <form onSubmit={handleChangePassword} className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5" noValidate>
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiLock className="w-4 h-4 text-amber" />
               Change Account Password
             </h3>
-            <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Current Password</label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className={inputClass}
-                required
-              />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiKey className="w-3 h-3 text-zinc-550" /> Current Password
+                </label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiLock className="w-3 h-3 text-zinc-550" /> New Password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  <FiCheckSquare className="w-3 h-3 text-zinc-550" /> Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className={inputClass}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Confirm New Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={inputClass}
-                required
-              />
-            </div>
+            
             <button
               type="submit"
-              className="border border-[#F59E0B] bg-[#F59E0B]/10 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 transition-all"
+              className="border border-[#F59E0B] bg-[#F59E0B]/10 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-[#F59E0B]/25 transition-all cursor-pointer mt-2"
             >
               Update Password
             </button>
@@ -503,7 +627,8 @@ export default function SettingsForm({
 
           {/* Two-Factor Authentication Setup */}
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-5">
-            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4">
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiShield className="w-4 h-4 text-amber" />
               Two-Factor Authentication (2FA)
             </h3>
 
@@ -530,7 +655,7 @@ export default function SettingsForm({
                   </div>
                   <button
                     type="submit"
-                    className="border border-red-500 bg-red-500/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/25 transition-all h-[38px]"
+                    className="border border-red-500 bg-red-500/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-red-500 hover:bg-red-500/25 transition-all h-[38px] cursor-pointer"
                   >
                     Disable 2FA
                   </button>
@@ -577,7 +702,7 @@ export default function SettingsForm({
                   </div>
                   <button
                     type="submit"
-                    className="border border-[#10B981] bg-[#10B981]/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-[#10B981] hover:bg-[#10B981]/25 transition-all h-[38px]"
+                    className="border border-[#10B981] bg-[#10B981]/10 px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-widest text-[#10B981] hover:bg-[#10B981]/25 transition-all h-[38px] cursor-pointer"
                   >
                     Enable 2FA
                   </button>
@@ -590,10 +715,11 @@ export default function SettingsForm({
 
       {/* SESSIONS & DEVICES TAB */}
       {activeTab === "sessions" && (
-        <div className="space-y-6">
+        <div className="max-w-4xl space-y-6">
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
             <div className="border-b border-[#262626] pb-3 mb-4">
-              <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest">
+              <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest flex items-center gap-1.5">
+                <FiMonitor className="w-4 h-4 text-amber" />
                 Active Logged-in Devices
               </h3>
               <p className="font-sans text-xs text-zinc-500 mt-1">
@@ -618,6 +744,7 @@ export default function SettingsForm({
                     return (
                       <tr key={session.id} className={cn("hover:bg-white/[0.01]", !session.active && "opacity-35")}>
                         <td className="py-3 px-2 font-medium text-white flex items-center gap-2">
+                          <FiMonitor className="w-3.5 h-3.5 text-zinc-500" />
                           <span className="capitalize">{session.deviceType || "unknown"}</span>
                           <span className="text-[10px] text-zinc-500 uppercase">({session.os || "unknown"})</span>
                         </td>
@@ -639,12 +766,12 @@ export default function SettingsForm({
                             <button
                               type="button"
                               onClick={() => setRevokeTarget(session.id)}
-                              className="border border-red-500 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/25 transition-all"
+                              className="border border-red-500 bg-red-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/25 transition-all cursor-pointer"
                             >
                               Revoke
                             </button>
                           ) : (
-                            <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-wider pr-2">Revoked</span>
+                            <span className="text-[10px] text-zinc-650 font-bold uppercase tracking-wider pr-2">Revoked</span>
                           )}
                         </td>
                       </tr>
@@ -652,7 +779,7 @@ export default function SettingsForm({
                   })}
                   {activeSessions.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-zinc-600 font-mono text-xs">
+                      <td colSpan={5} className="py-8 text-center text-zinc-550 font-mono text-xs uppercase">
                         No sessions recorded
                       </td>
                     </tr>
