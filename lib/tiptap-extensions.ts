@@ -14,10 +14,10 @@ import Highlight from "@tiptap/extension-highlight";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Youtube from "@tiptap/extension-youtube";
-import Table from "@tiptap/extension-table";
-import TableRow from "@tiptap/extension-table-row";
-import TableHeader from "@tiptap/extension-table-header";
-import TableCell from "@tiptap/extension-table-cell";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableCell } from "@tiptap/extension-table-cell";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { Node, mergeAttributes, type Extensions } from "@tiptap/core";
@@ -34,6 +34,7 @@ import dart from "highlight.js/lib/languages/dart";
 import powershell from "highlight.js/lib/languages/powershell";
 import nix from "highlight.js/lib/languages/nix";
 import protobuf from "highlight.js/lib/languages/protobuf";
+import rust from "highlight.js/lib/languages/rust";
 import glsl from "highlight.js/lib/languages/glsl";
 
 export const lowlight = createLowlight(common);
@@ -99,8 +100,8 @@ const CustomTable = Table.extend({
       ...this.parent?.(),
       class: {
         default: null,
-        parseHTML: (element) => element.getAttribute("class"),
-        renderHTML: (attributes) => {
+        parseHTML: (element: any) => element.getAttribute("class"),
+        renderHTML: (attributes: any) => {
           if (!attributes.class) return {};
           return { class: attributes.class };
         },
