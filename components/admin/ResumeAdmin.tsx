@@ -14,6 +14,26 @@ import Link from "next/link";
 import SkillIcon from "@/components/ui/SkillIcon";
 import EditorialModal from "./EditorialModal";
 import {
+  FiArrowUp,
+  FiArrowDown,
+  FiTrash2,
+  FiPlus,
+  FiX,
+  FiSmartphone,
+  FiMonitor,
+  FiTablet,
+  FiCalendar,
+  FiMapPin,
+  FiCheckCircle,
+  FiXCircle,
+  FiChevronDown,
+  FiChevronUp,
+  FiActivity,
+  FiGlobe,
+  FiShield,
+  FiInfo,
+} from "react-icons/fi";
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -217,7 +237,7 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
   );
 
   const photoField = (key: string, label: string) => (
-    <div className="resume-field" key={key}>
+    <div className="resume-field flex-1" key={key}>
       <label className="resume-label">{label}</label>
       <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
         <input
@@ -248,26 +268,99 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
       </div>
       {form[key] && (
         <div style={{ marginTop: 8 }}>
-          <Image src={form[key]} alt={label} width={80} height={80} style={{ objectFit: "cover", border: "1px solid var(--border)" }} />
+          <Image src={form[key]} alt={label} width={90} height={90} style={{ objectFit: "cover", border: "1px solid var(--border)" }} />
         </div>
       )}
     </div>
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {field("resume_enabled", "Resume Page Enabled", "toggle")}
-      {field("resume_name", "Full Name")}
-      {field("resume_title", "Job Title / Headline")}
-      {field("resume_email", "Email")}
-      {field("resume_phone", "Phone")}
-      {field("resume_location", "Location")}
-      {field("resume_summary", "Professional Summary", "textarea")}
-      {photoField("resume_photo_url", "Profile Photo (for resume)")}
-      {photoField("resume_hero_photo_url", "Hero Photo (alternate)")}
+    <div className="space-y-6">
+      {/* Photos Row at the Top */}
+      <div className="flex flex-col md:flex-row gap-6 p-5 border border-[#262626] bg-[#0c0c0c]/60">
+        {photoField("resume_photo_url", "Profile Photo (for resume)")}
+        {photoField("resume_hero_photo_url", "Hero Photo (alternate)")}
+      </div>
 
-      <div style={{ paddingTop: 8 }}>
-        <button className="resume-btn-primary" onClick={save} disabled={saving}>
+      {/* Inputs Grid */}
+      <div className="space-y-4">
+        {/* Row 1: Full Name & Job Title */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="resume-field">
+            <label className="resume-label">Full Name</label>
+            <input
+              className="resume-input"
+              value={form.resume_name ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, resume_name: e.target.value }))}
+            />
+          </div>
+          <div className="resume-field">
+            <label className="resume-label">Job Title / Headline</label>
+            <input
+              className="resume-input"
+              value={form.resume_title ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, resume_title: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        {/* Row 2: Email, Phone, Location */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="resume-field">
+            <label className="resume-label">Email</label>
+            <input
+              className="resume-input"
+              value={form.resume_email ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, resume_email: e.target.value }))}
+            />
+          </div>
+          <div className="resume-field">
+            <label className="resume-label">Phone</label>
+            <input
+              className="resume-input"
+              value={form.resume_phone ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, resume_phone: e.target.value }))}
+            />
+          </div>
+          <div className="resume-field">
+            <label className="resume-label">Location</label>
+            <input
+              className="resume-input"
+              value={form.resume_location ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, resume_location: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        {/* Row 3: Professional Summary */}
+        <div className="resume-field">
+          <label className="resume-label">Professional Summary</label>
+          <textarea
+            className="resume-input"
+            rows={5}
+            value={form.resume_summary ?? ""}
+            onChange={(e) => setForm((p) => ({ ...p, resume_summary: e.target.value }))}
+          />
+        </div>
+      </div>
+
+      {/* Footer Controls */}
+      <div className="flex items-center justify-between border-t border-[#262626] pt-5 mt-4">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Resume Status</span>
+          <button
+            type="button"
+            onClick={() => setForm((p) => ({ ...p, resume_enabled: p.resume_enabled === "true" ? "false" : "true" }))}
+            className={`px-3 py-1.5 border text-xs font-mono font-bold uppercase transition-colors rounded-none cursor-pointer ${
+              form.resume_enabled === "true"
+                ? "bg-green/10 border-green/30 text-green"
+                : "bg-red-950/20 border-red-500/20 text-red-400"
+            }`}
+          >
+            {form.resume_enabled === "true" ? "✓ Enabled" : "✗ Disabled"}
+          </button>
+        </div>
+        <button className="resume-btn-primary cursor-pointer font-mono text-xs font-bold uppercase tracking-wider px-5 py-2.5 bg-amber text-black hover:bg-amber/90 disabled:opacity-50 transition-colors" onClick={save} disabled={saving}>
           {saving ? "Saving…" : "Save Personal Info"}
         </button>
       </div>
@@ -662,105 +755,130 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const fmt = (d: string | null) => d ? new Date(d).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : null;
 
+  const getDeviceIcon = (t: string | null) => {
+    if (t === "mobile") return <FiSmartphone className="w-3.5 h-3.5 shrink-0" />;
+    if (t === "tablet") return <FiTablet className="w-3.5 h-3.5 shrink-0" />;
+    return <FiMonitor className="w-3.5 h-3.5 shrink-0" />;
+  };
+
+  const getDeviceLabel = (t: string | null) => {
+    if (t === "mobile") return "Mobile";
+    if (t === "tablet") return "Tablet";
+    return "Desktop";
+  };
+
   const deviceColor = (t: string | null) =>
-    t === "mobile" ? "#F59E0B" : t === "tablet" ? "#6ee7b7" : "#6b7280";
-  const deviceLabel = (t: string | null) =>
-    t === "mobile" ? "📱 MOBILE" : t === "tablet" ? "⬛ TABLET" : "🖥️ DESKTOP";
+    t === "mobile" ? "border-amber/20 bg-amber/5 text-amber" : t === "tablet" ? "border-green/20 bg-green/5 text-green" : "border-zinc-800 bg-zinc-900 text-zinc-400";
 
   return (
-    <div>
+    <div className="space-y-4">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <p style={{ color: "var(--text-muted)", fontSize: 13 }}>
-          <span style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>{initial.length}</span>{" "}
-          download{initial.length !== 1 ? "s" : ""} tracked
-        </p>
-        <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em" }}>
-          Click any row to expand
+      <div className="flex items-center justify-between border-b border-[#262626] pb-3">
+        <div className="flex items-center gap-2">
+          <FiActivity className="w-4 h-4 text-amber" />
+          <span className="font-mono text-xs font-bold text-white uppercase tracking-wider">
+            Resume Downloads Log
+          </span>
+          <span className="px-1.5 py-0.5 border border-zinc-800 bg-zinc-900/50 text-[10px] font-mono text-zinc-500 font-bold uppercase">
+            {initial.length} Tracked
+          </span>
+        </div>
+        <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest">
+          Click any row to expand details
         </span>
       </div>
 
       {initial.length === 0 && (
-        <p style={{ color: "var(--text-muted)", fontSize: 14 }}>No downloads yet.</p>
+        <p className="text-zinc-500 font-mono text-xs italic py-8 text-center uppercase">No downloads recorded yet.</p>
       )}
 
       {/* Cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <div className="space-y-2">
         {initial.map((d) => {
           const isOpen = expanded === d.id;
           const verifyFirst = fmt(d.verifiedAt);
           const dt = d.deviceType ?? "desktop";
 
           return (
-            <div key={d.id} style={{ border: "1px solid var(--border)", background: isOpen ? "var(--bg-elevated)" : "transparent", transition: "background 0.15s" }}>
+            <div key={d.id} className={`border transition-colors ${isOpen ? "border-zinc-700 bg-zinc-900/25" : "border-[#262626] bg-[#0c0c0c] hover:border-zinc-700"}`}>
 
               {/* ── Summary Row (always visible) ── */}
               <button
                 onClick={() => setExpanded(isOpen ? null : d.id)}
-                style={{ width: "100%", display: "grid", gridTemplateColumns: "160px 130px 1fr 110px 90px", gap: 12, padding: "12px 16px", background: "transparent", border: "none", cursor: "pointer", textAlign: "left", alignItems: "center" }}
+                className="w-full grid grid-cols-1 md:grid-cols-5 gap-3 p-4 items-center justify-between text-left cursor-pointer focus:outline-none font-mono text-xs border-0 bg-transparent"
               >
                 {/* Date */}
-                <span style={{ color: "var(--text-muted)", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                <span className="text-zinc-500 flex items-center gap-1.5 text-[11px] font-mono">
+                  <FiCalendar className="w-3.5 h-3.5 text-zinc-700" />
                   {new Date(d.downloadedAt).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
                 </span>
 
                 {/* IP */}
-                <span style={{ color: "#fff", fontFamily: "monospace", fontSize: 11 }}>
+                <span className="text-white font-mono font-bold tracking-tight md:text-center">
                   {d.visitorIp ?? "—"}
                 </span>
 
                 {/* Location */}
-                <span style={{ color: "var(--text-muted)", fontSize: 12, fontFamily: "Inter, sans-serif" }}>
-                  {[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}
+                <span className="text-zinc-455 flex items-center gap-1.5 truncate max-w-[200px]" title={[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}>
+                  <FiMapPin className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+                  <span className="truncate">{[d.city, d.region, d.country].filter(Boolean).join(", ") || "—"}</span>
                 </span>
 
                 {/* Device badge */}
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", padding: "3px 8px", border: `1px solid ${deviceColor(dt)}`, color: deviceColor(dt), whiteSpace: "nowrap", fontFamily: "Inter, sans-serif" }}>
-                  {deviceLabel(dt)}
-                </span>
+                <div className="flex md:justify-center">
+                  <span className={`inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border ${deviceColor(dt)}`}>
+                    {getDeviceIcon(dt)}
+                    <span>{getDeviceLabel(dt)}</span>
+                  </span>
+                </div>
 
-                {/* Verify status */}
-                {verifyFirst ? (
-                  <span style={{ color: "var(--green)", fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", fontFamily: "Inter, sans-serif" }}>
-                    ✓ VERIFIED
-                  </span>
-                ) : (
-                  <span style={{ color: "#4b5563", fontSize: 10, fontFamily: "Inter, sans-serif" }}>
-                    Not opened
-                  </span>
-                )}
+                {/* Verify status & Chevron */}
+                <div className="flex items-center justify-between md:justify-end gap-3">
+                  {verifyFirst ? (
+                    <span className="inline-flex items-center gap-1 text-green text-[9px] font-bold uppercase tracking-widest border border-green/20 bg-green/5 px-2 py-0.5">
+                      <FiCheckCircle className="w-3 h-3" />
+                      <span>Verified</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-zinc-500 text-[9px] uppercase tracking-widest border border-zinc-800 px-2 py-0.5">
+                      <FiXCircle className="w-3 h-3 text-zinc-650" />
+                      <span>Not Opened</span>
+                    </span>
+                  )}
+                  {isOpen ? <FiChevronUp className="w-4 h-4 text-zinc-500" /> : <FiChevronDown className="w-4 h-4 text-zinc-500" />}
+                </div>
               </button>
 
               {/* ── Expanded Detail Panel ── */}
               {isOpen && (
-                <div style={{ padding: "0 16px 20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, borderTop: "1px solid var(--border)" }}>
+                <div className="px-4 pb-5 pt-3 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-[#262626] font-mono text-xs text-zinc-400">
 
                   {/* GEO BLOCK */}
-                  <div style={{ paddingTop: 16 }}>
-                    <p style={{ color: "var(--amber)", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>
-                      🌍 GEO INTELLIGENCE
+                  <div className="space-y-3">
+                    <p className="text-amber text-[9px] font-bold uppercase tracking-widest border-b border-[#262626]/40 pb-1.5 flex items-center gap-1.5">
+                      <FiGlobe className="w-3.5 h-3.5" /> Geo Intelligence
                     </p>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inter, sans-serif" }}>
+                    <table className="w-full border-collapse">
                       <tbody>
                         {[
-                          ["IP", <span key="ip" style={{ fontFamily: "monospace", fontSize: 12, color: "#fff" }}>{d.visitorIp ?? "—"}</span>],
+                          ["IP", <span key="ip" className="font-bold text-white font-mono">{d.visitorIp ?? "—"}</span>],
                           ["City", d.city ?? "—"],
                           ["Region", d.region ?? "—"],
                           ["Country", d.country ?? "—"],
                           ["Timezone", d.timezone ?? "—"],
                           ["ISP / Org", d.isp ?? "—"],
                           ["Coordinates", d.lat && d.lng
-                            ? <a key="coords" href={`https://www.google.com/maps?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 11, textDecoration: "none" }}>
+                            ? <a key="coords" href={`https://www.google.com/maps?q=${d.lat},${d.lng}`} target="_blank" rel="noopener noreferrer" className="text-amber hover:underline inline-flex items-center gap-1">
                                 {d.lat.toFixed(4)}, {d.lng.toFixed(4)} ↗
                               </a>
                             : "—"
                           ],
                         ].map(([label, value]) => (
-                          <tr key={String(label)} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                            <td style={{ padding: "5px 0", color: "var(--text-muted)", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", width: "38%", verticalAlign: "top" }}>
+                          <tr key={String(label)} className="border-b border-[#262626]/20">
+                            <td className="py-2.5 text-zinc-500 font-bold uppercase tracking-widest text-[9px] w-[35%] align-top">
                               {label}
                             </td>
-                            <td style={{ padding: "5px 0 5px 12px", color: "var(--text-muted)", fontSize: 12 }}>
+                            <td className="py-2.5 pl-3 text-zinc-350 text-[11px]">
                               {value}
                             </td>
                           </tr>
@@ -770,26 +888,26 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                   </div>
 
                   {/* DEVICE BLOCK */}
-                  <div style={{ paddingTop: 16 }}>
-                    <p style={{ color: "var(--green)", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>
-                      💻 DEVICE INTELLIGENCE
+                  <div className="space-y-3">
+                    <p className="text-green text-[9px] font-bold uppercase tracking-widest border-b border-[#262626]/40 pb-1.5 flex items-center gap-1.5">
+                      <FiMonitor className="w-3.5 h-3.5" /> Device Intelligence
                     </p>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inter, sans-serif" }}>
+                    <table className="w-full border-collapse">
                       <tbody>
                         {[
-                          ["Type", <span key="type" style={{ color: deviceColor(dt), fontWeight: 700, fontSize: 12 }}>{(d.deviceType ?? "desktop").toUpperCase()}</span>],
+                          ["Type", <span key="type" className="font-bold text-white uppercase">{getDeviceLabel(dt)}</span>],
                           ["Vendor", d.deviceVendor ?? "—"],
                           ["Model", d.deviceModel ?? "—"],
                           ["Browser", d.browserName && d.browserVersion ? `${d.browserName} ${d.browserVersion}` : d.browserName ?? "—"],
                           ["OS", d.osName && d.osVersion ? `${d.osName} ${d.osVersion}` : d.osName ?? "—"],
                           ["CPU Arch", d.cpuArch ?? "—"],
-                          ["Raw UA", <span key="ua" title={d.userAgent ?? ""} style={{ fontSize: 10, color: "#4b5563", wordBreak: "break-all", display: "block", maxWidth: 260 }}>{d.userAgent ? d.userAgent.slice(0, 80) + (d.userAgent.length > 80 ? "…" : "") : "—"}</span>],
+                          ["Raw UA", <span key="ua" title={d.userAgent ?? ""} className="text-[10px] text-zinc-600 font-mono break-all line-clamp-2 leading-relaxed">{d.userAgent ?? "—"}</span>],
                         ].map(([label, value]) => (
-                          <tr key={String(label)} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                            <td style={{ padding: "5px 0", color: "var(--text-muted)", fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", width: "38%", verticalAlign: "top" }}>
+                          <tr key={String(label)} className="border-b border-[#262626]/20">
+                            <td className="py-2.5 text-zinc-500 font-bold uppercase tracking-widest text-[9px] w-[35%] align-top">
                               {label}
                             </td>
-                            <td style={{ padding: "5px 0 5px 12px", color: "var(--text-muted)", fontSize: 12 }}>
+                            <td className="py-2.5 pl-3 text-zinc-350 text-[11px]">
                               {value}
                             </td>
                           </tr>
@@ -799,33 +917,36 @@ function DownloadsTab({ initial }: { initial: Download[] }) {
                   </div>
 
                   {/* VERIFY BLOCK (full width) */}
-                  <div style={{ gridColumn: "1 / -1", borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-                    <p style={{ color: "#6b7280", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 10, fontFamily: "Inter, sans-serif" }}>
-                      🔗 VERIFY LINK ACTIVITY
+                  <div className="col-span-1 md:col-span-2 border-t border-[#262626] pt-4 mt-2">
+                    <p className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest pb-2 flex items-center gap-1.5">
+                      <FiShield className="w-3.5 h-3.5 text-zinc-650" /> Verification Link Activity Logs
                     </p>
                     {verifyFirst ? (
-                      <div style={{ display: "flex", gap: 32, flexWrap: "wrap", fontFamily: "Inter, sans-serif" }}>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3.5 border border-[#262626] bg-black/40">
                         <div>
-                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>Status</p>
-                          <p style={{ color: "var(--green)", fontSize: 12, fontWeight: 700 }}>✓ Link Opened</p>
+                          <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-1">Status</p>
+                          <p className="text-green text-xs font-bold uppercase tracking-wider">✓ Verified</p>
                         </div>
                         <div>
-                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>First Opened</p>
-                          <p style={{ color: "#fff", fontSize: 12 }}>{verifyFirst}</p>
+                          <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-1">First Opened</p>
+                          <p className="text-white text-xs font-bold">{verifyFirst}</p>
                         </div>
                         <div>
-                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>Total Visits</p>
-                          <p style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>{d.verifyCount}</p>
+                          <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-1">Total Hits</p>
+                          <p className="text-white text-xs font-bold">{d.verifyCount} visits</p>
                         </div>
                         <div>
-                          <p style={{ color: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 3 }}>Download ID</p>
-                          <p style={{ color: "#4b5563", fontSize: 11, fontFamily: "monospace" }}>{d.id}</p>
+                          <p className="text-zinc-600 text-[8px] uppercase tracking-widest mb-1">Download ID</p>
+                          <p className="text-zinc-500 text-[10px] font-mono select-all truncate">{d.id}</p>
                         </div>
                       </div>
                     ) : (
-                      <p style={{ color: "#4b5563", fontSize: 12, fontStyle: "italic", fontFamily: "Inter, sans-serif" }}>
-                        Recipient has not opened the verify link yet.
-                      </p>
+                      <div className="flex items-center gap-2 p-3 border border-dashed border-[#262626] bg-black/10">
+                        <FiInfo className="w-3.5 h-3.5 text-zinc-600" />
+                        <p className="text-zinc-600 text-xs italic">
+                          Recipient has not clicked/opened the verification link yet.
+                        </p>
+                      </div>
                     )}
                   </div>
 

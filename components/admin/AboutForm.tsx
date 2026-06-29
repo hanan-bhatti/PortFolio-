@@ -239,7 +239,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
     "w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-amber";
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6" noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-6xl space-y-6" noValidate>
       
       {/* Editorial Navigation Tabs */}
       <div className="relative border-b border-[#262626]">
