@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 import {
   FiMail,
   FiTrash2,
@@ -75,7 +75,23 @@ export default function NewsletterManager({
   const [isPending, startTransition] = useTransition();
   const [selectedPost, setSelectedPost] = useState("");
   const [subject, setSubject] = useState("");
+  const [bodyMarkdown, setBodyMarkdown] = useState("");
+  const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
   const [deleteTarget, setDeleteTarget] = useState<SubscriberItem | null>(null);
+
+  // Auto-fill template on selecting blog post
+  useEffect(() => {
+    if (selectedPost) {
+      const post = posts.find((p) => p.id === selectedPost);
+      if (post) {
+        setSubject(`New post: ${post.title}`);
+        setBodyMarkdown(`# ${post.title}\n\nWe just published a new article! Read the full post on the site using the button below.\n\nEnjoy reading!`);
+      }
+    } else {
+      setSubject("");
+      setBodyMarkdown("");
+    }
+  }, [selectedPost, posts]);
 
   // Subscribers list states
   const [subSearch, setSubSearch] = useState("");
@@ -183,13 +199,15 @@ export default function NewsletterManager({
 
     const toastId = toast.loading("Dispatching campaign to all subscribers...");
     startTransition(async () => {
-      const res = await dispatchCampaignAction(selectedPost, subject.trim());
+      const res = await dispatchCampaignAction(selectedPost, subject.trim(), bodyMarkdown.trim());
       if (res.error) {
         toast.error(res.error, { id: toastId });
       } else {
         toast.success("Campaign dispatched successfully!", { id: toastId });
         setSelectedPost("");
         setSubject("");
+        setBodyMarkdown("");
+        setActiveTab("write");
       }
     });
   };
@@ -261,40 +279,96 @@ export default function NewsletterManager({
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Left Column: Dispatcher Form */}
-        <div className="lg:col-span-1 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
+        <div className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
           <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
             New Email Campaign
           </h2>
           <form onSubmit={handleSendCampaign} className="space-y-4">
-            <div>
-              <label className="mb-1 block text-[9px] font-bold uppercase tracking-wider text-zinc-550">
-                Select Blog Post
-              </label>
-              <select
-                value={selectedPost}
-                onChange={(e) => setSelectedPost(e.target.value)}
-                className="w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-3 py-2 text-xs text-white outline-none focus:border-amber"
-              >
-                <option value="">-- Choose a published post --</option>
-                {posts.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.title}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-[9px] font-bold uppercase tracking-wider text-zinc-550">
+                  Select Blog Post reference
+                </label>
+                <select
+                  value={selectedPost}
+                  onChange={(e) => setSelectedPost(e.target.value)}
+                  className="w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-3 py-2 text-xs text-white outline-none focus:border-amber"
+                >
+                  <option value="">-- Choose a published post --</option>
+                  {posts.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-[9px] font-bold uppercase tracking-wider text-zinc-550">
+                  Email Subject
+                </label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="e.g. Fresh Out! Read our latest thoughts..."
+                  className="w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-3 py-2 text-xs text-white placeholder-zinc-650 outline-none focus:border-amber"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="mb-1 block text-[9px] font-bold uppercase tracking-wider text-zinc-550">
-                Email Subject
-              </label>
-              <input
-                type="text"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="e.g. Fresh Out! Read our latest thoughts..."
-                className="w-full rounded-none border border-[#262626] bg-[#0c0c0c] px-3 py-2 text-xs text-white placeholder-zinc-650 outline-none focus:border-amber"
-              />
+              <div className="flex border-b border-[#262626] mb-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("write")}
+                  className={`px-4 py-2 border-b-2 font-mono text-[9px] uppercase tracking-wider font-bold cursor-pointer ${
+                    activeTab === "write" ? "border-amber text-amber" : "border-transparent text-zinc-500"
+                  }`}
+                >
+                  Compose Markdown
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("preview")}
+                  className={`px-4 py-2 border-b-2 font-mono text-[9px] uppercase tracking-wider font-bold cursor-pointer ${
+                    activeTab === "preview" ? "border-amber text-amber" : "border-transparent text-zinc-500"
+                  }`}
+                >
+                  Email Simulator Preview
+                </button>
+              </div>
+
+              {activeTab === "write" ? (
+                <div>
+                  <textarea
+                    rows={12}
+                    value={bodyMarkdown}
+                    onChange={(e) => setBodyMarkdown(e.target.value)}
+                    placeholder="# Campaign Message&#10;&#10;Use markdown to style your content:&#10;- **Bold Text**&#10;- *Italic Text*&#10;- [Clickable Link](https://url.com)"
+                    className="w-full rounded-none border border-[#262626] bg-black p-3 text-xs text-zinc-300 placeholder-zinc-650 outline-none focus:border-amber font-mono resize-y min-h-[220px]"
+                  />
+                </div>
+              ) : (
+                <div className="border border-[#262626] p-4 bg-[#0a0a0a] overflow-y-auto max-h-[350px] font-sans">
+                  <div className="bg-[#0c0c0c] border border-[#262626] p-6 max-w-xl mx-auto text-left text-white">
+                    <div className="text-center pb-4 border-b border-[#262626]/40 mb-6">
+                      <h2 className="text-[#F59E0B] font-bold text-xs uppercase tracking-widest font-mono">NEWSLETTER</h2>
+                    </div>
+                    {bodyMarkdown.trim() ? (
+                      <div className="prose prose-invert prose-xs max-w-none text-zinc-300 font-sans space-y-4">
+                        <ReactMarkdown>{bodyMarkdown}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-zinc-600 text-xs italic font-mono uppercase tracking-wider text-center py-6">No preview content. Write something first.</p>
+                    )}
+                    <div className="text-center pt-6 border-t border-[#262626]/40 mt-8 text-[10px] text-zinc-500 font-mono">
+                      <p>You received this because you subscribed to updates on my portfolio site.</p>
+                      <p>&copy; {new Date().getFullYear()} Hanan Bhatti. All rights reserved.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <button
@@ -308,7 +382,7 @@ export default function NewsletterManager({
         </div>
 
         {/* Right Column: Subscribers List */}
-        <div className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
+        <div className="lg:col-span-1 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
           <div className="flex justify-between items-center flex-wrap gap-2">
             <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
               Subscribers ({filteredSubscribers.length} of {subscribers.length})

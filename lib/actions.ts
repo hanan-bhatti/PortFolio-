@@ -518,7 +518,47 @@ export async function deleteThreadAction(email: string): Promise<ActionResult> {
   return {};
 }
 
-export async function dispatchCampaignAction(postId: string, subject: string): Promise<ActionResult> {
+function parseMarkdownToHtml(markdown: string): string {
+  let html = markdown
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Headers
+  html = html.replace(/^### (.*$)/gim, '<h3 style="color: #ffffff; font-size: 16px; font-weight: bold; margin-top: 20px; margin-bottom: 10px;">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 style="color: #ffffff; font-size: 20px; font-weight: bold; margin-top: 24px; margin-bottom: 12px; border-bottom: 1px solid #262626; padding-bottom: 6px;">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 style="color: #ffffff; font-size: 24px; font-weight: bold; margin-top: 28px; margin-bottom: 16px; color: #F59E0B;">$1</h1>');
+
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #ffffff;">$1</strong>');
+
+  // Italic
+  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+  // Links
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color: #F59E0B; text-decoration: underline;">$1</a>');
+
+  // Lists (unordered)
+  html = html.replace(/^\s*-\s+(.*$)/gim, '<li style="margin-left: 20px; margin-bottom: 6px; list-style-type: square;">$1</li>');
+  html = html.replace(/(<li.*?>.*?<\/li>)/gs, '<ul style="padding-left: 0; margin-top: 10px; margin-bottom: 10px; color: #a1a1aa;">$1</ul>');
+  html = html.replace(/<\/ul>\s*<ul style="padding-left: 0; margin-top: 10px; margin-bottom: 10px; color: #a1a1aa;">/g, "");
+
+  // Paragraphs
+  html = html.split(/\n\s*\n/).map(p => {
+    p = p.trim();
+    if (!p) return "";
+    if (p.startsWith("<h") || p.startsWith("<ul") || p.startsWith("<li")) return p;
+    return `<p style="font-size: 14px; line-height: 1.6; color: #a1a1aa; margin-top: 0; margin-bottom: 16px;">${p}</p>`;
+  }).join("\n");
+
+  return html;
+}
+
+export async function dispatchCampaignAction(
+  postId: string,
+  subject: string,
+  bodyMarkdown?: string
+): Promise<ActionResult> {
   await requireAdmin();
 
   if (!postId || !subject) {
@@ -562,6 +602,8 @@ export async function dispatchCampaignAction(postId: string, subject: string): P
     // Sender from environment variable requested
     const fromSender = process.env.BLOG_EMAIL_FROM || "Portfolio <marketing@hanan-bhatti.site>";
 
+    const parsedCustomHtml = bodyMarkdown ? parseMarkdownToHtml(bodyMarkdown) : "";
+
     // Send emails in parallel
     await Promise.all(
       subscribers.map(async (sub) => {
@@ -570,12 +612,18 @@ export async function dispatchCampaignAction(postId: string, subject: string): P
         const htmlBody = `
           <div style="background-color: #0c0c0c; color: #ffffff; font-family: sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; border: 1px solid #262626;">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h2 style="font-weight: 800; letter-spacing: 0.1em; color: #F59E0B; margin: 0; font-family: 'Syne', sans-serif;">NEW BLOG POST</h2>
+              <h2 style="font-weight: 800; letter-spacing: 0.1em; color: #F59E0B; margin: 0; font-family: 'Syne', sans-serif;">NEWSLETTER</h2>
             </div>
-            ${post.coverImage ? `<div style="margin-bottom: 25px; border: 1px solid #262626; overflow: hidden;"><img src="${post.coverImage}" alt="${post.title}" style="width: 100%; height: auto; display: block;" /></div>` : ''}
-            <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #ffffff;">${post.title}</h1>
-            ${post.subtitle ? `<h3 style="font-size: 16px; font-weight: normal; color: #a1a1aa; margin-top: 0; margin-bottom: 20px;">${post.subtitle}</h3>` : ''}
-            <p style="font-size: 14px; line-height: 1.6; color: #a1a1aa; margin-bottom: 30px;">${post.excerpt || 'Read the latest post on my portfolio.'}</p>
+            ${parsedCustomHtml ? `
+              <div style="margin-bottom: 30px;">
+                ${parsedCustomHtml}
+              </div>
+            ` : `
+              ${post.coverImage ? `<div style="margin-bottom: 25px; border: 1px solid #262626; overflow: hidden;"><img src="${post.coverImage}" alt="${post.title}" style="width: 100%; height: auto; display: block;" /></div>` : ''}
+              <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #ffffff;">${post.title}</h1>
+              ${post.subtitle ? `<h3 style="font-size: 16px; font-weight: normal; color: #a1a1aa; margin-top: 0; margin-bottom: 20px;">${post.subtitle}</h3>` : ''}
+              <p style="font-size: 14px; line-height: 1.6; color: #a1a1aa; margin-bottom: 30px;">${post.excerpt || 'Read the latest post on my portfolio.'}</p>
+            `}
             <div style="text-align: center; margin-bottom: 40px;">
               <a href="${readMoreUrl}" style="display: inline-block; background-color: #F59E0B; color: #000000; text-decoration: none; padding: 12px 30px; font-weight: bold; font-size: 13px; letter-spacing: 0.1em; border: 1px solid #F59E0B;">READ MORE →</a>
             </div>
