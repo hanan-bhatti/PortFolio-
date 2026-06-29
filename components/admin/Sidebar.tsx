@@ -1,15 +1,6 @@
 "use client";
 
-/**
- * @file components/admin/Sidebar.tsx
- * @description React component for Sidebar.tsx under the admin category.
- * Supports mobile toggle state, sliding drawer, and responsive layouts.
- * 
- * @exports
- * - Sidebar (default): Main React component or function
- */
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -33,6 +24,9 @@ import {
   FiSend,
   FiLayout,
   FiLayers,
+  FiChevronLeft,
+  FiChevronRight,
+  FiLogOut
 } from "react-icons/fi";
 
 interface SidebarItem {
@@ -58,14 +52,19 @@ const SECTIONS: SidebarSection[] = [
     ],
   },
   {
+    title: "WORKSPACE",
+    items: [
+      { href: "/admin/workspace", label: "Workspace", icon: FiLayout },
+      { href: "/admin/canvas", label: "Canvas", icon: FiLayers },
+    ],
+  },
+  {
     title: "CONTENT",
     items: [
       { href: "/admin/posts", label: "Posts", icon: FiEdit3 },
       { href: "/admin/projects", label: "Projects", icon: FiFolder },
       { href: "/admin/photography", label: "Photography", icon: FiCamera },
       { href: "/admin/newsletter", label: "Newsletter", icon: FiSend },
-      { href: "/admin/workspace", label: "Workspace", icon: FiLayout },
-      { href: "/admin/canvas", label: "Canvas", icon: FiLayers },
     ],
   },
   {
@@ -89,10 +88,25 @@ const SECTIONS: SidebarSection[] = [
 export default function Sidebar({ unreadCount, userEmail }: { unreadCount: number; userEmail: string }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Load initial collapse state from localStorage client-side
+  useEffect(() => {
+    const saved = localStorage.getItem("admin_sidebar_collapsed");
+    if (saved === "true") {
+      setIsCollapsed(true);
+    }
+  }, []);
+
+  const toggleCollapse = () => {
+    const nextState = !isCollapsed;
+    setIsCollapsed(nextState);
+    localStorage.setItem("admin_sidebar_collapsed", String(nextState));
+  };
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Mobile Backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 md:hidden transition-opacity duration-300"
@@ -119,24 +133,42 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
         </button>
       </div>
 
+      {/* Desktop / Tablet Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col border-r border-[#262626] bg-[#080808] transition-transform duration-300 ease-in-out rounded-none",
-        "md:relative md:translate-x-0 md:flex md:w-60 md:shrink-0 md:left-auto md:top-auto md:bottom-auto",
-        isOpen && "translate-x-0"
+        "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-[#262626] bg-[#080808] transition-all duration-300 ease-in-out rounded-none select-none",
+        isCollapsed ? "w-16" : "w-64",
+        "translate-x-full md:relative md:translate-x-0 md:shrink-0 md:left-auto md:top-auto md:bottom-auto",
+        isOpen && "translate-x-0 w-64"
       )}>
         {/* Header / Brand */}
-        <div className="flex items-center justify-between border-b border-[#262626] px-5 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center border border-[#10B981] bg-[#10B981]/10 text-xs font-bold font-mono text-[#10B981]">
+        <div className={cn(
+          "flex items-center border-b border-[#262626] py-5 px-4",
+          isCollapsed ? "justify-center" : "justify-between"
+        )}>
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-[#10B981] bg-[#10B981]/10 text-xs font-bold font-mono text-[#10B981]">
               HB
             </div>
-            <Link href="/admin/dashboard" onClick={() => setIsOpen(false)} className="font-syne text-base font-bold text-white tracking-wider uppercase">
-              Admin
-            </Link>
+            {!isCollapsed && (
+              <Link href="/admin/dashboard" onClick={() => setIsOpen(false)} className="font-syne text-base font-bold text-white tracking-wider uppercase truncate">
+                Admin
+              </Link>
+            )}
           </div>
+          
+          {/* Collapse toggle button on desktop */}
+          <button
+            onClick={toggleCollapse}
+            className="hidden md:flex h-7 w-7 items-center justify-center border border-[#262626] text-zinc-450 hover:text-white transition-colors rounded-none"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {isCollapsed ? <FiChevronRight className="h-4 w-4" /> : <FiChevronLeft className="h-4 w-4" />}
+          </button>
+
+          {/* Close button on mobile */}
           <button
             onClick={() => setIsOpen(false)}
-            className="flex h-8 w-8 items-center justify-center border border-[#262626] text-zinc-400 hover:text-white md:hidden transition-colors rounded-none"
+            className="flex md:hidden h-8 w-8 items-center justify-center border border-[#262626] text-zinc-400 hover:text-white transition-colors rounded-none"
             aria-label="Close menu"
           >
             <FiX className="h-4 w-4" />
@@ -144,15 +176,20 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-6 space-y-6">
+        <nav className="flex-1 overflow-y-auto py-5 space-y-5 scrollbar-thin">
           {SECTIONS.map((section, idx) => (
             <div key={section.title} className="space-y-1">
-              <p className={cn(
-                "px-4 text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-[0.2em] mb-2",
-                idx > 0 ? "mt-2" : "mt-0"
-              )}>
-                {section.title}
-              </p>
+              {!isCollapsed ? (
+                <p className={cn(
+                  "px-4 text-[9px] font-mono font-bold text-zinc-550 uppercase tracking-[0.2em] mb-2",
+                  idx > 0 ? "mt-2" : "mt-0"
+                )}>
+                  {section.title}
+                </p>
+              ) : (
+                <div className="h-px bg-[#262626]/40 my-3 mx-4" />
+              )}
+              
               {section.items.map((item) => {
                 const isActive =
                   item.href === "/admin/analytics"
@@ -165,20 +202,22 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
                     href={item.href}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "group flex items-center justify-between px-4 py-2 text-[13px] font-sans font-medium transition-all duration-150 border-l-2 rounded-none",
+                      "group flex items-center justify-between py-2 text-[13px] font-sans font-medium transition-all duration-150 border-l-2 rounded-none",
                       isActive
                         ? "border-[#F59E0B] bg-[#F59E0B]/5 text-white"
-                        : "border-transparent text-zinc-400 hover:bg-white/[0.02] hover:text-white"
+                        : "border-transparent text-zinc-400 hover:bg-white/[0.02] hover:text-white",
+                      isCollapsed ? "px-0 justify-center border-l-0" : "px-4"
                     )}
+                    title={isCollapsed ? item.label : undefined}
                   >
                     <span className="flex items-center gap-3">
                       <Icon className={cn(
                         "h-4 w-4 shrink-0 transition-colors duration-150",
                         isActive ? "text-[#F59E0B]" : "text-zinc-500 group-hover:text-zinc-300"
                       )} />
-                      <span>{item.label}</span>
+                      {!isCollapsed && <span>{item.label}</span>}
                     </span>
-                    {item.badge && unreadCount > 0 ? (
+                    {!isCollapsed && item.badge && unreadCount > 0 ? (
                       <span className="flex h-5 items-center justify-center bg-[#10B981] px-1.5 font-mono text-[10px] font-bold text-black min-w-[20px] rounded-none">
                         {unreadCount}
                       </span>
@@ -191,18 +230,33 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
         </nav>
 
         {/* Profile Section */}
-        <div className="flex items-center gap-3 border-t border-[#262626] p-4 bg-black/20">
+        <div className={cn(
+          "flex items-center border-t border-[#262626] p-4 bg-black/20",
+          isCollapsed ? "justify-center" : "gap-3"
+        )}>
           <span className="flex h-8 w-8 items-center justify-center border border-[#F59E0B] bg-[#F59E0B]/10 text-xs font-bold text-[#F59E0B] shrink-0 rounded-none">
             {userEmail.charAt(0).toUpperCase()}
           </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-sans text-xs font-medium text-zinc-400">{userEmail}</p>
-            <form action={logoutAction}>
-              <button type="submit" className="font-mono text-[10px] text-red-400 hover:text-red-300 uppercase tracking-wider transition-colors mt-0.5 rounded-none">
-                LOG OUT →
+          {!isCollapsed ? (
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-sans text-xs font-medium text-zinc-450">{userEmail}</p>
+              <form action={logoutAction}>
+                <button type="submit" className="font-mono text-[9px] text-red-500 hover:text-red-400 uppercase tracking-wider transition-colors mt-0.5 rounded-none outline-none">
+                  LOG OUT →
+                </button>
+              </form>
+            </div>
+          ) : (
+            <form action={logoutAction} className="inline-block">
+              <button
+                type="submit"
+                className="text-red-500 hover:text-red-400 transition-colors p-1"
+                title="Log out"
+              >
+                <FiLogOut className="h-4 w-4" />
               </button>
             </form>
-          </div>
+          )}
         </div>
       </aside>
     </>
