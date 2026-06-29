@@ -9,9 +9,8 @@
 
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatDate } from "@/lib/utils";
 import PageHeader from "@/components/admin/PageHeader";
-import PublishToggle from "@/components/admin/PublishToggle";
+import DashboardClient from "@/components/admin/DashboardClient";
 import {
   FiUsers,
   FiEye,
@@ -20,7 +19,6 @@ import {
   FiFileText,
   FiFolder,
   FiMail,
-  FiActivity,
   FiPlus,
   FiUser,
   FiSettings,
@@ -100,24 +98,14 @@ export default async function DashboardPage() {
 
   // Generate continuous list of last 30 days
   const sparklineData: number[] = [];
+  const datesList: string[] = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split("T")[0] || "";
     sparklineData.push(viewsByDay[dateStr] || 0);
+    datesList.push(dateStr);
   }
-
-  const maxVal = Math.max(...sparklineData, 1);
-  const width = 240;
-  const height = 40;
-  const points = sparklineData
-    .map((v, i) => {
-      const x = (i / (sparklineData.length - 1)) * width;
-      const y = height - (v / maxVal) * height;
-      return `${x},${y}`;
-    })
-    .join(" ");
-  const areaPoints = `0,${height} ${points} ${width},${height}`;
 
   const stats = [
     { label: "Total Visitors", value: totalVisitors, icon: FiUsers, iconColor: "text-[#10B981]", subtext: "Unique sessions" },
@@ -211,162 +199,27 @@ export default async function DashboardPage() {
             </div>
           </div>
         ))}
-
-        {/* 30-Day Activity Sparkline Card */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-4 flex flex-col justify-between col-span-1 md:col-span-2 lg:col-span-1 h-[115px] rounded-none">
-          <div className="flex items-start justify-between gap-2">
-            <p className="font-mono text-[9px] sm:text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-snug">30-Day Activity</p>
-            <FiActivity className="h-4 w-4 text-[#10B981] shrink-0 mt-0.5" />
-          </div>
-          <div className="mt-2 flex-1 flex flex-col justify-end">
-            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-8 overflow-visible">
-              <defs>
-                <linearGradient id="sparkline-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <polygon points={areaPoints} fill="url(#sparkline-grad)" />
-              <polyline
-                fill="none"
-                stroke="#10B981"
-                strokeWidth="1.5"
-                points={points}
-              />
-            </svg>
-            <div className="mt-1 flex justify-between text-[8px] font-mono text-zinc-650 uppercase tracking-wide leading-none">
-              <span>30d ago</span>
-              <span>Today</span>
-            </div>
-          </div>
-        </div>
       </div>
 
-
-      {/* Panels Grid */}
-      <div className="grid gap-6 md:grid-cols-2 min-w-0">
-        {/* Top Pages This Week */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
-          <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
-            <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Top Pages (This Week)</h2>
-            <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
-              Views
-            </span>
-          </div>
-          <div className="space-y-4">
-            {topPages.map((page) => (
-              <div key={page.path} className="space-y-1">
-                <div className="flex justify-between items-center text-xs font-mono gap-4 min-w-0">
-                  <span className="truncate text-zinc-300 flex-1" title={page.path}>
-                    {page.path}
-                  </span>
-                  <span className="text-zinc-500 shrink-0">{page._count.path} views</span>
-                </div>
-                {/* Visual bar */}
-                <div className="h-1 bg-zinc-900">
-                  <div
-                    className="h-full bg-[#10B981]"
-                    style={{
-                      width: `${(page._count.path / Math.max(...topPages.map((p) => p._count.path), 1)) * 100}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-            {topPages.length === 0 ? (
-              <p className="py-6 text-center font-mono text-xs text-zinc-600">No page views recorded this week</p>
-            ) : null}
-          </div>
-        </section>
-
-        {/* Recent Visitors */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
-          <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
-            <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Recent Visitors</h2>
-            <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider">
-              Live Feed
-            </span>
-          </div>
-          <ul className="divide-y divide-[#262626]">
-            {recentVisitors.map((visitor) => (
-              <li key={visitor.id} className="py-3 flex items-start justify-between gap-4 text-xs font-mono">
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-zinc-200 font-medium truncate">
-                    {visitor.country || "Unknown Location"}
-                  </span>
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wide mt-0.5 truncate">
-                    {visitor.device || "desktop"} • {visitor.browser || "unknown"}
-                  </span>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="text-zinc-400">
-                    {formatDate(visitor.lastSeen)}
-                  </span>
-                  <span className="block text-[10px] text-zinc-500 mt-0.5">
-                    {visitor.visits} visits
-                  </span>
-                </div>
-              </li>
-            ))}
-            {recentVisitors.length === 0 ? (
-              <li className="py-6 text-center text-xs font-mono text-zinc-600">No visitors recorded yet</li>
-            ) : null}
-          </ul>
-        </section>
-
-        {/* Recent Messages */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
-          <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
-            <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Recent Messages</h2>
-            <Link href="/admin/messages" className="font-mono text-[10px] text-[#F59E0B] uppercase tracking-wider hover:underline">
-              View all →
-            </Link>
-          </div>
-          <ul className="divide-y divide-[#262626]">
-            {recentMessages.map((msg) => (
-              <li key={msg.id} className="py-3">
-                <div className="flex items-center justify-between gap-4 font-mono text-xs min-w-0">
-                  <p className="font-medium text-zinc-200 flex items-center gap-2 truncate min-w-0 flex-1">
-                    {!msg.read ? (
-                      <span className="inline-block h-1.5 w-1.5 bg-[#10B981] shrink-0" />
-                    ) : null}
-                    <span className="truncate">{msg.name}</span>
-                  </p>
-                  <span className="text-[10px] text-zinc-500 shrink-0">{formatDate(msg.createdAt)}</span>
-                </div>
-                <p className="mt-1 truncate font-mono text-[11px] text-zinc-400">{msg.subject}</p>
-              </li>
-            ))}
-            {recentMessages.length === 0 ? (
-              <li className="py-6 text-center font-mono text-xs text-zinc-600">No messages yet</li>
-            ) : null}
-          </ul>
-        </section>
-
-        {/* Recent Posts */}
-        <section className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden">
-          <div className="mb-6 flex items-center justify-between border-b border-[#262626] pb-3">
-            <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Recent Posts</h2>
-            <Link href="/admin/posts" className="font-mono text-[10px] text-[#F59E0B] uppercase tracking-wider hover:underline">
-              View all →
-            </Link>
-          </div>
-          <ul className="divide-y divide-[#262626]">
-            {recentPosts.map((post) => (
-              <li key={post.id} className="flex items-center justify-between gap-3 py-3">
-                <Link href={`/admin/posts/${post.id}/edit`} className="min-w-0 flex-1 group">
-                  <p className="truncate font-mono text-xs text-zinc-200 group-hover:text-[#F59E0B] transition-colors">{post.title}</p>
-                  <p className="mt-0.5 font-mono text-[10px] text-zinc-500">{formatDate(post.createdAt)}</p>
-                </Link>
-                <PublishToggle id={post.id} published={post.published} />
-              </li>
-            ))}
-            {recentPosts.length === 0 ? (
-              <li className="py-6 text-center font-mono text-xs text-zinc-600">No posts yet</li>
-            ) : null}
-          </ul>
-        </section>
-      </div>
+      {/* Interactive Planner, Calendar and Analytics Components */}
+      <DashboardClient
+        stats={{
+          totalVisitors,
+          totalPageViews,
+          totalDownloads,
+          totalPhotos,
+          totalPosts,
+          publishedPosts,
+          totalProjects,
+          unreadMessages,
+        }}
+        recentMessages={recentMessages}
+        recentPosts={recentPosts}
+        recentVisitors={recentVisitors}
+        topPages={topPages}
+        sparklineData={sparklineData}
+        datesList={datesList}
+      />
     </div>
   );
 }
