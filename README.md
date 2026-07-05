@@ -1,55 +1,92 @@
-# Portfolio
+# Hanan Bhatti Portfolio
 
-Production-grade personal portfolio with a 3D organic-blob aesthetic. Built with Next.js 15 (App Router), React Three Fiber, Tailwind CSS v4, TipTap, Prisma + PostgreSQL, NextAuth v5, Uploadthing and Resend.
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-## Quick Start
+> **Copyright (C) 2026 Abdul Hannan Bhatti.**  
+> This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](file://./LICENSE) for full details.
 
-1. **Install dependencies**:
+A production-grade, highly interactive personal portfolio web application utilizing a dark-mode, neo-brutalist flat grid layout with sharp terminal-inspired borders and high-contrast amber highlights. Built with Next.js (App Router), React Three Fiber, TipTap, Prisma, NextAuth, UploadThing, and Resend.
+
+A live demo is available at: [https://hanan-bhatti.site](https://hanan-bhatti.site)
+
+---
+
+## ⚡ Tech Stack
+
+| Technology / Library | Version | Description |
+|---|---|---|
+| **Next.js** | `^16.2.9` | React Framework (App Router, Turbopack, Standalone SSR/SSG) |
+| **React** | `^19.0.0` | Client Rendering & state pipeline |
+| **Prisma** | `^7.8.0` | Database ORM |
+| **PostgreSQL** | *N/A* | Persistent database layer |
+| **NextAuth** | `^5.0.0-beta.25` | Secure Session/Admin Authentication |
+| **UploadThing** | `^7.3.3` | Image asset uploading |
+| **Resend** | `^4.0.0` | Email dispatch (inbox reply & newsletter alerts) |
+| **driver.js** | `^1.6.0` | In-app interactive onboarding tour framework |
+
+---
+
+## 🚀 Quick Start
+
+Follow these steps to run the portfolio locally on your machine in under 5 minutes:
+
+1. **Clone the Repository**:
    ```bash
-   npm install
+   git clone https://github.com/hanan-bhatti/portfolio.git
+   cd portfolio
    ```
 
-2. **Configure environment**: Copy `.env.example` to `.env` and fill out:
+2. **Configure Environment Variables**:
+   Copy `.env.example` to `.env` and fill out your variables:
    ```bash
    cp .env.example .env
    ```
+   *Note: Set `DATABASE_URL` to your local PostgreSQL connection string, and generate a session secret for `AUTH_SECRET` (see instructions in [.env.example](file://./.env.example)).*
 
-3. **Initialize the database**:
+3. **Install Dependencies**:
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+
+4. **Initialize Database Schema**:
+   Deploy the database schema using Prisma:
    ```bash
    npm run db:push
    ```
 
-4. **Run development server**:
+5. **Start Dev Server**:
+   Start the Next.js development server with Turbopack support:
    ```bash
    npm run dev
    ```
 
-5. Visit `http://localhost:3000` to view the public site and `http://localhost:3000/admin/login` for the admin portal.
+6. **Access App & Portal**:
+   * **Public Website**: [http://localhost:3000](http://localhost:3000)
+   * **Admin Panel Login**: [http://localhost:3000/admin/login](http://localhost:3000/admin/login)  
+     *(If logging in for the first time, registration/admin creation occurs dynamically on this screen).*
 
-## Features
+---
 
-- **3D Theme**: Morphing GLSL blob background with mouse parallax, unique 3D hero per page (lazy-loaded, SSR-safe, error-bounded, with mobile CSS fallbacks).
-- **Public Pages**: Home (typewriter hero), Projects (tag filter + details), About (radial skills + animated timeline), Blog (search, tags, pagination, TipTap rendering, TOC, related posts), Contact (Zod-validated + Resend integration).
-- **Admin Portal** (`/admin`): NextAuth-protected dashboard, TipTap post editor, project CRUD with dnd-kit ordering, inbox management, 2FA/TOTP security, and site settings.
-- **Strict Quality**: Strict TypeScript (no `any`), Zod-validated input layers, custom JSDoc file headers, and Next.js Turbopack-compatible configuration.
+## 📑 Features
 
-## Configuration
+* **Neo-Brutalist Visual Design**: A flat-accented theme featuring a dark background (`#0a0a0a`), high-contrast amber highlights, geometric grid layouts, and interactive cursor spotlight masks over heading texts.
+* **Canvas Interactive Portrait**: The homepage features an interactive canvas-rendered pixelation portrait that dynamically shifts resolution and blends amber tints based on cursor distance and hover easing.
+* **Blog CMS & Analytics**: Complete TipTap-based rich text editor with built-in visitor metrics tracking search logs, reader-intent emoji reactions, helpful votes, Exit Intent triggers, and email campaign newsletters.
+* **Portfolio & Resume Timeline**: Structured project filters, drag-and-drop order sorting, education/career timeline, and a resume layout capable of tracking PDF downloads and geolocation metrics.
+* **Personal Sandbox Workspace**: An admin-only workspace featuring a sandbox node board to draw layouts, take notes, create inline checklists, and store bookmark previews.
+* **In-App Onboarding**: Two-layered interactive onboarding tours powered by `driver.js` that guide new developers through all 13 admin panel routes on their first visit.
+* **Session Auditing**: Complete dashboard session listing tracking browser user-agent, geolocation country flags, IP addresses, and enabling immediate session revocation.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | *Required* |
-| `AUTH_SECRET` | Secret key for NextAuth session signing | *Required* |
-| `RESEND_API_KEY` | Resend service API key for emails | *Optional* |
-| `CONTACT_EMAIL_TO` | Recipient email for contact messages | *Optional* |
-| `CONTACT_EMAIL_FROM` | Sender email address for automated alerts | `onboarding@resend.dev` |
-| `UPLOADTHING_TOKEN` | Uploadthing authentication token for files | *Optional* |
+---
 
-## Documentation
+## 📚 Core Documentation Map
 
-- [Project Specifications & Memory](file://./.agents/memory/MEMORY.md)
-- [Architecture Decision Records (ADRs)](file://./docs/adr/ADR-001-codebase-cleanup.md)
-- [Developer Guidelines (llms.txt)](file://./llms.txt)
+We have prepared comprehensive documentation files to orient self-hosters and open-source contributors:
 
-## License
-
-MIT
+1. **[SETUP.md](file://./SETUP.md)**: A complete, step-by-step local development setup walkthrough including prerequisite versions, seeding, and common error troubleshooting.
+2. **[ARCHITECTURE.md](file://./ARCHITECTURE.md)**: Explains the internal structure accompanied by Mermaid diagrams covering the system overview, Prisma ERD, Auth workflows, UploadThing pipelines, and visitor analytics.
+3. **[DEPLOYMENT.md](file://./DEPLOYMENT.md)**: Guidelines on hosting the portfolio, reverse proxy configurations (Coolify/Traefik), and standalone frontend deployment options (Vercel).
+4. **[CONTRIBUTING.md](file://./CONTRIBUTING.md)**: Rules for contributing to the repository, coding style (ESLint configs), and formatting conventions.
+5. **[SECURITY.md](file://./SECURITY.md)**: Safe disclosure protocols for reporting vulnerability issues.
+6. **[CODE_OF_CONDUCT.md](file://./CODE_OF_CONDUCT.md)**: Standard contributor code of conduct guidelines.
+7. **[CHANGELOG.md](file://./CHANGELOG.md)**: Histographical list of notable project releases and updates.

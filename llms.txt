@@ -14,7 +14,7 @@
 - [prisma/schema.prisma]: Database definitions for posts, projects, messages, sessions, and settings.
 
 ## Key Concepts
-- **3D Morphing GLSL Blob**: The background employs custom shaders with mouse parallax effects. Falling back to static gradients on mobile devices for speed.
+- **Interactive Visuals**: Features custom Canvas 2D pixelation filters on portraits, and a WebGL-based custom liquid-glass shader active on navigation highlights.
 - **Admin Authentication**: Uses NextAuth credentials strategy with optional 2FA/TOTP verification, session revocation, and email notifications on login.
 - **TipTap Rich Text Editor**: A complete editor configured in the admin panel which outputs JSON content rendered on the server side into styled HTML.
 - **Prisma Extended Client Hook**: Auto-touches the `resume_last_updated` date whenever skills, projects, certifications, or settings are modified.
