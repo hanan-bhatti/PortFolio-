@@ -1,7 +1,18 @@
 {
-  "name": "portfolio",
-  "version": "0.1.0",
-  "private": true,
+  "name": "hanan-bhatti-portfolio",
+  "version": "1.1.0",
+  "description": "A production portfolio and admin CMS with blog, analytics, and engagement tracking — open source under AGPL-3.0",
+  "author": "Abdul Hannan Bhatti",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hanan-bhatti/portfolio-.git"
+  },
+  "keywords": [
+    "portfolio",
+    "cms",
+    "nextjs",
+    "admin-panel"
+  ],
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "dev": "next dev --turbopack",

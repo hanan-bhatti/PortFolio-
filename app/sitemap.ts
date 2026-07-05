@@ -12,16 +12,23 @@ import { prisma } from "@/lib/prisma";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  // Fetch published blog posts
-  const posts = await prisma.post.findMany({
-    where: { published: true },
-    select: { slug: true, updatedAt: true },
-  });
+  let posts: Array<{ slug: string; updatedAt: Date }> = [];
+  let projects: Array<{ slug: string; createdAt: Date }> = [];
 
-  // Fetch all projects (projects are public by default in the schema)
-  const projects = await prisma.project.findMany({
-    select: { slug: true, createdAt: true },
-  });
+  try {
+    // Fetch published blog posts
+    posts = await prisma.post.findMany({
+      where: { published: true },
+      select: { slug: true, updatedAt: true },
+    });
+
+    // Fetch all projects (projects are public by default in the schema)
+    projects = await prisma.project.findMany({
+      select: { slug: true, createdAt: true },
+    });
+  } catch (err) {
+    console.warn("Sitemap: Database is offline/unreachable during build. Returning static routes only.", err);
+  }
 
   // Static routes
   const routes = [
