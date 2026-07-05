@@ -229,7 +229,7 @@ export default function NewsletterManager({
   return (
     <div className="space-y-8 font-mono text-xs">
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div data-tour="newsletter-stats-grid" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="border border-[#262626] bg-[#0c0c0c] p-5">
           <div className="flex items-center justify-between text-zinc-500">
             <span className="uppercase text-[9px] font-bold tracking-wider">Subscribers</span>
@@ -279,7 +279,7 @@ export default function NewsletterManager({
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Left Column: Dispatcher Form */}
-        <div className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
+        <div data-tour="newsletter-campaign-creator" className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
           <h2 className="text-zinc-400 uppercase tracking-wider font-bold text-[10px]">
             New Email Campaign
           </h2>

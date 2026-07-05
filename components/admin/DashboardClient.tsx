@@ -433,6 +433,7 @@ export default function DashboardClient({
       {/* Navigation Tabs Header */}
       <div className="flex border-b border-[#262626] bg-[#0c0c0c] p-1 gap-1">
         <button
+          data-tour="planner-toggle"
           onClick={() => setActiveTab("planner")}
           className={cn(
             "flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] font-bold uppercase tracking-wider transition-all rounded-none",
@@ -1014,7 +1015,7 @@ export default function DashboardClient({
 
             {/* Popular Pages grid */}
             <div className="grid gap-6 md:grid-cols-2">
-              <section className="border border-[#262626] bg-[#0c0c0c] p-6">
+              <section data-tour="quick-actions" className="border border-[#262626] bg-[#0c0c0c] p-6">
                 <div className="mb-4 flex items-center justify-between border-b border-[#262626] pb-3">
                   <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Popular Pages (Last 7 Days)</h2>
                   <span className="font-mono text-[9px] text-zinc-500 uppercase">Hits</span>
@@ -1044,7 +1045,7 @@ export default function DashboardClient({
                 </div>
               </section>
 
-              <section className="border border-[#262626] bg-[#0c0c0c] p-6">
+              <section data-tour="dashboard-stats" className="border border-[#262626] bg-[#0c0c0c] p-6">
                 <div className="mb-4 flex items-center justify-between border-b border-[#262626] pb-3">
                   <h2 className="font-mono text-xs font-bold text-white uppercase tracking-widest">Quick Stats Summary</h2>
                   <FiActivity className="h-4 w-4 text-amber shrink-0" />

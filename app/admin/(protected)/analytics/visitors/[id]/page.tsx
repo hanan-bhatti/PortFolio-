@@ -277,7 +277,7 @@ export default async function VisitorDetailPage({ params }: PageProps) {
           )}
 
           {/* Section 2: Engagement Timeline */}
-          <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none">
+          <div data-tour="visitor-journey-timeline" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none">
             <h2 className="mb-4 font-syne text-lg font-bold text-white tracking-tight flex items-center gap-2">
               <LuFlame className="w-5 h-5 text-amber-500" /> User Interaction Timeline
             </h2>

@@ -25,6 +25,7 @@ import {
   FaFacebook,
   FaInstagram
 } from "react-icons/fa6";
+import InfoTooltip from "@/components/admin/InfoTooltip";
 
 // Meta parser helper for quick links
 function parseShortLinkMeta(display: string, targetUrl: string) {
@@ -327,7 +328,7 @@ export default function ClicksDashboardClient({
   return (
     <div className="space-y-8">
       {/* SECTION 1: BLOG POST INTERACTIONS */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
+      <div data-tour="clicks-blog-table" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <div>
@@ -336,18 +337,21 @@ export default function ClicksDashboardClient({
               </h2>
               <p className="text-[10px] text-zinc-500 font-mono mt-1">Aggregated statistics for reader actions and copy events</p>
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search blog posts..."
-                value={postSearch}
-                onChange={(e) => {
-                  setPostSearch(e.target.value);
-                  setPostPage(1);
-                }}
-                className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
-              />
-              <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search blog posts..."
+                  value={postSearch}
+                  onChange={(e) => {
+                    setPostSearch(e.target.value);
+                    setPostPage(1);
+                  }}
+                  className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
+                />
+                <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+              </div>
+              <InfoTooltip content="Search blog posts by title or slug category to audit user reactions and block-copy actions." />
             </div>
           </div>
           
@@ -451,7 +455,7 @@ export default function ClicksDashboardClient({
       </div>
 
       {/* SECTION 2: SHORTLINKS REDIRECTS SUMMARY */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
+      <div data-tour="clicks-redirects-table" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <div>
@@ -460,18 +464,21 @@ export default function ClicksDashboardClient({
               </h2>
               <p className="text-[10px] text-zinc-500 font-mono mt-1">Clicks on profile redirects, headers, and campaign links</p>
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search short links..."
-                value={linkSearch}
-                onChange={(e) => {
-                  setLinkSearch(e.target.value);
-                  setLinkPage(1);
-                }}
-                className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
-              />
-              <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search short links..."
+                  value={linkSearch}
+                  onChange={(e) => {
+                    setLinkSearch(e.target.value);
+                    setLinkPage(1);
+                  }}
+                  className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
+                />
+                <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+              </div>
+              <InfoTooltip content="Search profile redirects and custom campaign links by slug code or destination URL." />
             </div>
           </div>
 
@@ -590,7 +597,7 @@ export default function ClicksDashboardClient({
       </div>
 
       {/* SECTION 3: PROJECT LINK CLICKS */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
+      <div data-tour="clicks-projects-table" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <div>
@@ -599,18 +606,21 @@ export default function ClicksDashboardClient({
               </h2>
               <p className="text-[10px] text-zinc-500 font-mono mt-1">Reader clicks directing to project live demos or GitHub code</p>
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={projectSearch}
-                onChange={(e) => {
-                  setProjectSearch(e.target.value);
-                  setProjectPage(1);
-                }}
-                className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
-              />
-              <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search projects..."
+                  value={projectSearch}
+                  onChange={(e) => {
+                    setProjectSearch(e.target.value);
+                    setProjectPage(1);
+                  }}
+                  className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
+                />
+                <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+              </div>
+              <InfoTooltip content="Search portfolio projects by title to monitor outgoing click distributions." />
             </div>
           </div>
 

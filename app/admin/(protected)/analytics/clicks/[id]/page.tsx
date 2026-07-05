@@ -558,7 +558,7 @@ export default async function PostAnalyticsPage({ params }: Props) {
       </div>
 
       {/* Combined Activity Log */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+      <div data-tour="clicks-detail-log" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
         <h3 className="font-syne text-sm font-bold uppercase tracking-wider text-white">
           Recent Interactions Log (Last 50)
         </h3>

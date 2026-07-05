@@ -43,10 +43,11 @@ Open `.env` and fill in the required fields:
 *(Note: Optional configurations like Resend API keys or UploadThing tokens can be left blank initially — the app degrades gracefully).*
 
 ### 3. Install NPM Dependencies
-Install Node modules. Because the project leverages React 19, make sure to bypass peer dependency limits using the legacy flag:
+Install Node modules. Because the project leverages React 19, you must bypass peer dependency limits using the legacy flag:
 ```bash
 npm install --legacy-peer-deps
 ```
+*Note: The `--legacy-peer-deps` flag is required because `@excalidraw/excalidraw` and older Radix UI primitives define peer dependency specifications on React 18, which conflicts with our React 19 framework core. Bypassing this check is completely safe and does not impact application runtime behavior.*
 
 ### 4. Push Database Schema
 Sync your database tables directly with the Prisma schema structure:

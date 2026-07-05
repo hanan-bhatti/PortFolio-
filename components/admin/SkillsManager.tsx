@@ -59,7 +59,7 @@ export default function SkillsManager({ initialSkills }: SkillsManagerProps) {
   const selectedSkillToDelete = skills.find(s => s.id === deleteId);
 
   return (
-    <div className="space-y-6">
+    <div data-tour="skills-reorder-grid" className="space-y-6">
       {/* View Toggle and Create Row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#262626] pb-4">
         {/* Toggle */}
@@ -88,6 +88,7 @@ export default function SkillsManager({ initialSkills }: SkillsManagerProps) {
 
         {/* Add Skill */}
         <Link
+          data-tour="add-skill-btn"
           href="/admin/skills/new"
           className="border border-[#10B981] bg-[#10B981]/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#10B981] hover:bg-[#10B981]/30 transition-colors rounded-none text-center w-full sm:w-auto"
         >

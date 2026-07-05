@@ -12,6 +12,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import InfoTooltip from "./InfoTooltip";
 
 interface Experience {
   id: string;
@@ -128,11 +129,12 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
         {experience ? `Edit Experience: ${experience.role} at ${experience.company}` : "Create New Experience"}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form data-tour="experience-editor-area" onSubmit={handleSubmit} className="space-y-6">
         {/* Role */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             Role *
+            <InfoTooltip content="Your job title at this company, e.g. Full Stack Developer." />
           </label>
           <input
             type="text"
@@ -146,8 +148,9 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
 
         {/* Company */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             Company *
+            <InfoTooltip content="Name of the organization or client you worked with." />
           </label>
           <input
             type="text"
@@ -161,8 +164,9 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
 
         {/* Location */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             Location
+            <InfoTooltip content="City and country, optionally noting if the role was remote." />
           </label>
           <input
             type="text"
@@ -177,8 +181,9 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           {/* Start Date */}
           <div className="space-y-2">
-            <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+            <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
               Start Date *
+              <InfoTooltip content="Month and year you started this role." />
             </label>
             <input
               type="month"
@@ -191,8 +196,9 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
 
           {/* End Date */}
           <div className="space-y-2">
-            <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+            <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
               End Date {current ? "" : "*"}
+              <InfoTooltip content="Month and year you left this role. Leave blank if you currently work here." />
             </label>
             {current ? (
               <div className="w-full bg-[#1a1a1a]/50 border border-[#262626]/50 p-3 text-sm text-zinc-500 font-mono select-none">
@@ -231,8 +237,9 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
 
         {/* Description */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             Description *
+            <InfoTooltip content="Markdown-supported summary of your responsibilities and achievements in this role." />
           </label>
           <textarea
             value={description}
@@ -249,8 +256,9 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
 
         {/* Order */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
             Display Order
+            <InfoTooltip content="Controls sort order on the resume page. Lower numbers appear first." />
           </label>
           <input
             type="number"

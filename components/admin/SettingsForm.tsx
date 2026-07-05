@@ -392,6 +392,7 @@ export default function SettingsForm({
             const isActive = activeTab === tab;
             return (
               <button
+                data-tour={`settings-tab-${tab}`}
                 key={tab}
                 type="button"
                 onClick={() => setTab(tab)}

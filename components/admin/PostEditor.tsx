@@ -9,7 +9,7 @@
  * - PostEditorData: Type/Interface definition
  */
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
@@ -22,12 +22,22 @@ import { toast } from "sonner";
 import { baseExtensions, ImageGalleryNode } from "@/lib/tiptap-extensions";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import ImageGalleryBlock from "@/components/admin/ImageGalleryBlock";
+import {
+  FiFileText,
+  FiType,
+  FiList,
+  FiCode,
+  FiMessageSquare,
+  FiMinus,
+  FiImage
+} from "react-icons/fi";
 import { slugify, cn } from "@/lib/utils";
 import { UploadButton, useUploadThing } from "@/lib/uploadthing";
 import { compressImage, compressImages } from "@/lib/image-compress";
 import { createPostAction, updatePostAction } from "@/lib/actions";
 import EditorToolbar from "@/components/admin/EditorToolbar";
 import BlogContentClient from "@/components/blog/BlogContentClient";
+import InfoTooltip from "./InfoTooltip";
 
 export interface PostEditorData {
   id: string;
@@ -49,9 +59,27 @@ function parseContent(content: string): JSONContent | string {
   }
 }
 
+const COMMANDS = [
+  { label: "Paragraph", icon: FiFileText, iconColor: "text-zinc-550", desc: "Start writing plain paragraph text", action: (editor: any) => editor.chain().focus().clearNodes().run() },
+  { label: "Heading 1", icon: FiType, iconColor: "text-amber", desc: "Large page heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+  { label: "Heading 2", icon: FiType, iconColor: "text-amber/80", desc: "Medium section heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+  { label: "Heading 3", icon: FiType, iconColor: "text-amber/60", desc: "Small section heading", action: (editor: any) => editor.chain().focus().toggleHeading({ level: 3 }).run() },
+  { label: "Bullet List", icon: FiList, iconColor: "text-sky-400", desc: "Simple bulleted list", action: (editor: any) => editor.chain().focus().toggleBulletList().run() },
+  { label: "Numbered List", icon: FiList, iconColor: "text-sky-400", desc: "Sequential numbered list", action: (editor: any) => editor.chain().focus().toggleOrderedList().run() },
+  { label: "Code Block", icon: FiCode, iconColor: "text-[#16A34A]", desc: "Preformatted code snippet", action: (editor: any) => editor.chain().focus().toggleCodeBlock().run() },
+  { label: "Blockquote", icon: FiMessageSquare, iconColor: "text-zinc-500", desc: "Capture block quotes", action: (editor: any) => editor.chain().focus().toggleBlockquote().run() },
+  { label: "Divider", icon: FiMinus, iconColor: "text-zinc-650", desc: "Horizontal divider line", action: (editor: any) => editor.chain().focus().setHorizontalRule().run() },
+  { label: "Image Gallery", icon: FiImage, iconColor: "text-pink-500", desc: "Responsive photos grid layouts", action: (editor: any) => editor.chain().focus().insertContent({ type: "imageGallery", attrs: { images: [], columns: 3 } }).run() }
+];
+
 export default function PostEditor({ post }: { post: PostEditorData | null }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  const [slashPosition, setSlashPosition] = useState<{ top: number; left: number } | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [query, setQuery] = useState("");
+  const slashMenuRef = useRef<HTMLDivElement>(null);
 
   const [title, setTitle] = useState(post?.title ?? "");
   const [subtitle, setSubtitle] = useState(post?.subtitle ?? "");
@@ -113,6 +141,32 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
     }
   };
 
+  const updateSlashMenuState = useCallback((editor: any) => {
+    if (!editor) return;
+    const { state } = editor;
+    const { from } = state.selection;
+    const $pos = state.doc.resolve(from);
+    const textBefore = $pos.parent.textBetween(Math.max(0, $pos.parentOffset - 50), $pos.parentOffset, undefined, "\0");
+    const lastSlashIndex = textBefore.lastIndexOf("/");
+
+    if (lastSlashIndex !== -1) {
+      const q = textBefore.slice(lastSlashIndex + 1);
+      if (!q.includes(" ")) {
+        setQuery(q);
+        try {
+          const coords = editor.view.coordsAtPos(from - q.length - 1);
+          setSlashPosition({ top: coords.top + 24, left: coords.left });
+        } catch {
+          // fallback
+        }
+        return;
+      }
+    }
+    setSlashPosition(null);
+    setQuery("");
+    setSelectedIndex(0);
+  }, []);
+
   const editor = useEditor({
     extensions: [
       ...baseExtensions().filter((ext) => ext.name !== "imageGallery"),
@@ -126,6 +180,12 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
     ],
     content: post ? parseContent(post.content) : "",
     immediatelyRender: false,
+    onSelectionUpdate: ({ editor }) => {
+      updateSlashMenuState(editor);
+    },
+    onUpdate: ({ editor }) => {
+      updateSlashMenuState(editor);
+    },
     editorProps: {
       attributes: { class: "prose-blog min-h-[420px] px-4 py-3 focus:outline-none" },
       handleDrop(view, event, slice, moved) {
@@ -193,6 +253,60 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
       }
     },
   });
+
+  const filteredCommands = COMMANDS.filter((cmd) =>
+    cmd.label.toLowerCase().includes(query.toLowerCase())
+  );
+
+  // Clamp selectedIndex when search query changes filtered length
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
+
+  // Handle outside click to dismiss slash menu
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (slashPosition && slashMenuRef.current && !slashMenuRef.current.contains(e.target as Node)) {
+        setSlashPosition(null);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [slashPosition]);
+
+  // Keyboard navigation for slash menu
+  useEffect(() => {
+    if (!slashPosition || !editor) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (filteredCommands.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        
+        // Remove the "/" and typed query text range
+        const { state } = editor;
+        const { from } = state.selection;
+        editor.chain().focus().deleteRange({ from: from - query.length - 1, to: from }).run();
+
+        // Run command
+        filteredCommands[selectedIndex]?.action(editor);
+        setSlashPosition(null);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        setSlashPosition(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [slashPosition, selectedIndex, editor, query, filteredCommands]);
 
   const onTitleChange = (value: string): void => {
     setTitle(value);
@@ -263,34 +377,65 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
   return (
     <div className="grid gap-6 xl:grid-cols-[1fr_320px] pb-24 xl:pb-0">
       <div className="min-w-0 space-y-4">
-        <input
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          placeholder="Post title"
-          className={cn(inputClass, "text-sm font-bold tracking-wide")}
-        />
-        <input
-          value={subtitle}
-          onChange={(e) => setSubtitle(e.target.value)}
-          placeholder="Post subtitle (optional)"
-          className={cn(inputClass, "text-xs tracking-wide")}
-        />
-        <input
-          value={slug}
-          onChange={(e) => {
-            setSlugTouched(true);
-            setSlug(slugify(e.target.value));
-          }}
-          placeholder="post-slug"
-          className={cn(inputClass, "font-mono text-xs")}
-        />
-        <textarea
-          value={excerpt}
-          onChange={(e) => setExcerpt(e.target.value)}
-          placeholder="Short excerpt for cards and SEO..."
-          rows={2}
-          className={inputClass}
-        />
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            <span>Title</span>
+            <InfoTooltip content="The main headline of your blog article." />
+          </div>
+          <input
+            data-tour="post-editor-title"
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            placeholder="Post title"
+            className={cn(inputClass, "text-sm font-bold tracking-wide")}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            <span>Subtitle (Optional)</span>
+            <InfoTooltip content="Optional sub-heading to provide extra context (displays below title)." />
+          </div>
+          <input
+            data-tour="post-editor-subtitle"
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            placeholder="Post subtitle (optional)"
+            className={cn(inputClass, "text-xs tracking-wide")}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            <span>URL Slug</span>
+            <InfoTooltip content="The custom URL slug path. Defaults to automatic URL-friendly title conversion." />
+          </div>
+          <input
+            data-tour="post-editor-slug"
+            value={slug}
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(slugify(e.target.value));
+            }}
+            placeholder="post-slug"
+            className={cn(inputClass, "font-mono text-xs")}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+            <span>Excerpt</span>
+            <InfoTooltip content="A brief summary of the article (appears on blog cards and in SEO search snippet listings)." />
+          </div>
+          <textarea
+            data-tour="post-editor-excerpt"
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            placeholder="Short excerpt for cards and SEO..."
+            rows={2}
+            className={inputClass}
+          />
+        </div>
 
         <div className="rounded-none border border-[#262626] bg-[#0c0c0c]">
           <div className="flex items-center justify-between border-b border-[#262626] bg-black/20 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wider">
@@ -329,9 +474,58 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
               sectionReactionsOn={false}
             />
           </div>
-          <div className={!showPreview ? "block" : "hidden"}>
+          <div data-tour="post-editor-area" className={!showPreview ? "block" : "hidden"}>
             {editor ? <EditorToolbar editor={editor} /> : null}
             <EditorContent editor={editor} />
+
+            {/* Floating Slash Commands Menu */}
+            {slashPosition && filteredCommands.length > 0 && (
+              <div
+                ref={slashMenuRef}
+                className="fixed z-50 bg-[#0c0c0c] border border-[#262626] w-[280px] max-h-[250px] overflow-y-auto shadow-2xl p-1 animate-fadeIn select-none rounded-none"
+                style={{
+                  top: `${slashPosition.top}px`,
+                  left: `${slashPosition.left}px`,
+                }}
+              >
+                <div className="px-2 py-1.5 border-b border-[#262626] font-mono text-[8px] font-bold text-zinc-555 uppercase tracking-widest">
+                  Editor blocks
+                </div>
+                <div className="space-y-0.5 mt-1">
+                  {filteredCommands.map((cmd, idx) => {
+                    const CmdIcon = cmd.icon;
+                    return (
+                      <button
+                        key={cmd.label}
+                        type="button"
+                        onClick={() => {
+                          if (editor) {
+                            const { state } = editor;
+                            const { from } = state.selection;
+                            editor.chain().focus().deleteRange({ from: from - query.length - 1, to: from }).run();
+                            cmd.action(editor);
+                            setSlashPosition(null);
+                          }
+                        }}
+                        className={cn(
+                          "w-full text-left px-2.5 py-1.5 flex items-start gap-3 transition-colors rounded-none outline-none",
+                          selectedIndex === idx ? "bg-amber/15 text-white" : "hover:bg-zinc-900/60"
+                        )}
+                      >
+                        <CmdIcon className={cn("h-3.5 w-3.5 mt-0.5 shrink-0", cmd.iconColor)} />
+                        <div className="flex-1 min-w-0">
+                          <span className={cn("font-mono text-[10px] font-bold block", selectedIndex === idx ? "text-amber" : "text-zinc-200")}>
+                            {cmd.label}
+                          </span>
+                          <span className="text-[8px] text-zinc-500 font-sans tracking-wide mt-0.5 block truncate">{cmd.desc}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {editor && (
               <BubbleMenu
                 editor={editor}
@@ -466,7 +660,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
       </div>
 
       <aside className="space-y-5">
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
+        <div data-tour="post-cover-image" className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
           <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Cover image</p>
           {coverImage ? (
             <div className="relative mb-3 h-36 w-full overflow-hidden border border-[#262626] bg-black/20 rounded-none">
@@ -503,7 +697,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           />
         </div>
 
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
+        <div data-tour="post-tags" className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
           <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400">Tags</p>
           <div className="mb-3 flex flex-wrap gap-2">
             {tags.map((tag) => (
@@ -536,7 +730,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           />
         </div>
 
-        <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
+        <div data-tour="post-engagement-settings" className="rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
           <button
             type="button"
             onClick={() => setEngagementExpanded(!engagementExpanded)}
@@ -610,7 +804,7 @@ export default function PostEditor({ post }: { post: PostEditorData | null }) {
           )}
         </div>
 
-        <div className="hidden xl:block space-y-3 rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
+        <div data-tour="post-save-actions" className="hidden xl:block space-y-3 rounded-none border border-[#262626] bg-[#0c0c0c] p-4">
           <button
             type="button"
             disabled={isPending}

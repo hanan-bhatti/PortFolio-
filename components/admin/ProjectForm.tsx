@@ -21,6 +21,7 @@ import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import { createProjectAction, updateProjectAction } from "@/lib/actions";
 import type { ProjectInput } from "@/lib/validations";
+import InfoTooltip from "./InfoTooltip";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title is required"),
@@ -112,9 +113,9 @@ export default function ProjectForm({ project }: { project: ProjectFormData | nu
   const err = (msg?: string) => (msg ? <p className="mt-1 text-xs text-red-400 font-mono">{msg}</p> : null);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-4 font-mono text-xs" noValidate>
+    <form data-tour="project-editor-area" onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-4 font-mono text-xs" noValidate>
       <div>
-        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Project Title</label>
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Project Title<InfoTooltip content="Project name shown on the portfolio projects page." /></label>
         <input
           {...register("title")}
           placeholder="Project title"
@@ -126,39 +127,39 @@ export default function ProjectForm({ project }: { project: ProjectFormData | nu
         {err(errors.title?.message)}
       </div>
       <div>
-        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Project Slug</label>
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Project Slug<InfoTooltip content="URL-friendly identifier for the project's permalink (auto-generated from title)." /></label>
         <input {...register("slug")} placeholder="project-slug" className={inputClass} />
         {err(errors.slug?.message)}
       </div>
       <div>
-        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Short Description</label>
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Short Description<InfoTooltip content="Short summary shown on project cards in the portfolio grid." /></label>
         <textarea {...register("description")} placeholder="Short description" rows={2} className={inputClass} />
         {err(errors.description?.message)}
       </div>
       <div>
-        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Long Description (Markdown)</label>
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Long Description (Markdown)<InfoTooltip content="Full markdown content for the project detail page." /></label>
         <textarea {...register("longDesc")} placeholder="Long description (optional)" rows={6} className={inputClass} />
       </div>
       <div>
-        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Resume Bullets (One Per Line)</label>
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Resume Bullets (One Per Line)<InfoTooltip content="2–5 bullet points describing this project for your resume. One bullet per line." /></label>
         <textarea {...register("resumeBullets")} placeholder="Resume Bullet Points (optional, one per line, 2-5 bullets)" rows={4} className={inputClass} />
         <p className="mt-1 text-[10px] text-zinc-500">
           Enter 2-5 bullet points to display in your resume. Start each bullet point on a new line.
         </p>
       </div>
       <div>
-        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Tech Stack (Comma Separated)</label>
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Tech Stack (Comma Separated)<InfoTooltip content="Comma-separated list of technologies and tools used in this project." /></label>
         <input {...register("techStack")} placeholder="Tech stack, comma separated (e.g. Next.js, Prisma)" className={inputClass} />
         {err(errors.techStack?.message)}
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Live URL</label>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">Live URL<InfoTooltip content="Link to the live deployed project or demo." /></label>
           <input {...register("liveUrl")} placeholder="Live URL (optional)" className={inputClass} />
           {err(errors.liveUrl?.message)}
         </div>
         <div>
-          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">GitHub URL</label>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400">GitHub URL<InfoTooltip content="Link to the project's source code repository." /></label>
           <input {...register("githubUrl")} placeholder="GitHub URL (optional)" className={inputClass} />
           {err(errors.githubUrl?.message)}
         </div>
@@ -197,10 +198,12 @@ export default function ProjectForm({ project }: { project: ProjectFormData | nu
         <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
           <input type="checkbox" {...register("featured")} className="h-4 w-4 accent-amber" />
           Featured on homepage
+          <InfoTooltip content="Pinned featured projects appear at the top of the portfolio grid." />
         </label>
         <label className="flex items-center gap-2 text-xs text-zinc-300">
           Order
           <input type="number" {...register("order")} className="w-20 border border-[#262626] bg-[#0c0c0c] px-2 py-1 text-xs text-white placeholder-zinc-600 outline-none focus:border-amber" />
+          <InfoTooltip content="Controls sort order among non-featured projects. Lower numbers appear first." />
         </label>
       </div>
 

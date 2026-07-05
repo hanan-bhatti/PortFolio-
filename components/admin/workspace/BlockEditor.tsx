@@ -14,7 +14,7 @@ import { common, createLowlight } from "lowlight";
 import CalloutNode from "./CalloutNode";
 import LinkPreviewNode from "./LinkPreviewNode";
 import SlashCommandExtension from "./SlashCommandExtension";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import {
   FiFileText,
@@ -63,9 +63,36 @@ const COMMANDS = [
 export default function BlockEditor({ initialContent, onChange, statusIndicator = "idle" }: BlockEditorProps) {
   const [slashPosition, setSlashPosition] = useState<{ top: number; left: number } | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [query, setQuery] = useState("");
   const slashMenuRef = useRef<HTMLDivElement>(null);
 
   const lowlight = createLowlight(common);
+
+  const updateSlashMenuState = useCallback((editor: any) => {
+    if (!editor) return;
+    const { state } = editor;
+    const { from } = state.selection;
+    const $pos = state.doc.resolve(from);
+    const textBefore = $pos.parent.textBetween(Math.max(0, $pos.parentOffset - 50), $pos.parentOffset, undefined, "\0");
+    const lastSlashIndex = textBefore.lastIndexOf("/");
+
+    if (lastSlashIndex !== -1) {
+      const q = textBefore.slice(lastSlashIndex + 1);
+      if (!q.includes(" ")) {
+        setQuery(q);
+        try {
+          const coords = editor.view.coordsAtPos(from - q.length - 1);
+          setSlashPosition({ top: coords.top + 24, left: coords.left });
+        } catch {
+          // fallback
+        }
+        return;
+      }
+    }
+    setSlashPosition(null);
+    setQuery("");
+    setSelectedIndex(0);
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -89,12 +116,6 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
       }),
       CalloutNode,
       LinkPreviewNode,
-      SlashCommandExtension.configure({
-        onTrigger: (pos) => {
-          setSlashPosition(pos);
-          setSelectedIndex(0);
-        },
-      }),
     ],
     content: (() => {
       try {
@@ -108,10 +129,23 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
         class: "prose prose-invert prose-amber max-w-none focus:outline-none min-h-[400px] text-zinc-350 font-sans text-sm tracking-wide leading-relaxed",
       },
     },
+    onSelectionUpdate: ({ editor }) => {
+      updateSlashMenuState(editor);
+    },
     onUpdate: ({ editor }) => {
       onChange(JSON.stringify(editor.getJSON()));
+      updateSlashMenuState(editor);
     },
   });
+
+  const filteredCommands = COMMANDS.filter((cmd) =>
+    cmd.label.toLowerCase().includes(query.toLowerCase())
+  );
+
+  // Clamp selectedIndex when search query changes filtered length
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
 
   // Handle outside click to dismiss slash menu
   useEffect(() => {
@@ -129,22 +163,24 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
     if (!slashPosition || !editor) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (filteredCommands.length === 0) return;
+
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % COMMANDS.length);
+        setSelectedIndex((prev) => (prev + 1) % filteredCommands.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev - 1 + COMMANDS.length) % COMMANDS.length);
+        setSelectedIndex((prev) => (prev - 1 + filteredCommands.length) % filteredCommands.length);
       } else if (e.key === "Enter") {
         e.preventDefault();
         
-        // Remove the "/" typed
+        // Remove the "/" and typed query text range
         const { state } = editor;
         const { from } = state.selection;
-        editor.chain().focus().deleteRange({ from: from - 1, to: from }).run();
+        editor.chain().focus().deleteRange({ from: from - query.length - 1, to: from }).run();
 
         // Run command
-        COMMANDS[selectedIndex]?.action(editor);
+        filteredCommands[selectedIndex]?.action(editor);
         setSlashPosition(null);
       } else if (e.key === "Escape") {
         e.preventDefault();
@@ -154,7 +190,7 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
 
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [slashPosition, selectedIndex, editor]);
+  }, [slashPosition, selectedIndex, editor, query, filteredCommands]);
 
   // Load new content if initialContent changes externally
   useEffect(() => {
@@ -183,7 +219,7 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
       </div>
 
       {/* Floating Slash Commands Menu */}
-      {slashPosition && (
+      {slashPosition && filteredCommands.length > 0 && (
         <div
           ref={slashMenuRef}
           className="fixed z-50 bg-[#0c0c0c] border border-[#262626] w-[280px] max-h-[250px] overflow-y-auto shadow-2xl p-1 animate-fadeIn select-none rounded-none"
@@ -196,7 +232,7 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
             Workspace blocks
           </div>
           <div className="space-y-0.5 mt-1">
-            {COMMANDS.map((cmd, idx) => {
+            {filteredCommands.map((cmd, idx) => {
               const CmdIcon = cmd.icon;
               return (
                 <button
@@ -205,7 +241,7 @@ export default function BlockEditor({ initialContent, onChange, statusIndicator 
                     if (editor) {
                       const { state } = editor;
                       const { from } = state.selection;
-                      editor.chain().focus().deleteRange({ from: from - 1, to: from }).run();
+                      editor.chain().focus().deleteRange({ from: from - query.length - 1, to: from }).run();
                       cmd.action(editor);
                       setSlashPosition(null);
                     }

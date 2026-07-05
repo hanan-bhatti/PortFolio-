@@ -163,7 +163,7 @@ export default async function SubscriberDetailPage({ params }: Props) {
       </div>
 
       {/* Campaign Email Opens Log */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
+      <div data-tour="subscriber-activity-log" className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
         <h3 className="font-syne text-sm font-bold text-white uppercase tracking-wider border-b border-[#262626]/40 pb-2 flex items-center gap-2">
           <FiEye className="text-green w-4 h-4" /> Campaign Email Opens History ({opens.length})
         </h3>

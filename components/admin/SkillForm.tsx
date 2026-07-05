@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import SkillIcon from "./SkillIcon";
+import InfoTooltip from "./InfoTooltip";
 
 const TECH_ICONS = [
   { name: "SiReact", label: "React" },
@@ -166,11 +167,12 @@ export default function SkillForm({ skill }: SkillFormProps) {
         {skill ? `Edit Skill: ${skill.name}` : "Create New Skill"}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form data-tour="skill-editor-area" onSubmit={handleSubmit} className="space-y-6">
         {/* Name */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
             Name *
+            <InfoTooltip content="Display name of the skill as shown on your portfolio." />
           </label>
           <input
             type="text"
@@ -184,8 +186,9 @@ export default function SkillForm({ skill }: SkillFormProps) {
 
         {/* Category */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
             Category *
+            <InfoTooltip content="Groups this skill under a category (e.g. Frontend, Backend, DevOps)." />
           </label>
           <input
             list="categories"
@@ -212,7 +215,7 @@ export default function SkillForm({ skill }: SkillFormProps) {
         {/* Level */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
-            <span>Level *</span>
+            <span className="flex items-center gap-1.5">Level * <InfoTooltip content="Your proficiency level as a percentage (1–100). Higher values indicate greater expertise." /></span>
             <span className="text-[#F59E0B] font-bold">{level}%</span>
           </div>
           <input
@@ -231,8 +234,9 @@ export default function SkillForm({ skill }: SkillFormProps) {
 
         {/* Icon Picker */}
         <div className="space-y-4 pt-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
             Icon Picker
+            <InfoTooltip content="Icon identifier used to render the skill's visual badge." />
           </label>
 
           <div className="flex flex-col md:flex-row gap-4">
@@ -312,8 +316,9 @@ export default function SkillForm({ skill }: SkillFormProps) {
 
         {/* Order */}
         <div className="space-y-2">
-          <label className="block text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+          <label className="flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
             Display Order
+            <InfoTooltip content="Controls sort order. Lower numbers appear first." />
           </label>
           <input
             type="number"

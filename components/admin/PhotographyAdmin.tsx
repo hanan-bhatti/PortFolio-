@@ -38,6 +38,7 @@ import {
   FaTwitter
 } from "react-icons/fa6";
 import EditorialModal from "./EditorialModal";
+import CelebrationPopover from "./CelebrationPopover";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Photo {
@@ -409,7 +410,7 @@ export default function PhotographyAdmin({
   return (
     <div style={{ maxWidth: "900px" }} className="font-mono text-xs">
       {/* ── Page Settings ─────────────────────────────────── */}
-      <section className="mb-10 border border-[#262626] bg-[#0c0c0c] p-6">
+      <section data-tour="photography-settings" className="mb-10 border border-[#262626] bg-[#0c0c0c] p-6">
         <h2 className="mb-6 font-syne text-sm font-bold text-white uppercase tracking-wider">Page Settings</h2>
 
         {/* Enabled toggle */}
@@ -505,7 +506,7 @@ export default function PhotographyAdmin({
             </div>
           </div>
         ) : (
-          <label className="flex cursor-pointer flex-col items-center justify-center gap-3 border-2 border-dashed border-[#262626] bg-[#0c0c0c] p-10 text-center transition hover:border-[#F59E0B]/40">
+          <label data-tour="photography-uploadzone" className="flex cursor-pointer flex-col items-center justify-center gap-3 border-2 border-dashed border-[#262626] bg-[#0c0c0c] p-10 text-center transition hover:border-[#F59E0B]/40">
             <span className="text-2xl">📷</span>
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
               Click to select images
@@ -958,6 +959,8 @@ export default function PhotographyAdmin({
         onConfirm={confirmDeletePhoto}
         onCancel={() => setDeleteId(null)}
       />
+
+      <CelebrationPopover type="photo" count={photos.length} />
     </div>
   );
 }

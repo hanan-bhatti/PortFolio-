@@ -24,7 +24,7 @@ export default async function AdminPostsPage() {
         title="Posts"
         crumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Posts" }]}
         action={
-          <Link href="/admin/posts/new" className="border border-amber bg-amber px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black hover:bg-amber/90 transition-all">
+          <Link data-tour="create-post-btn" href="/admin/posts/new" className="border border-amber bg-amber px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black hover:bg-amber/90 transition-all">
             + New Post
           </Link>
         }

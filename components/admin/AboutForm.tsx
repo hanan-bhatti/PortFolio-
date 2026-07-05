@@ -23,6 +23,7 @@ import { FiArrowUp, FiArrowDown, FiTrash2, FiPlus, FiX } from "react-icons/fi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import EditorialModal from "./EditorialModal";
+import InfoTooltip from "./InfoTooltip";
 
 const MarkdownComponents = {
   p: ({ children }: any) => (
@@ -258,6 +259,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
             const isActive = activeTab === tab;
             return (
               <button
+                data-tour={`about-tab-${tab}`}
                 key={tab}
                 type="button"
                 onClick={() => setTab(tab)}
@@ -282,7 +284,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
           
           {/* Avatar Upload */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-zinc-300">Avatar Image</label>
+            <label className="mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-300">Avatar Image <InfoTooltip content="Your profile photo displayed on the About page hero section." /></label>
             {aboutAvatarUrl ? (
               <div className="relative mb-3 h-48 w-48 overflow-hidden border border-[#262626] bg-black/20">
                 <Image src={aboutAvatarUrl} alt="Avatar" fill className="object-contain" />
@@ -325,7 +327,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
 
           {/* Tagline */}
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-zinc-300">Hero Tagline</label>
+            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-zinc-300">Hero Tagline <InfoTooltip content="Short punchy tagline shown in the hero header of your About page." /></label>
             <input
               {...register("about_hero_tagline")}
               placeholder="e.g. CS student by day, full-stack dev by night..."
@@ -345,8 +347,9 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
           <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
             <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Story Editor</h3>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-350">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-zinc-350">
                 Your Story (markdown supported)
+                <InfoTooltip content="Long-form markdown biography rendered on your About page story section." />
               </label>
               <textarea
                 {...register("about_story")}
@@ -385,8 +388,9 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
             <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
               <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Currently</h3>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-350">
+                <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-zinc-350">
                   What are you doing now? (markdown supported)
+                  <InfoTooltip content="Markdown content shown in your Currently section — what you're working on right now." />
                 </label>
                 <textarea
                   {...register("about_currently")}
@@ -421,8 +425,9 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
             <div className="rounded-none border border-[#262626] bg-[#0c0c0c] p-5 space-y-4">
               <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">Beyond Code</h3>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-350">
+                <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-zinc-350">
                   The Human Side (markdown supported)
+                  <InfoTooltip content="Interests and hobbies outside of coding, shown in your Beyond Code section." />
                 </label>
                 <textarea
                   {...register("about_beyond_code")}
@@ -459,7 +464,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
           <h3 className="text-lg font-bold text-white border-b border-[#262626] pb-2 font-syne uppercase tracking-wider">CTA</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">CTA Text</label>
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-zinc-300">CTA Text <InfoTooltip content="Button label text for your About page call-to-action." /></label>
               <input
                 {...register("about_cta_text")}
                 placeholder="Let's build something"
@@ -470,7 +475,7 @@ export default function AboutForm({ initial }: { initial: AboutInput }) {
               ) : null}
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-zinc-300">CTA Email/Link</label>
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-zinc-300">CTA Email/Link <InfoTooltip content="Email address or URL the CTA button links to." /></label>
               <input
                 {...register("about_cta_email")}
                 placeholder="you@email.com or https://..."

@@ -20,6 +20,7 @@ import { deleteProjectAction, reorderProjectsAction } from "@/lib/actions";
 import { FiGrid, FiList, FiTrash2, FiEdit3, FiMove } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
+import CelebrationPopover from "./CelebrationPopover";
 
 export interface AdminProjectRow {
   id: string;
@@ -204,7 +205,7 @@ export default function ProjectsManager({ initial }: { initial: AdminProjectRow[
 
       {/* LIST VIEW (With Drag and Drop) */}
       {activeLayout === "list" && (
-        <div className="border border-[#262626] bg-[#0c0c0c]">
+        <div data-tour="projects-reorder-list" className="border border-[#262626] bg-[#0c0c0c]">
           <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
               <ul className="divide-y divide-[#262626]">
@@ -301,6 +302,8 @@ export default function ProjectsManager({ initial }: { initial: AdminProjectRow[
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      <CelebrationPopover type="project" count={items.length} />
     </div>
   );
 }

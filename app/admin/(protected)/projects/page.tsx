@@ -24,7 +24,7 @@ export default async function AdminProjectsPage() {
         title="Projects"
         crumbs={[{ label: "Admin", href: "/admin/dashboard" }, { label: "Projects" }]}
         action={
-          <Link href="/admin/projects/new" className="border border-amber bg-amber px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black hover:bg-amber/90 transition-all">
+          <Link data-tour="create-project-btn" href="/admin/projects/new" className="border border-amber bg-amber px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-black hover:bg-amber/90 transition-all">
             + New Project
           </Link>
         }

@@ -61,6 +61,7 @@ export default function MessagesTable({ messages }: { messages: AdminMessageRow[
           {messages.map((msg) => (
             <li key={msg.id}>
               <button
+                data-tour="message-list-row"
                 type="button"
                 onClick={() => open(msg)}
                 className="flex w-full items-start sm:items-center gap-3 sm:gap-4 px-4 py-3 text-left hover:bg-white/[0.02]"

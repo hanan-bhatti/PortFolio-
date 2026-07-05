@@ -117,6 +117,56 @@ flowchart TD
     UpsertVisitor --> CreatePageView
 ```
 
+### D. Onboarding Tour System
+Onboarding tours are initialized automatically as administrators navigate the control panel. The system uses a centralized config registry mapping routes to target DOM elements, utilizing a self-healing polling loop to avoid React hydration race conditions.
+
+```mermaid
+flowchart TD
+    Route["Admin navigates to path /admin/*"]
+    Config{"Is there a configured tour for path?"}
+    End["Do Nothing"]
+    CheckSeen{"Has user seen this tour before? (seenPageTours DB list)"}
+    WaitMount["Poll DOM for target element (Max 5s)"]
+    ElementExists{"Target mounted in DOM?"}
+    StartTour["driver.js initializes and starts tour overlay"]
+
+    Route --> Config
+    Config -->|No| End
+    Config -->|Yes| CheckSeen
+    CheckSeen -->|Yes| End
+    CheckSeen -->|No| WaitMount
+    WaitMount --> ElementExists
+    ElementExists -->|No| End
+    ElementExists -->|Yes| StartTour
+```
+
+---
+
+### E. Creation Celebration Pipeline
+To gamify administrator interactions, first-time creations (first post, project, photography, skill, or career experience) trigger a celebration popover with canvas-confetti. To ensure cross-session integrity, this state is stored in the database.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Admin Browser
+    participant API as Server Action (getCelebrationsAction)
+    participant DB as Database (AdminUser)
+    participant Confetti as canvas-confetti
+
+    Admin->>API: Load Page (Component mounts with item count === 1)
+    API->>DB: Query AdminUser columns (celebratedPost, celebratedProject, etc.)
+    DB-->>API: Returns boolean flags
+    API-->>Admin: Returns status payload
+    
+    alt wasCelebrated is false
+        Admin->>API: markCelebratedAction(type)
+        API->>DB: Update flag to true (celebrated[Type] = true)
+        DB-->>API: Persisted
+        Admin->>Confetti: Fire particles animation
+        Admin->>Admin: Display congratulations popover modal
+    end
+```
+
 ---
 
 ## 3. Database Entity Relationship Diagram (ERD)

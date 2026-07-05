@@ -23,6 +23,7 @@ A live demo is available at: [https://hanan-bhatti.site](https://hanan-bhatti.si
 | **UploadThing** | `^7.3.3` | Image asset uploading |
 | **Resend** | `^4.0.0` | Email dispatch (inbox reply & newsletter alerts) |
 | **driver.js** | `^1.6.0` | In-app interactive onboarding tour framework |
+| **canvas-confetti** | `^1.9.4` | First-time action celebration engine |
 
 ---
 
@@ -74,7 +75,9 @@ Follow these steps to run the portfolio locally on your machine in under 5 minut
 * **Blog CMS & Analytics**: Complete TipTap-based rich text editor with built-in visitor metrics tracking search logs, reader-intent emoji reactions, helpful votes, Exit Intent triggers, and email campaign newsletters.
 * **Portfolio & Resume Timeline**: Structured project filters, drag-and-drop order sorting, education/career timeline, and a resume layout capable of tracking PDF downloads and geolocation metrics.
 * **Personal Sandbox Workspace**: An admin-only workspace featuring a sandbox node board to draw layouts, take notes, create inline checklists, and store bookmark previews.
-* **In-App Onboarding**: Two-layered interactive onboarding tours powered by `driver.js` that guide new developers through all 13 admin panel routes on their first visit.
+* **In-App Onboarding**: Two-layered interactive onboarding tours powered by `driver.js` that guide new developers through all 13 admin panel routes on their first visit, equipped with self-healing element detection polling that waits for DOM nodes to mount (solving React Suspense and client routing hydration timing limits).
+* **Contextual InfoTooltips**: Granular tooltip help text overlays implemented across every input field and form tab (Settings, About, Resume, Certifications, Posts, Projects, Skills, Experience, Photography) to explain navigation and data inputs.
+* **Database-Backed Action Celebrations**: A congratulatory popover reward system utilizing `canvas-confetti` when a user publishes their first blog post, portfolio project, photography slide, skill entry, or career milestone, tracked securely via postgres boolean flags in the `AdminUser` model to guarantee cross-browser consistency.
 * **Session Auditing**: Complete dashboard session listing tracking browser user-agent, geolocation country flags, IP addresses, and enabling immediate session revocation.
 
 ---

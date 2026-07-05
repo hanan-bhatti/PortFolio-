@@ -66,6 +66,8 @@ import { toast } from "sonner";
 import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import Image from "next/image";
+import InfoTooltip from "./InfoTooltip";
+import CelebrationPopover from "./CelebrationPopover";
 
 type Settings = Record<string, string>;
 type EducationItem = {
@@ -369,7 +371,10 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
         {/* Row 1: Full Name & Job Title */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="resume-field">
-            <label className="resume-label">Full Name</label>
+            <label className="resume-label flex items-center gap-1.5">
+              Full Name
+              <InfoTooltip content="Your full name displayed at the top of the resume." />
+            </label>
             <input
               className="resume-input"
               value={form.resume_name ?? ""}
@@ -377,7 +382,10 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
             />
           </div>
           <div className="resume-field">
-            <label className="resume-label">Job Title / Headline</label>
+            <label className="resume-label flex items-center gap-1.5">
+              Job Title / Headline
+              <InfoTooltip content="Your professional target title (e.g. Senior Full Stack Engineer)." />
+            </label>
             <input
               className="resume-input"
               value={form.resume_title ?? ""}
@@ -389,7 +397,10 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
         {/* Row 2: Email, Phone, Location */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="resume-field">
-            <label className="resume-label">Email</label>
+            <label className="resume-label flex items-center gap-1.5">
+              Email
+              <InfoTooltip content="Public contact email address listed on the resume." />
+            </label>
             <input
               className="resume-input"
               value={form.resume_email ?? ""}
@@ -397,7 +408,10 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
             />
           </div>
           <div className="resume-field">
-            <label className="resume-label">Phone</label>
+            <label className="resume-label flex items-center gap-1.5">
+              Phone
+              <InfoTooltip content="Contact telephone number (optional)." />
+            </label>
             <input
               className="resume-input"
               value={form.resume_phone ?? ""}
@@ -405,7 +419,10 @@ function PersonalTab({ settings, onSaved }: { settings: Settings; onSaved: (s: S
             />
           </div>
           <div className="resume-field">
-            <label className="resume-label">Location</label>
+            <label className="resume-label flex items-center gap-1.5">
+              Location
+              <InfoTooltip content="City and country of residence (e.g. San Francisco, CA)." />
+            </label>
             <input
               className="resume-input"
               value={form.resume_location ?? ""}
@@ -767,9 +784,17 @@ function CertificationsTab({ initial }: { initial: CertItem[] }) {
       {showForm && (
         <div className="resume-form-card">
           <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 16 }}>{editItem ? "Edit Certification" : "Add Certification"}</h3>
-          {([["name", "Certificate Name"], ["issuer", "Issuing Organization"], ["year", "Year (optional)"], ["url", "URL (optional)"]] as [string, string][]).map(([k, l]) => (
+          {([
+            ["name", "Certificate Name", "The name of the certificate or credential (e.g. AWS Certified Solutions Architect)."],
+            ["issuer", "Issuing Organization", "The name of the institution or company that issued this certification (e.g. Amazon Web Services)."],
+            ["year", "Year (optional)", "The year the certificate was issued (e.g. 2024)."],
+            ["url", "URL (optional)", "Optional web address pointing to the public certificate verification page."]
+          ] as [string, string, string][]).map(([k, l, tooltip]) => (
             <div className="resume-field" key={k}>
-              <label className="resume-label">{l}</label>
+              <label className="resume-label flex items-center gap-1.5">
+                {l}
+                <InfoTooltip content={tooltip} />
+              </label>
               <input className="resume-input" value={(form as any)[k]} onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))} />
             </div>
           ))}
@@ -1151,11 +1176,12 @@ export default function ResumeAdmin({ settings, education, certifications, exper
         {/* Right Fade indicator on mobile */}
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none z-10 md:hidden" />
         
-        <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-none gap-px bg-[#262626]/20 font-mono text-[11px] font-bold uppercase tracking-wider min-w-0 pr-8 md:pr-0">
+        <div data-tour="resume-tabs-nav" className="flex flex-row flex-nowrap overflow-x-auto scrollbar-none gap-px bg-[#262626]/20 font-mono text-[11px] font-bold uppercase tracking-wider min-w-0 pr-8 md:pr-0">
           {TABS.map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
+                data-tour={`resume-tab-${tab}`}
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
@@ -1266,8 +1292,10 @@ export default function ResumeAdmin({ settings, education, certifications, exper
         }
         .resume-btn-danger:hover {
           opacity: 0.75;
-        }
       `}</style>
+
+      <CelebrationPopover type="skill" count={skills.length} />
+      <CelebrationPopover type="experience" count={experience.length} />
     </div>
   );
 }

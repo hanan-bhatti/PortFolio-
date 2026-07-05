@@ -7,6 +7,7 @@ import { deleteThreadAction, markThreadReadAction, sendReplyAction } from "@/lib
 import { formatDate, cn } from "@/lib/utils";
 import { FiMail, FiTrash2, FiSend, FiArrowLeft, FiUser, FiTerminal, FiSearch, FiClock, FiCheckSquare } from "react-icons/fi";
 import EditorialModal from "./EditorialModal";
+import InfoTooltip from "./InfoTooltip";
 
 export interface ThreadMessage {
   id: string;
@@ -115,17 +116,20 @@ export default function InboxView({ initialThreads }: { initialThreads: MessageT
         selectedEmail ? "hidden md:flex" : "flex"
       )}>
         {/* Search */}
-        <div className="p-4 border-b border-[#262626] relative">
-          <span className="absolute inset-y-0 left-0 pl-7 flex items-center pointer-events-none">
-            <FiSearch className="text-zinc-500 w-3.5 h-3.5" />
-          </span>
-          <input
-            type="text"
-            placeholder="Search threads..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 border border-[#262626] bg-black text-xs text-white placeholder-zinc-500 outline-none focus:border-amber transition-colors rounded-none"
-          />
+        <div className="p-4 border-b border-[#262626] flex items-center gap-2">
+          <div className="relative flex-1">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FiSearch className="text-zinc-500 w-3.5 h-3.5" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search threads..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-8 pr-3 py-2 border border-[#262626] bg-black text-xs text-white placeholder-zinc-500 outline-none focus:border-amber transition-colors rounded-none"
+            />
+          </div>
+          <InfoTooltip content="Search messages by sender name, email address, message subject, or body contents." />
         </div>
 
         {/* List */}
@@ -280,7 +284,7 @@ export default function InboxView({ initialThreads }: { initialThreads: MessageT
 
             {/* Bottom Composer */}
             <form onSubmit={handleSendReply} className="border-t border-[#262626] bg-[#0c0c0c] p-4 flex gap-3 items-end">
-              <div className="flex-1">
+              <div className="flex-1 relative">
                 <textarea
                   rows={3}
                   placeholder={`Send an email reply to ${selectedThread.name}... (Ctrl + Enter to send)`}
@@ -294,9 +298,12 @@ export default function InboxView({ initialThreads }: { initialThreads: MessageT
                       }
                     }
                   }}
-                  className="w-full border border-[#262626] bg-[#090909] px-3.5 py-3 text-xs text-white placeholder-zinc-500 outline-none focus:border-amber transition-colors rounded-none resize-none"
+                  className="w-full border border-[#262626] bg-[#090909] px-3.5 py-3 pr-10 text-xs text-white placeholder-zinc-500 outline-none focus:border-amber transition-colors rounded-none resize-none"
                   required
                 />
+                <div className="absolute top-3 right-3 z-10">
+                  <InfoTooltip content="Sending a reply here saves the message thread response and automatically sends an email response via Resend." />
+                </div>
               </div>
               <button
                 type="submit"

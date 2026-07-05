@@ -27,6 +27,7 @@ import {
   LuActivity,
   LuInfo
 } from "react-icons/lu";
+import InfoTooltip from "@/components/admin/InfoTooltip";
 
 interface PostItem {
   id: string;
@@ -130,7 +131,7 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
   return (
     <div className="space-y-8 text-left">
       {/* Overview Stat Strip */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div data-tour="engagement-stats" className="grid gap-4 sm:grid-cols-3">
         {[
           { label: "Total Emojis", val: summary.totalReactions, desc: "Reactions recorded across all posts" },
           { label: "Surveys Received", val: summary.totalSurveyResponses, desc: "End-post suggestions submitted" },
@@ -147,10 +148,10 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
       </div>
 
       {/* Filter and Sort controls */}
-      <div className="border border-[#262626] bg-[#0c0c0c]/40 p-4 space-y-4">
+      <div data-tour="engagement-filters" className="border border-[#262626] bg-[#0c0c0c]/40 p-4 space-y-4">
         <div className="grid gap-3 sm:grid-cols-4 font-mono text-xs">
           {/* Keyword Search */}
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-2 flex items-center gap-2">
             <input
               type="text"
               value={searchTerm}
@@ -158,10 +159,11 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
               placeholder="Search posts by title..."
               className="w-full rounded-none border border-[#262626] bg-[#0a0a0a] px-3 py-2 font-mono text-xs text-white placeholder-zinc-650 outline-none focus:border-amber transition-colors"
             />
+            <InfoTooltip content="Filter post comparison list dynamically by post title keywords." />
           </div>
 
           {/* Sort By */}
-          <div>
+          <div className="flex items-center gap-2">
             <select
               value={sortBy}
               onChange={(e: any) => setSortBy(e.target.value)}
@@ -173,10 +175,11 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
               <option value="views">Sort: Most Views</option>
               <option value="scroll">Sort: Lowest Scroll (Audit)</option>
             </select>
+            <InfoTooltip content="Sort table rows by publication recency, emoji counts, helpful vote averages, raw view count, or scroll completion." />
           </div>
-
+ 
           {/* Date Filter */}
-          <div>
+          <div className="flex items-center gap-2">
             <select
               value={dateRange}
               onChange={(e: any) => setDateRange(e.target.value)}
@@ -186,6 +189,7 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
               <option value="7d">Date: Last 7 Days</option>
               <option value="30d">Date: Last 30 Days</option>
             </select>
+            <InfoTooltip content="Limit comparative analysis to posts created within specified timelines." />
           </div>
         </div>
 
@@ -218,7 +222,7 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
       </div>
 
       {/* Comparisons Table */}
-      <div className="border border-[#262626] bg-[#0c0c0c] overflow-x-auto min-w-0">
+      <div data-tour="engagement-table" className="border border-[#262626] bg-[#0c0c0c] overflow-x-auto min-w-0">
         <table className="w-full min-w-[800px] border-collapse font-sans text-left text-xs">
           <thead>
             <tr className="border-b border-[#262626] bg-black/20 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-550">
@@ -422,7 +426,7 @@ export default function EngagementOverviewClient({ posts, contentGaps, summary }
       </div>
 
       {/* Content Gaps Site Search queries log */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+      <div data-tour="engagement-gaps" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
         <div className="space-y-1">
           <h3 className="font-syne text-base font-bold text-white uppercase tracking-wider">
             Content Gaps analyzer

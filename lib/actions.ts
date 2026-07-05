@@ -79,6 +79,46 @@ export async function logoutAction(): Promise<void> {
   await signOut({ redirectTo: "/admin/login" });
 }
 
+export async function getCelebrationsAction() {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+  const user = await prisma.adminUser.findUnique({
+    where: { id: session.user.id },
+    select: {
+      celebratedPost: true,
+      celebratedProject: true,
+      celebratedPhoto: true,
+      celebratedSkill: true,
+      celebratedExperience: true,
+    },
+  });
+  return user || {
+    celebratedPost: false,
+    celebratedProject: false,
+    celebratedPhoto: false,
+    celebratedSkill: false,
+    celebratedExperience: false,
+  };
+}
+
+export async function markCelebratedAction(type: "post" | "project" | "photo" | "skill" | "experience"): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Unauthorized" };
+  const fieldMap = {
+    post: "celebratedPost",
+    project: "celebratedProject",
+    photo: "celebratedPhoto",
+    skill: "celebratedSkill",
+    experience: "celebratedExperience",
+  } as const;
+  const field = fieldMap[type];
+  await prisma.adminUser.update({
+    where: { id: session.user.id },
+    data: { [field]: true },
+  });
+  return {};
+}
+
 /* ---------- Posts ---------- */
 
 function revalidateBlog(): void {

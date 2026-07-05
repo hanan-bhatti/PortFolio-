@@ -18,6 +18,7 @@ import { formatDate, cn } from "@/lib/utils";
 import PublishToggle from "@/components/admin/PublishToggle";
 import { FiGrid, FiList, FiTrash2, FiEdit3, FiEye } from "react-icons/fi";
 import EditorialModal from "./EditorialModal";
+import CelebrationPopover from "./CelebrationPopover";
 
 export interface AdminPostRow {
   id: string;
@@ -79,7 +80,7 @@ export default function PostsTable({ posts }: { posts: AdminPostRow[] }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div data-tour="posts-list-container" className="space-y-4">
       {/* Layout Toggle Bar */}
       <div className="flex justify-between items-center bg-[#0c0c0c] border border-[#262626] p-4 font-mono text-[10px] font-bold uppercase tracking-wider">
         <span className="text-zinc-500">
@@ -244,6 +245,8 @@ export default function PostsTable({ posts }: { posts: AdminPostRow[] }) {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      <CelebrationPopover type="post" count={posts.length} />
     </div>
   );
 }

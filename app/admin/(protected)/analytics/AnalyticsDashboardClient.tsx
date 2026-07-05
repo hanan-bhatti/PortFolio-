@@ -425,7 +425,7 @@ export default function AnalyticsDashboardClient({
       )}
 
       {/* ROW 1: 4 Stat Cards */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div data-tour="analytics-stats" className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
@@ -440,7 +440,7 @@ export default function AnalyticsDashboardClient({
       </div>
 
       {/* ROW 2: CSS Chart */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none">
+      <div data-tour="analytics-visitor-chart" className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h3 className="font-syne text-lg font-bold text-white">
             Page Views ({filters.chartRange === "30d" ? "Last 30 Days" : "All Time"})
@@ -504,7 +504,7 @@ export default function AnalyticsDashboardClient({
       {/* ROW 3: Top Pages & Top Referrers */}
       <div className="grid gap-6 lg:grid-cols-2 min-w-0">
         {/* Left Column: Top Pages */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none">
+        <div data-tour="analytics-pages-table" className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none">
           <h3 className="mb-4 font-syne text-lg font-bold text-white">Top Pages</h3>
           <div className="overflow-x-auto scrollbar-none">
             <table className="w-full table-fixed text-left font-sans text-[13px]">
@@ -541,7 +541,7 @@ export default function AnalyticsDashboardClient({
         </div>
 
         {/* Right Column: Top Referrers */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none flex flex-col justify-between">
+        <div data-tour="analytics-referrers-table" className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none flex flex-col justify-between">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <h3 className="font-syne text-lg font-bold text-white">Top Referrers</h3>
@@ -640,7 +640,7 @@ export default function AnalyticsDashboardClient({
       {/* Traffic Sources & UTM Campaigns */}
       <div className={`grid gap-6 min-w-0 ${data.utmCampaigns.length > 0 ? "lg:grid-cols-2" : "grid-cols-1"}`}>
         {/* Traffic Sources */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-6 min-w-0 overflow-hidden rounded-none">
+        <div data-tour="analytics-sources" className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-6 min-w-0 overflow-hidden rounded-none">
           <h3 className="font-syne text-lg font-bold text-white">Traffic Sources</h3>
           <div className="space-y-4">
             {data.trafficSources.filter((s) => s.count > 0).map((source) => {
@@ -709,7 +709,7 @@ export default function AnalyticsDashboardClient({
       </div>
 
       {/* ROW 4: Countries, Devices, and Browsers Breakdown */}
-      <div className="grid gap-6 md:grid-cols-3 min-w-0">
+      <div data-tour="analytics-demographics" className="grid gap-6 md:grid-cols-3 min-w-0">
         {/* Countries Breakdown */}
         <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4 min-w-0 overflow-hidden rounded-none">
           <h3 className="font-syne text-lg font-bold text-white">Countries</h3>
@@ -778,7 +778,7 @@ export default function AnalyticsDashboardClient({
       </div>
 
       {/* ROW 5: Recent Visitors */}
-      <div className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none space-y-4">
+      <div data-tour="analytics-recent-visitors" className="border border-[#262626] bg-[#0c0c0c] p-6 min-w-0 overflow-hidden rounded-none space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h3 className="font-syne text-lg font-bold text-white">Recent Visitors</h3>
           {/* Visitor Search Input */}

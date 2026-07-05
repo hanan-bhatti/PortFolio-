@@ -201,6 +201,7 @@ export default function Sidebar({ unreadCount, userEmail }: { unreadCount: numbe
                 const Icon = item.icon;
                 return (
                   <Link
+                    data-tour={`sidebar-link-${item.href.replace(/\//g, "-").substring(1)}`}
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsOpen(false)}

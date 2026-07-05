@@ -13,6 +13,7 @@ import {
   LuLaptop 
 } from "react-icons/lu";
 import AnalyticsChart from "@/components/admin/AnalyticsChart";
+import InfoTooltip from "@/components/admin/InfoTooltip";
 
 interface ShortLinkMeta {
   id: string;
@@ -206,14 +207,14 @@ export default function ShortLinkDetailClient({
       {clicks.length > 0 ? (
         <>
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+            <div data-tour="clicks-shortlinks-timeline" className="lg:col-span-2 border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
               <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
                 Clicks Timeline (Last 7 Days)
               </h3>
               <AnalyticsChart type="bar" data={timelineChartData} options={timelineChartOptions} height={200} />
             </div>
 
-            <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+            <div data-tour="clicks-shortlinks-devices" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
               <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
                 Device Distribution
               </h3>
@@ -224,7 +225,7 @@ export default function ShortLinkDetailClient({
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+            <div data-tour="clicks-shortlinks-browsers" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
               <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
                 Browser Distribution
               </h3>
@@ -233,7 +234,7 @@ export default function ShortLinkDetailClient({
               </div>
             </div>
 
-            <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
+            <div data-tour="clicks-shortlinks-os" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none space-y-4">
               <h3 className="font-syne text-xs font-bold uppercase tracking-wider text-white">
                 Operating System Distribution
               </h3>
@@ -251,7 +252,7 @@ export default function ShortLinkDetailClient({
 
       {/* Click logs table */}
       {clicks.length > 0 && (
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
+        <div data-tour="clicks-shortlinks-log" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
               <div>
@@ -260,18 +261,21 @@ export default function ShortLinkDetailClient({
                 </h2>
                 <p className="text-[10px] text-zinc-500 font-mono mt-1">Timeline logs of all visitors reaching via this redirection path</p>
               </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search logs..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
-                />
-                <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search logs..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(1);
+                    }}
+                    className="w-full sm:w-60 bg-[#121212] border border-[#262626] pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-sans"
+                  />
+                  <LuSearch className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-600" />
+                </div>
+                <InfoTooltip content="Search click logs by visitor location, browser agent, operating system, or referring site URL." />
               </div>
             </div>
 

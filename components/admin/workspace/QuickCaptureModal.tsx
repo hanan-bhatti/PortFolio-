@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { FiX, FiCheck, FiCpu } from "react-icons/fi";
 import { cn } from "@/lib/utils";
+import InfoTooltip from "../InfoTooltip";
 
 interface ProjectOption {
   id: string;
@@ -82,6 +83,7 @@ export default function QuickCaptureModal({ isOpen, projects, onClose, onSave }:
           <div className="flex items-center justify-between border-b border-[#262626] pb-2.5 mb-4">
             <span className="font-mono text-[9px] font-bold text-amber uppercase tracking-widest flex items-center gap-1.5 animate-pulse">
               <FiCpu className="h-3.5 w-3.5" /> Quick Capture
+              <InfoTooltip content="Use hotkey ⌘K to open. Quickly save notes, tasks, or blog ideas from anywhere inside the workspace." />
             </span>
             <button onClick={onClose} className="text-zinc-550 hover:text-white transition-colors">
               <FiX className="h-4 w-4" />

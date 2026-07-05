@@ -500,5 +500,102 @@ body {
   user-select: none;
 }
 
+/* ── Driver.js Custom Brutalist Popover overrides ─────────────────── */
+.driver-popover,
+.driver-popover.driverjs-theme {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0px !important;
+  color: var(--text-primary) !important;
+  padding: 16px !important;
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 0.9) !important;
+}
+
+.driver-popover .driver-popover-title,
+.driver-popover.driverjs-theme .driver-popover-title {
+  font-family: var(--font-mono), monospace !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  color: var(--text-primary) !important;
+  letter-spacing: 0.05em !important;
+  margin-bottom: 8px !important;
+}
+
+.driver-popover .driver-popover-description,
+.driver-popover.driverjs-theme .driver-popover-description {
+  font-family: var(--font-sans), sans-serif !important;
+  font-size: 11px !important;
+  color: var(--text-muted) !important;
+  line-height: 1.5 !important;
+}
+
+.driver-popover .driver-popover-footer,
+.driver-popover.driverjs-theme .driver-popover-footer {
+  margin-top: 14px !important;
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.driver-popover .driver-popover-footer-btn,
+.driver-popover.driverjs-theme .driver-popover-footer-btn {
+  background-color: transparent !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0px !important;
+  color: var(--text-muted) !important;
+  font-family: var(--font-mono), monospace !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  padding: 6px 12px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.driver-popover .driver-popover-footer-btn:hover,
+.driver-popover.driverjs-theme .driver-popover-footer-btn:hover {
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--text-muted) !important;
+}
+
+/* Highlight the primary forward button with amber tint */
+.driver-popover .driver-popover-next-btn,
+.driver-popover.driverjs-theme .driver-popover-next-btn {
+  background-color: var(--amber) !important;
+  border: 1px solid var(--amber) !important;
+  color: #000000 !important;
+}
+
+.driver-popover .driver-popover-prev-btn,
+.driver-popover.driverjs-theme .driver-popover-prev-btn {
+  background-color: transparent !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-muted) !important;
+}
+
+/* Style the directional popover arrows to match popover border */
+.driver-popover .driver-popover-arrow,
+.driver-popover.driverjs-theme .driver-popover-arrow {
+  border-color: var(--border) !important;
+}
+
+.driver-popover .driver-popover-arrow-side-top,
+.driver-popover.driverjs-theme .driver-popover-arrow-side-top {
+  border-top-color: var(--bg-surface) !important;
+}
+.driver-popover .driver-popover-arrow-side-right,
+.driver-popover.driverjs-theme .driver-popover-arrow-side-right {
+  border-right-color: var(--bg-surface) !important;
+}
+.driver-popover .driver-popover-arrow-side-bottom,
+.driver-popover.driverjs-theme .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--bg-surface) !important;
+}
+.driver-popover .driver-popover-arrow-side-left,
+.driver-popover.driverjs-theme .driver-popover-arrow-side-left {
+  border-left-color: var(--bg-surface) !important;
+}
+
 
 

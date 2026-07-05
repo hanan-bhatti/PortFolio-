@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import LinkPreviewCard from "./LinkPreviewCard";
 import { FiX, FiCheck } from "react-icons/fi";
 import { toast } from "sonner";
+import InfoTooltip from "../InfoTooltip";
 
 interface Bookmark {
   id?: string;
@@ -96,7 +97,10 @@ export default function AddBookmarkForm({ initialData, categoriesList, onSave, o
 
       <div className="grid gap-3 md:grid-cols-3 font-mono text-[11px]">
         <div className="md:col-span-2">
-          <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Paste Link URL</label>
+          <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+            Paste Link URL
+            <InfoTooltip content="The webpage URL you want to bookmark (will auto-scrape title and meta data)." />
+          </label>
           <input
             type="url"
             required
@@ -110,7 +114,10 @@ export default function AddBookmarkForm({ initialData, categoriesList, onSave, o
         </div>
 
         <div>
-          <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Category Group</label>
+          <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+            Category Group
+            <InfoTooltip content="Groups the bookmark for sorting (e.g., docs, tools, design)." />
+          </label>
           <input
             type="text"
             list="workspace-bookmark-categories"
@@ -128,7 +135,10 @@ export default function AddBookmarkForm({ initialData, categoriesList, onSave, o
       </div>
 
       <div>
-        <label className="block font-mono text-[9px] font-bold text-zinc-550 uppercase mb-1">Bookmark Display Title</label>
+        <label className="flex items-center gap-1 font-mono text-[9px] font-bold text-zinc-550 uppercase mb-1">
+          Bookmark Display Title
+          <InfoTooltip content="Custom label for this bookmark, overriding the auto-scraped page title." />
+        </label>
         <input
           type="text"
           placeholder="Override scraped title..."

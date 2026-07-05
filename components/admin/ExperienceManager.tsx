@@ -77,7 +77,7 @@ export default function ExperienceManager({ initialExperiences }: ExperienceMana
   const selectedExperienceToDelete = experiences.find(e => e.id === deleteId);
 
   return (
-    <div className="space-y-6">
+    <div data-tour="experience-timeline-list" className="space-y-6">
       {/* View Toggle and Create Row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-[#262626] pb-4">
         {/* Toggle */}
@@ -106,6 +106,7 @@ export default function ExperienceManager({ initialExperiences }: ExperienceMana
 
         {/* Add Experience */}
         <Link
+          data-tour="add-experience-btn"
           href="/admin/experience/new"
           className="border border-[#10B981] bg-[#10B981]/15 px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#10B981] hover:bg-[#10B981]/30 transition-colors rounded-none text-center w-full sm:w-auto"
         >

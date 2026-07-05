@@ -203,6 +203,7 @@ export default function PostEngagementDrilldownClient({
           </div>
           <div className="flex gap-2">
             <Link
+              data-tour="post-engagement-edit-link"
               href={`/admin/posts/${postId}/edit`}
               className="border border-zinc-700 bg-transparent px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-white hover:border-zinc-500 transition-all rounded-none text-center"
             >

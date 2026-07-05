@@ -232,6 +232,7 @@ export default function WorkspaceSidebar({
 
         {/* Quick Capture Button */}
         <button
+          data-tour="create-node-btn"
           onClick={onTriggerQuickCapture}
           className="w-full flex items-center justify-between border border-amber/35 hover:border-amber bg-amber/5 hover:bg-amber/10 px-3 py-2 font-mono text-[9px] font-bold text-amber uppercase tracking-wider transition-all rounded-none outline-none"
         >
@@ -240,7 +241,7 @@ export default function WorkspaceSidebar({
         </button>
 
         {/* Browser File Tree */}
-        <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+        <div data-tour="workspace-explorer" className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
           {CATEGORIES.map((cat) => {
             const catPages = pages.filter((p) => p.type === cat.type && p.parentId === null);
             const isCatExpanded = expandedCats[cat.type];

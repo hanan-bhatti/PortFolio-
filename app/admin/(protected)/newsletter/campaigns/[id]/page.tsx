@@ -113,7 +113,7 @@ export default async function CampaignDetailPage({ params }: Props) {
       </div>
 
       {/* Grid Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div data-tour="campaign-metrics-row" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="border border-[#262626] bg-[#0c0c0c] p-5">
           <div className="flex items-center justify-between text-zinc-500">
             <span className="uppercase text-[9px] font-bold tracking-wider">Receivers</span>

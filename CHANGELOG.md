@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-05
+
+### Added
+- **Dynamic Creation Celebrations**: Added an interactive, database-backed celebration system. When the user successfully publishes their first post, project, photography item, skill, or career experience, a canvas-confetti blast triggers alongside a congratulatory popover.
+- **Onboarding Self-Healing element detection**: Upgraded the interactive onboarding tours to poll for target DOM elements rather than utilizing static timeouts. This resolves race conditions and positioning errors caused by React Suspense hydration delay during router transitions.
+- **Granular Help Coverage**: Audited and completed InfoTooltip coverage across every single input field on all admin forms, including Settings tabs (General, Hero & Bio, Social, Security & 2FA, Devices, Help & Tours) and certifications forms.
+- **Slash Commands Menu**: Implemented a fully keyboard-navigable and search-filterable slash commands popover inside both the Workspace block editor and the Blog Post TipTap editor. Users can filter block options reactively by typing, with automatic range replacement.
+
+### Fixed
+- **driver.js Popover Alignment**: Fixed an issue where the onboarding tour popover would sometimes hover in the center of the viewport due to premature initialization prior to hydration.
+- **driver.js Selector Syntax**: Fixed invalid jQuery-style `:contains()` css selector syntax that caused JS errors in driver.js engine.
+- **Celebration State Persistence**: Replaced the fragile local-storage state tracking with secure, postgres-backed boolean columns on the `AdminUser` model, maintaining state consistency across different browsers and active sessions.
+
+---
+
 ## [1.0.0] - 2026-07-05
 
 ### Added

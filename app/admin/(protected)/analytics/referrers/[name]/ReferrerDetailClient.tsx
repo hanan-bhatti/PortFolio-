@@ -297,7 +297,7 @@ export default function ReferrerDetailClient({
         </div>
 
         {/* Referral Logs Table */}
-        <div className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
+        <div data-tour="referrer-visitors-log" className="border border-[#262626] bg-[#0c0c0c] p-6 rounded-none flex flex-col justify-between">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <h2 className="font-syne text-lg font-bold text-white tracking-tight flex items-center gap-2">

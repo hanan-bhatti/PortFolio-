@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FiX, FiTrash2, FiClock } from "react-icons/fi";
 import { cn } from "@/lib/utils";
+import InfoTooltip from "../InfoTooltip";
 
 interface Task {
   id: string;
@@ -71,7 +72,10 @@ export default function TaskSlideOver({ task, isOpen, onClose, onSave, onDelete 
           <div className="space-y-4 font-mono text-[11px] text-zinc-400">
             {/* Title */}
             <div>
-              <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Task Title</label>
+              <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+                Task Title
+                <InfoTooltip content="The name of this workspace task." />
+              </label>
               <input
                 type="text"
                 value={title}
@@ -86,7 +90,10 @@ export default function TaskSlideOver({ task, isOpen, onClose, onSave, onDelete 
             {/* Status & Priority Grid */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Status</label>
+                <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+                  Status
+                  <InfoTooltip content="The progression state of this task (backlog, todo, in progress, done)." />
+                </label>
                 <select
                   value={status}
                   onChange={(e) => {
@@ -103,7 +110,10 @@ export default function TaskSlideOver({ task, isOpen, onClose, onSave, onDelete 
               </div>
 
               <div>
-                <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Priority</label>
+                <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+                  Priority
+                  <InfoTooltip content="Set a severity priority level for this task." />
+                </label>
                 <select
                   value={priority}
                   onChange={(e) => {
@@ -122,7 +132,10 @@ export default function TaskSlideOver({ task, isOpen, onClose, onSave, onDelete 
 
             {/* Due Date */}
             <div>
-              <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Due Date</label>
+              <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+                Due Date
+                <InfoTooltip content="Select a due date for completion." />
+              </label>
               <input
                 type="date"
                 value={dueDate}
@@ -136,7 +149,10 @@ export default function TaskSlideOver({ task, isOpen, onClose, onSave, onDelete 
 
             {/* Notes */}
             <div>
-              <label className="block text-[9px] font-bold text-zinc-550 uppercase mb-1">Notes</label>
+              <label className="flex items-center gap-1 text-[9px] font-bold text-zinc-550 uppercase mb-1">
+                Notes
+                <InfoTooltip content="Extra details, logs, or description blocks for this task." />
+              </label>
               <textarea
                 value={notes}
                 onChange={(e) => {
