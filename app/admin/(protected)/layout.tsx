@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Sidebar from "@/components/admin/Sidebar";
+import OnboardingTour from "@/components/admin/OnboardingTour";
 
 export const metadata = { robots: { index: false } };
 
@@ -25,7 +26,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-[#0a0a0a] text-zinc-200">
       <Sidebar unreadCount={unreadCount} userEmail={session.user.email ?? "admin"} />
-      <main className="min-w-0 flex-1 p-4 sm:p-6 md:p-8">{children}</main>
+      <main className="min-w-0 flex-1 p-4 sm:p-6 md:p-8">
+        <OnboardingTour>{children}</OnboardingTour>
+      </main>
     </div>
   );
 }

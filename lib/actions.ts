@@ -659,3 +659,72 @@ export async function deleteSubscriberAction(id: string): Promise<ActionResult> 
     return { error: error.message };
   }
 }
+
+/* ---------- Onboarding Tours ---------- */
+
+export async function resetAdminToursAction(): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  await prisma.adminUser.update({
+    where: { id: session.user.id },
+    data: {
+      hasSeenAdminTour: false,
+      seenPageTours: "[]",
+    },
+  });
+
+  revalidatePath("/admin/settings");
+  revalidatePath("/admin/dashboard");
+  return {};
+}
+
+export async function trackSeenPageTourAction(pageId: string): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const user = await prisma.adminUser.findUnique({
+    where: { id: session.user.id },
+    select: { seenPageTours: true },
+  });
+
+  if (!user) return { error: "User not found" };
+
+  let currentTours: string[] = [];
+  try {
+    if (typeof user.seenPageTours === "string") {
+      currentTours = JSON.parse(user.seenPageTours);
+    } else if (Array.isArray(user.seenPageTours)) {
+      currentTours = user.seenPageTours as string[];
+    }
+  } catch {
+    currentTours = [];
+  }
+
+  if (!currentTours.includes(pageId)) {
+    currentTours.push(pageId);
+    await prisma.adminUser.update({
+      where: { id: session.user.id },
+      data: {
+        seenPageTours: JSON.stringify(currentTours),
+      },
+    });
+  }
+
+  return {};
+}
+
+export async function setHasSeenAdminTourAction(seen: boolean): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  await prisma.adminUser.update({
+    where: { id: session.user.id },
+    data: {
+      hasSeenAdminTour: seen,
+    },
+  });
+
+  return {};
+}
+

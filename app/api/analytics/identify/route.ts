@@ -102,7 +102,11 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Fingerprint (never store raw IP) ─────────────────────────────────────
-    const salt = process.env.FINGERPRINT_SALT || "default-salt-value";
+    const salt = process.env.FINGERPRINT_SALT;
+    if (!salt) {
+      console.error("FINGERPRINT_SALT is not configured in environment variables.");
+      return NextResponse.json({ error: "Configuration error" }, { status: 500 });
+    }
     const fingerprint = createHash("sha256")
       .update(ip + userAgent + salt)
       .digest("hex");

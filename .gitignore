@@ -8,3 +8,8 @@ build/
 next-env.d.ts
 .vercel
 .DS_Store
+.antigravitycli/
+.agents/
+.gemini/
+.vscode/
+.gitlab-ci.yml

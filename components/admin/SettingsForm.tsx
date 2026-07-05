@@ -2,7 +2,7 @@
 
 /**
  * @file components/admin/SettingsForm.tsx
- * @description React component for SettingsForm.tsx under the admin category.
+ * @description React component for SettingsForm.tsx under the admin category with InfoTooltips and restart tours.
  * 
  * @exports
  * - SettingsForm (default): Main React component or function
@@ -23,12 +23,14 @@ import {
   revokeSessionAction,
   changePasswordAction,
   logoutAction,
+  resetAdminToursAction,
 } from "@/lib/actions";
 import { UploadButton } from "@/lib/uploadthing";
 import { compressImages } from "@/lib/image-compress";
 import { cn, formatDate } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
 import ScrollingMarquee from "@/components/ui/ScrollingMarquee";
+import InfoTooltip from "./InfoTooltip";
 import {
   FiGlobe,
   FiTag,
@@ -53,6 +55,7 @@ import {
   FiTablet,
   FiChevronUp,
   FiChevronDown,
+  FiRefreshCw,
 } from "react-icons/fi";
 import {
   FaGithub,
@@ -90,26 +93,6 @@ interface SettingsFormProps {
   activeSessions: SessionData[];
   currentSessionToken: string;
 }
-
-const GENERAL_FIELDS: Array<{ name: keyof SettingsInput; label: string; placeholder: string; textarea?: boolean }> = [
-  { name: "siteName", label: "Site Name", placeholder: "Hanan Bhatti" },
-  { name: "tagline", label: "Tagline", placeholder: "Full-Stack Developer" },
-  { name: "socialEmail", label: "Public Email", placeholder: "you@example.com" },
-  { name: "footerLocation", label: "Footer Location", placeholder: "Lahore, Pakistan" },
-  { name: "footerTimezone", label: "Footer Timezone / Awake Info", placeholder: "GMT+5 · Usually awake at 2am" },
-];
-
-const HERO_FIELDS: Array<{ name: keyof SettingsInput; label: string; placeholder: string; textarea?: boolean }> = [
-  { name: "heroTagline", label: "Hero Tagline", placeholder: "Engineer by logic. Designer by obsession." },
-  { name: "aboutBio", label: "About Bio", placeholder: "Tell visitors about yourself...", textarea: true },
-  { name: "marqueeSkills", label: "Marquee Skills (comma-separated)", placeholder: "FULL STACK, DEVOPS, C++", textarea: true },
-];
-
-const SOCIAL_FIELDS: Array<{ name: keyof SettingsInput; label: string; placeholder: string }> = [
-  { name: "socialGithub", label: "GitHub URL", placeholder: "https://github.com/username" },
-  { name: "socialLinkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/in/username" },
-  { name: "socialTwitter", label: "Twitter / X URL", placeholder: "https://x.com/username" },
-];
 
 interface MarkdownTextareaProps {
   value: string;
@@ -272,6 +255,17 @@ export default function SettingsForm({
     }
   };
 
+  const handleResetTours = async () => {
+    const toastId = toast.loading("Resetting onboarding tours...");
+    const res = await resetAdminToursAction();
+    if (res.error) {
+      toast.error(res.error, { id: toastId });
+    } else {
+      toast.success("All onboarding tours reset successfully! Reloading...", { id: toastId });
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  };
+
   const {
     register,
     handleSubmit,
@@ -372,7 +366,7 @@ export default function SettingsForm({
   };
 
   const inputClass =
-    "w-full border border-[#262626] bg-black/40 px-4 py-2.5 font-mono text-xs text-white placeholder-zinc-600 outline-none focus:border-[#F59E0B] transition-colors";
+    "w-full border border-[#262626] bg-black/40 px-4 py-2.5 font-mono text-xs text-white placeholder-zinc-650 outline-none focus:border-[#F59E0B] transition-colors";
 
   // Google Authenticator QR Url builder
   const otpAuthUrl = `otpauth://totp/Portfolio:Admin?secret=${new2faSecret}&issuer=Portfolio`;
@@ -386,13 +380,14 @@ export default function SettingsForm({
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black via-black/80 to-transparent pointer-events-none z-10 md:hidden" />
         
         <div className="flex flex-row flex-nowrap overflow-x-auto scrollbar-none gap-px bg-[#262626]/20 font-mono text-[11px] font-bold uppercase tracking-wider min-w-0 pr-8 md:pr-0">
-          {["general", "hero-bio", "social", "security", "sessions"].map((tab) => {
+          {["general", "hero-bio", "social", "security", "sessions", "tours"].map((tab) => {
             const labels = {
               general: "General",
               "hero-bio": "Hero & Bio",
               social: "Social",
               security: "Security & 2FA",
               sessions: `Devices (${activeSessions.filter((s) => s.active).length})`,
+              tours: "Help & Tours",
             };
             const isActive = activeTab === tab;
             return (
@@ -427,6 +422,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiGlobe className="w-3.5 h-3.5 text-zinc-550" /> Site Name
+                  <InfoTooltip content="The site owner's name displayed in layouts, navbars, and browser titles." />
                 </label>
                 <input {...register("siteName")} placeholder="Hanan Bhatti" className={inputClass} />
                 {errors.siteName ? <p className="font-mono text-[10px] text-red-400">{errors.siteName?.message}</p> : null}
@@ -435,6 +431,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiTag className="w-3.5 h-3.5 text-zinc-550" /> Tagline
+                  <InfoTooltip content="Quick profession subtitle shown on dynamic pages and footer sections." />
                 </label>
                 <input {...register("tagline")} placeholder="Full-Stack Developer" className={inputClass} />
                 {errors.tagline ? <p className="font-mono text-[10px] text-red-400">{errors.tagline?.message}</p> : null}
@@ -443,6 +440,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiMail className="w-3.5 h-3.5 text-zinc-550" /> Public Email
+                  <InfoTooltip content="Primary email address displayed in contact lists and footer icons." />
                 </label>
                 <input {...register("socialEmail")} placeholder="you@example.com" className={inputClass} />
                 {errors.socialEmail ? <p className="font-mono text-[10px] text-red-400">{errors.socialEmail?.message}</p> : null}
@@ -451,6 +449,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiMapPin className="w-3.5 h-3.5 text-zinc-550" /> Footer Location
+                  <InfoTooltip content="Your city location displayed in page layouts." />
                 </label>
                 <input {...register("footerLocation")} placeholder="Lahore, Pakistan" className={inputClass} />
                 {errors.footerLocation ? <p className="font-mono text-[10px] text-red-400">{errors.footerLocation?.message}</p> : null}
@@ -459,6 +458,7 @@ export default function SettingsForm({
               <div className="space-y-1.5 md:col-span-2">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiClock className="w-3.5 h-3.5 text-zinc-550" /> Footer Timezone / Awake Info
+                  <InfoTooltip content="Timezone offset details and sleep schedule displayed on public pages." />
                 </label>
                 <input {...register("footerTimezone")} placeholder="GMT+5 · Usually awake at 2am" className={inputClass} />
                 {errors.footerTimezone ? <p className="font-mono text-[10px] text-red-400">{errors.footerTimezone?.message}</p> : null}
@@ -486,24 +486,28 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiCalendar className="w-3.5 h-3.5 text-zinc-550" /> Experience
+                  <InfoTooltip content="Number of years in software engineering. Overridden by GitHub sync." />
                 </label>
                 <input {...register("statsYears")} placeholder="3+" className={inputClass} />
               </div>
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiBriefcase className="w-3.5 h-3.5 text-zinc-550" /> Projects
+                  <InfoTooltip content="Display count of your coding projects. Overridden by GitHub sync." />
                 </label>
                 <input {...register("statsProjects")} placeholder="20+" className={inputClass} />
               </div>
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiActivity className="w-3.5 h-3.5 text-zinc-550" /> Contributions
+                  <InfoTooltip content="Contributions count for landing page showcase. Overridden by GitHub sync." />
                 </label>
                 <input {...register("statsContributions")} placeholder="500+" className={inputClass} />
               </div>
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiCheckSquare className="w-3.5 h-3.5 text-zinc-550" /> Commits
+                  <InfoTooltip content="Commits count display. Overridden by GitHub sync." />
                 </label>
                 <input {...register("statsCommits")} placeholder="1200+" className={inputClass} />
               </div>
@@ -518,7 +522,10 @@ export default function SettingsForm({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">Enable Visitor Tracking</label>
+                <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                  Enable Visitor Tracking
+                  <InfoTooltip content="Toggle to activate or completely disable the self-hosted visitor telemetry tracker." />
+                </label>
                 <select {...register("analytics_enabled")} className={inputClass}>
                   <option value="true">Enabled</option>
                   <option value="false">Disabled</option>
@@ -526,7 +533,12 @@ export default function SettingsForm({
               </div>
               <div className="space-y-1.5">
                 <MarkdownTextarea
-                  label="Cookie Banner Consent Text"
+                  label={
+                    <span className="flex items-center gap-1">
+                      Cookie Consent Text
+                      <InfoTooltip content="The legal terms banner disclaimer text visible to users on first landing." />
+                    </span>
+                  }
                   value={watch("cookie_consent_text") || ""}
                   onChange={(v) => setValue("cookie_consent_text", v, { shouldDirty: true })}
                   placeholder="We use cookies..."
@@ -561,11 +573,12 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiUser className="w-3.5 h-3.5 text-zinc-550" /> Profile Photo URL
+                  <InfoTooltip content="Direct image URL for avatar shown on navbar and about profiles." />
                 </label>
                 <input {...register("profilePhotoUrl")} placeholder="https://..." className={inputClass} />
                 {profilePhotoUrl && (
                   <div className="relative mt-2 h-16 w-16 border border-[#262626] bg-black/40">
-                    <Image src={profilePhotoUrl} alt="Profile preview" fill className="object-cover" />
+                     <img src={profilePhotoUrl} alt="Profile preview" className="object-cover w-full h-full" />
                   </div>
                 )}
               </div>
@@ -574,10 +587,11 @@ export default function SettingsForm({
               <div className="space-y-3">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FiAward className="w-3.5 h-3.5 text-zinc-550" /> Hero Photo Banner
+                  <InfoTooltip content="Upload your hero image banner displayed on portfolio landing page." />
                 </label>
                 {heroPhotoUrl ? (
                   <div className="relative h-24 w-full border border-[#262626] bg-black/30">
-                    <Image src={heroPhotoUrl} alt="Hero banner preview" fill className="object-contain" />
+                    <img src={heroPhotoUrl} alt="Hero banner preview" className="object-contain w-full h-full" />
                     <button
                       type="button"
                       onClick={() => setValue("heroPhotoUrl", "", { shouldDirty: true })}
@@ -618,6 +632,7 @@ export default function SettingsForm({
             <div className="space-y-1.5">
               <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                 <FiTag className="w-3.5 h-3.5 text-zinc-550" /> Hero Tagline
+                <InfoTooltip content="Header caption displayed alongside hero image banner." />
               </label>
               <input {...register("heroTagline")} placeholder="Engineer by logic. Designer by obsession." className={inputClass} />
               {errors.heroTagline ? <p className="font-mono text-[10px] text-red-400">{errors.heroTagline?.message}</p> : null}
@@ -629,6 +644,7 @@ export default function SettingsForm({
                 label={
                   <span className="flex items-center gap-1.5">
                     <FiTerminal className="w-3.5 h-3.5 text-zinc-550" /> About Bio
+                    <InfoTooltip content="Markdown narrative text about your bio. Displayed on landing layout." />
                   </span>
                 }
                 value={watch("aboutBio") || ""}
@@ -645,6 +661,7 @@ export default function SettingsForm({
                 label={
                   <span className="flex items-center gap-1.5">
                     <FiCpu className="w-3.5 h-3.5 text-zinc-550" /> Marquee Skills (comma-separated)
+                    <InfoTooltip content="Comma-separated uppercase skill list for the marquee sliding text banner." />
                   </span>
                 }
                 value={watch("marqueeSkills") || ""}
@@ -685,6 +702,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FaGithub className="w-3.5 h-3.5 text-zinc-550" /> GitHub URL
+                  <InfoTooltip content="Direct link to your GitHub profile card." />
                 </label>
                 <input {...register("socialGithub")} placeholder="https://github.com/username" className={inputClass} />
                 {errors.socialGithub ? <p className="font-mono text-[10px] text-red-400">{errors.socialGithub?.message}</p> : null}
@@ -693,6 +711,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FaLinkedin className="w-3.5 h-3.5 text-zinc-550" /> LinkedIn URL
+                  <InfoTooltip content="Direct link to your LinkedIn profile card." />
                 </label>
                 <input {...register("socialLinkedin")} placeholder="https://linkedin.com/in/username" className={inputClass} />
                 {errors.socialLinkedin ? <p className="font-mono text-[10px] text-red-400">{errors.socialLinkedin?.message}</p> : null}
@@ -701,6 +720,7 @@ export default function SettingsForm({
               <div className="space-y-1.5">
                 <label className="block font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                   <FaTwitter className="w-3.5 h-3.5 text-zinc-550" /> Twitter / X URL
+                  <InfoTooltip content="Direct link to your Twitter/X profile card." />
                 </label>
                 <input {...register("socialTwitter")} placeholder="https://x.com/username" className={inputClass} />
                 {errors.socialTwitter ? <p className="font-mono text-[10px] text-red-400">{errors.socialTwitter?.message}</p> : null}
@@ -861,7 +881,9 @@ export default function SettingsForm({
             )}
           </div>
         </div>
-      )}      {/* SESSIONS & DEVICES TAB */}
+      )}
+
+      {/* SESSIONS & DEVICES TAB */}
       {activeTab === "sessions" && (
         <div className="max-w-4xl space-y-6">
           <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
@@ -870,7 +892,7 @@ export default function SettingsForm({
                 <FiMonitor className="w-4 h-4 text-amber" />
                 Active Logged-in Devices
               </h3>
-              <p className="font-sans text-xs text-zinc-500 mt-1">
+              <p className="font-sans text-xs text-zinc-550 mt-1">
                 A history of sessions and browsers that have authenticated to this admin account.
               </p>
             </div>
@@ -1003,6 +1025,32 @@ export default function SettingsForm({
                 </div>
               ) : null}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* HELP & ONBOARDING TOURS RESET TAB */}
+      {activeTab === "tours" && (
+        <div className="max-w-4xl space-y-6">
+          <div className="border border-[#262626] bg-[#0c0c0c] p-6 space-y-4">
+            <h3 className="font-mono text-xs font-bold text-[#F59E0B] uppercase tracking-widest border-b border-[#262626] pb-3 mb-4 flex items-center gap-1.5">
+              <FiRefreshCw className="w-4 h-4 text-amber" />
+              Onboarding Tours Management
+            </h3>
+            <p className="font-sans text-xs text-zinc-400 leading-relaxed">
+              When a new developer clones this repository, they are greeted by an overarching dashboard walk-through followed by short, interactive guides on each individual subpage to explain features.
+            </p>
+            <p className="font-sans text-xs text-zinc-500 leading-relaxed">
+              Click the button below to clear your onboarding seen status. This will reset the flags so the next visit to the dashboard or any CMS subpage re-triggers the walkthrough.
+            </p>
+            <button
+              type="button"
+              onClick={handleResetTours}
+              className="flex items-center gap-2 border border-amber bg-amber/10 px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-[#F59E0B] hover:bg-amber/25 transition-all cursor-pointer mt-2"
+            >
+              <FiRefreshCw className="w-3.5 h-3.5 animate-spin" />
+              Restart All Tours
+            </button>
           </div>
         </div>
       )}

@@ -41,7 +41,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Welcome to your Admin Panel! 🚀",
                   description: "This interactive tour will show you how to manage your portfolio settings, resume, messages, and more. Let's take a quick walk.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -49,7 +49,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Primary Navigation",
                   description: "Use the sidebar links to switch sections: Content (posts, projects, photography), Personal (resume, skills), System (settings, incoming messages), and Workspace.",
-                  position: "right"
+                  side: "right", align: "start"
                 }
               },
               {
@@ -57,7 +57,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Dashboard Overview",
                   description: "Monitor visitor counts, quick action links, and manage your tasks or ideas using the built-in Planner.",
-                  position: "right"
+                  side: "right", align: "start"
                 }
               },
               {
@@ -65,14 +65,14 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "System Settings",
                   description: "Configure your site title, SEO tags, cookie consents, 2FA credentials, and reset onboarding tours whenever you want.",
-                  position: "right"
+                  side: "right", align: "start"
                 }
               },
               {
                 popover: {
                   title: "Ready to Explore!",
                   description: "You're all set! As you visit each subpage, a brief, page-specific walkthrough will help guide you on how to use it.",
-                  position: "mid-center"
+                  
                 }
               }
             ],
@@ -96,7 +96,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Dashboard Planner 📊",
                   description: "This page displays site highlights: visitors, page views, resume downloads, and unread messages.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -104,7 +104,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Quick Statistics Cards",
                   description: "Monitor live counters: see your total visitors, page views, photography counts, and active resume downloads.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -112,7 +112,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Quick Actions Panel",
                   description: "Jump directly into creating new posts, projects, or editing about fields with these single-click shortcuts.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -120,7 +120,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Project & Task Planner",
                   description: "Keep track of backlog items, tasks in progress, milestones, and blog post ideas right on your main dashboard.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               }
             ]
@@ -132,7 +132,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Blog Posts CMS ✍️",
                   description: "Manage your thoughts, tutorials, and articles. Create drafts, edit contents, and preview before publishing.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -140,7 +140,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Create Post",
                   description: "Start writing a new post in the TipTap rich-text editor with support for syntax highlighting, markdown, and image uploads.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -148,7 +148,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Draft / Publish Toggles",
                   description: "View post status at a glance, toggle publish state immediately, check view count statistics, or delete old entries.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               }
             ]
@@ -160,7 +160,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Portfolio Projects 🛠️",
                   description: "Showcase your best projects on the main site. You can create new entries, edit details, or re-order them.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -168,7 +168,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "New Project",
                   description: "Add title, description, cover image, stack list, and URLs pointing to repositories or live demos.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -176,7 +176,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Drag-and-Drop Ordering",
                   description: "Click and drag projects to re-order them. The sequence here maps directly to the home page list.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               }
             ]
@@ -188,7 +188,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Skills Management ⚡",
                   description: "Configure dynamic skill bars and category tags displayed on your portfolio landing page.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -196,7 +196,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Create Skill Card",
                   description: "Define a skill name, proficiency level (1-100), select category (e.g. Languages, Tools), and map appropriate icons.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -204,7 +204,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Drag-and-Drop Sequence",
                   description: "Re-arrange skills by dragging the grab handles. Adjust hierarchy categories dynamically for clean layouts.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               }
             ]
@@ -216,7 +216,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Work Experience Timeline 💼",
                   description: "Document your career positions, responsibilities, dates, and companies.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -224,7 +224,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Add Position",
                   description: "Input role title, company name, location, duration, current status, and descriptive details.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -232,7 +232,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Manager Timeline",
                   description: "Sort roles, update descriptions, toggle current status, or delete entries. Changes update live in the portfolio timeline.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               }
             ]
@@ -244,7 +244,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "About Me Story Section 👤",
                   description: "Update the landing page story layout. Manage narrative text blocks, current focuses, and beyond-code items.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -252,7 +252,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Avatar & Quick Pitch",
                   description: "Upload your main profile avatar image and write a catchy quick-pitch tagline.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -260,7 +260,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Story Markdown Editor",
                   description: "Write your biography narrative block. Full markdown formatting is supported with preview toggle.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -268,7 +268,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Skill Domain Tags",
                   description: "Configure core category headers and add specific skill badge tags (like Node.js, C++) to display visual clusters.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
@@ -280,7 +280,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "System Config & 2FA ⚙️",
                   description: "Central configuration panel managing title fields, visitor analytics tracking, password updates, and sessions.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -288,7 +288,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Basic Metadata",
                   description: "Change site title, primary public contact emails, footer locations, and wake offsets.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -296,7 +296,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Account Security & TOTP 2FA",
                   description: "Update dashboard password, generate TOTP 2FA QR secrets, and enable secure dynamic sign-ins.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -304,7 +304,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Revoke Live Sessions",
                   description: "View and manage active browser sessions: see login location, device, IP addresses, and immediately revoke unwanted connections.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
@@ -316,7 +316,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Photography Portfolio 📷",
                   description: "Upload and display photos captured through your devices, and read automatically parsed EXIF data.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -324,7 +324,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Image Upload Block",
                   description: "Drag-and-drop or select images. The system auto-extracts camera tags (ISO, aperture, exposure) and applies styling tokens.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -332,7 +332,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Visibility & Ordering Toggles",
                   description: "Re-arrange photography order, toggle visible flags on the public page, or remove assets.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               }
             ]
@@ -344,7 +344,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Interactive CV Builder 📄",
                   description: "Build, configure layout options, and preview the PDF format of your developer resume.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -352,7 +352,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Live Rendering Preview",
                   description: "Toggle view templates, select theme variables, and preview formatting output dynamically.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -360,7 +360,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Export & Publish",
                   description: "Save configurations to the database and generate a PDF copy of your CV ready for download.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
@@ -372,7 +372,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Inquiry Mailbox 📬",
                   description: "Read, reply, and organize visitor contact messages sent through the landing page form.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -380,7 +380,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Message Details",
                   description: "Check sender name, subject, dates, read/unread badge indicators, and thread history.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               },
               {
@@ -388,7 +388,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Direct Response Form",
                   description: "Open the rich reply editor to draft response emails, which are sent instantly via Resend.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
@@ -400,7 +400,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Newsletter Campaigns ✉️",
                   description: "Manage your subscribers list and write HTML updates to dispatch directly using Resend.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -408,7 +408,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Subscribers Database",
                   description: "Monitor subscriber email addresses, confirm status records, and remove unsubscribed entries.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -416,7 +416,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Write & Send Campaign",
                   description: "Compose update campaigns using markdown. Pushes tracking pixel embeds for open statistics.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
@@ -428,7 +428,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Blog Clicks & Star Ratings 📈",
                   description: "Analyze reader feedback and interactive engagement on your blog articles.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -436,7 +436,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Feedback Stats Grid",
                   description: "Review aggregate emoji reactions, average star ratings, helpful vote stats, and section reviews.",
-                  position: "top"
+                  side: "top", align: "start"
                 }
               },
               {
@@ -444,7 +444,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Article Level Insights",
                   description: "Inspect specific details for each post: see exact copy events, survey feedback, and exit-intent stats.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
@@ -456,7 +456,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Personal Workspace Playground 💻",
                   description: "Create notes, organize links, manage tasks, and configure your visual developer workspace board.",
-                  position: "mid-center"
+                  
                 }
               },
               {
@@ -464,7 +464,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Page Explorer",
                   description: "Navigate through workspace documents, notes, bookmark collections, and planner lists.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               },
               {
@@ -472,7 +472,7 @@ export default function OnboardingTour({ children }: TourWrapperProps) {
                 popover: {
                   title: "Interactive Sandbox Board",
                   description: "Add inline check-lists, link preview cards, canvas blocks, or customize nodes.",
-                  position: "bottom"
+                  side: "bottom", align: "start"
                 }
               }
             ]
