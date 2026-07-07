@@ -209,7 +209,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
         {/* Long Description / Content */}
         {project.longDesc && (
-          <section className="font-inter font-normal text-[15px] leading-[1.8] text-text-primary text-left">
+          <div className="font-inter font-normal text-[15px] leading-[1.8] text-text-primary text-left">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
@@ -272,7 +272,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             >
               {project.longDesc}
             </ReactMarkdown>
-          </section>
+          </div>
         )}
       </article>
 

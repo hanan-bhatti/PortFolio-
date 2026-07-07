@@ -93,7 +93,7 @@ export default async function PhotographyPage() {
       />
 
       {/* Content Container */}
-      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-32 pb-20">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 md:pt-32 pb-20">
         {/* Header Section */}
         <div className="relative mb-16">
           {/* Green Label */}

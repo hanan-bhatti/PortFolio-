@@ -8,7 +8,7 @@
 [![wakatime](https://wakapi.hanan-bhatti.site/api/badge/hannanbhatti2006@gmail.com/interval:any/project:portfolio)](https://wakapi.hanan-bhatti.site)
 
 > **Copyright (C) 2026 Abdul Hannan Bhatti.**  
-> This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](file://./LICENSE) for full details.
+> This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](./LICENSE) for full details.
 
 A production-grade, highly interactive personal portfolio web application utilizing a dark-mode, neo-brutalist flat grid layout with sharp terminal-inspired borders and high-contrast amber highlights. Built with Next.js (App Router), Prisma, NextAuth, UploadThing, and Resend, featuring custom Canvas 2D interactive visuals and a WebGL liquid-glass shader accent on the navbar.
 
@@ -48,7 +48,7 @@ Follow these steps to run the portfolio locally on your machine in under 5 minut
    ```bash
    cp .env.example .env
    ```
-   *Note: Set `DATABASE_URL` to your local PostgreSQL connection string, and generate a session secret for `AUTH_SECRET` (see instructions in [.env.example](file://./.env.example)).*
+   *Note: Set `DATABASE_URL` to your local PostgreSQL connection string, and generate a session secret for `AUTH_SECRET` (see instructions in [.env.example](./.env.example)).*
 
 3. **Install Dependencies**:
    ```bash
@@ -93,10 +93,10 @@ Follow these steps to run the portfolio locally on your machine in under 5 minut
 
 We have prepared comprehensive documentation files to orient self-hosters and open-source contributors:
 
-1. **[SETUP.md](file://./SETUP.md)**: A complete, step-by-step local development setup walkthrough including prerequisite versions, seeding, and common error troubleshooting.
-2. **[ARCHITECTURE.md](file://./ARCHITECTURE.md)**: Explains the internal structure accompanied by Mermaid diagrams covering the system overview, Prisma ERD, Auth workflows, UploadThing pipelines, and visitor analytics.
-3. **[DEPLOYMENT.md](file://./DEPLOYMENT.md)**: Guidelines on hosting the portfolio, reverse proxy configurations (Coolify/Traefik), and standalone frontend deployment options (Vercel).
-4. **[CONTRIBUTING.md](file://./CONTRIBUTING.md)**: Rules for contributing to the repository, coding style (ESLint configs), and formatting conventions.
-5. **[SECURITY.md](file://./SECURITY.md)**: Safe disclosure protocols for reporting vulnerability issues.
-6. **[CODE_OF_CONDUCT.md](file://./CODE_OF_CONDUCT.md)**: Standard contributor code of conduct guidelines.
-7. **[CHANGELOG.md](file://./CHANGELOG.md)**: Histographical list of notable project releases and updates.
+1. **[SETUP.md](./SETUP.md)**: A complete, step-by-step local development setup walkthrough including prerequisite versions, seeding, and common error troubleshooting.
+2. **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Explains the internal structure accompanied by Mermaid diagrams covering the system overview, Prisma ERD, Auth workflows, UploadThing pipelines, and visitor analytics.
+3. **[DEPLOYMENT.md](./DEPLOYMENT.md)**: Guidelines on hosting the portfolio, reverse proxy configurations (Coolify/Traefik), and standalone frontend deployment options (Vercel).
+4. **[CONTRIBUTING.md](./CONTRIBUTING.md)**: Rules for contributing to the repository, coding style (ESLint configs), and formatting conventions.
+5. **[SECURITY.md](./SECURITY.md)**: Safe disclosure protocols for reporting vulnerability issues.
+6. **[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)**: Standard contributor code of conduct guidelines.
+7. **[CHANGELOG.md](./CHANGELOG.md)**: Histographical list of notable project releases and updates.

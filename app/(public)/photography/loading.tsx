@@ -29,7 +29,7 @@ export default function Loading() {
       />
 
       {/* Content Container */}
-      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-32 pb-20 animate-pulse">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 md:pt-32 pb-20 animate-pulse">
         {/* Header Section */}
         <div className="relative mb-16">
           <div className="h-3.5 bg-white/5 w-28 mb-6 rounded-none" />

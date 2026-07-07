@@ -8,7 +8,9 @@
  * - HeroSection (default): Main React component or function
  */
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { animate } from "animejs";
 import Link from "next/link";
 import Image from "next/image";
 import HeroPhoto from "./HeroPhoto";
@@ -32,6 +34,43 @@ export default function HeroSection({
 }: HeroSectionProps) {
   const solidH1Ref = useRef<HTMLHeadingElement>(null);
   const strokeH1Ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
+  const amberRectRef = useRef<HTMLDivElement>(null);
+  const greenRectRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // GSAP text animations
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ".hero-anim-item",
+        { y: 50, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.2, stagger: 0.1, ease: "power4.out", delay: 0.2 }
+      );
+    }, containerRef);
+
+    // Anime.js floating shapes
+    if (amberRectRef.current) {
+      animate(amberRectRef.current, {
+        translateY: [-50, 0],
+        opacity: [0, 1],
+        duration: 2000,
+        ease: "outElastic(1, .5)",
+        delay: 500,
+      });
+    }
+
+    if (greenRectRef.current) {
+      animate(greenRectRef.current, {
+        translateY: [50, 0],
+        opacity: [0, 1],
+        duration: 2000,
+        ease: "outElastic(1, .5)",
+        delay: 800,
+      });
+    }
+
+    return () => ctx.revert();
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLHeadingElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -60,7 +99,7 @@ export default function HeroSection({
   };
 
   return (
-    <section className="relative min-h-screen w-full bg-bg flex flex-col justify-between pt-20 md:pt-24 overflow-visible" style={{ background: "#0a0a0a" }}>
+    <section ref={containerRef} className="relative min-h-screen w-full bg-bg flex flex-col justify-between pt-20 md:pt-8 md:pt-24 overflow-visible" style={{ background: "#0a0a0a" }}>
       {/* Background Decorative Grid */}
       <div className="absolute inset-0 bg-grid opacity-[0.2] pointer-events-none -z-10" />
 
@@ -82,17 +121,18 @@ export default function HeroSection({
               "--spotlight-radius": "0px",
             } as React.CSSProperties}
           >
-            <span className="text-text-primary block">
+            {/* Normal: Solid Text (Base) */}
+            <span className="text-text-primary block hero-anim-item">
               ENGINEER
             </span>
-            <span className="text-text-primary block">
+            <span className="text-text-primary block hero-anim-item">
               <span className="md:inline block">BY</span>{" "}
               <span className="md:inline block">LOGIC.</span>
             </span>
-            <span className="pl-0 md:pl-12 text-amber block">
+            <span className="pl-0 md:pl-12 text-amber block hero-anim-item">
               DESIGNER
             </span>
-            <span className="pl-0 md:pl-12 text-amber block">
+            <span className="pl-0 md:pl-12 text-amber block hero-anim-item">
               <span className="md:inline block">BY</span>{" "}
               <span className="md:inline block">OBSESSION.</span>
             </span>
@@ -105,17 +145,17 @@ export default function HeroSection({
                 WebkitMaskImage: "radial-gradient(circle var(--spotlight-radius) at var(--mouse-x) var(--mouse-y), black 80%, transparent 100%)",
               }}
             >
-              <span style={{ WebkitTextStroke: "3.5px var(--text-primary)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties} className="block">
+              <span style={{ WebkitTextStroke: "2.5px var(--text-primary)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties} className="block">
                 ENGINEER
               </span>
-              <span style={{ WebkitTextStroke: "3.5px var(--text-primary)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties} className="block">
+              <span style={{ WebkitTextStroke: "2.5px var(--text-primary)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties} className="block">
                 <span className="md:inline block">BY</span>{" "}
                 <span className="md:inline block">LOGIC.</span>
               </span>
-              <span className="pl-0 md:pl-12 block" style={{ WebkitTextStroke: "3.5px var(--amber)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties}>
+              <span className="pl-0 md:pl-12 block" style={{ WebkitTextStroke: "2.5px var(--amber)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties}>
                 DESIGNER
               </span>
-              <span className="pl-0 md:pl-12 block" style={{ WebkitTextStroke: "3.5px var(--amber)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties}>
+              <span className="pl-0 md:pl-12 block" style={{ WebkitTextStroke: "2.5px var(--amber)", WebkitTextFillColor: "transparent", color: "transparent" } as React.CSSProperties}>
                 <span className="md:inline block">BY</span>{" "}
                 <span className="md:inline block">OBSESSION.</span>
               </span>
@@ -123,19 +163,19 @@ export default function HeroSection({
           </h1>
 
           {/* Name & Border Line */}
-          <div className="mt-8 pl-3 border-l-[3px] border-amber">
+          <div className="mt-8 pl-3 border-l-[3px] border-amber hero-anim-item">
             <span className="font-inter font-medium text-[14px] text-text-muted tracking-[0.1em]">
               — {siteName || "Hanan Bhatti"}
             </span>
           </div>
 
           {/* Tagline */}
-          <p className="mt-4 font-inter font-normal text-[15px] text-text-muted leading-[1.7] max-w-[380px]">
+          <p className="mt-4 font-inter font-normal text-[15px] text-text-muted leading-[1.7] max-w-[380px] hero-anim-item">
             {heroTagline || "Engineer by logic. Designer by obsession."}
           </p>
 
           {/* CTA Buttons */}
-          <div className="mt-10 flex flex-wrap gap-4 items-center">
+          <div className="mt-10 flex flex-wrap gap-4 items-center hero-anim-item">
             <Link
               href="/projects"
               className="inline-flex items-center justify-center font-inter font-semibold text-[14px] bg-amber text-black px-7 py-3.5 transition-all active:scale-[0.98] select-none uppercase hover:bg-amber/90 whitespace-nowrap min-w-[140px] flex-shrink-0"
@@ -151,7 +191,7 @@ export default function HeroSection({
           </div>
 
           {/* Social Links */}
-          <div className="mt-4 flex items-center gap-6">
+          <div className="mt-4 flex items-center gap-6 hero-anim-item">
             {socialGithub && (
               <a
                 href={socialGithub}
@@ -219,10 +259,10 @@ export default function HeroSection({
           )}
 
           {/* Amber Rectangle Accent */}
-          <div className="absolute bottom-[15%] right-[8%] w-[6px] h-[80px] bg-amber z-20" />
+          <div ref={amberRectRef} className="absolute bottom-[15%] right-[8%] w-[6px] h-[80px] bg-amber z-20 opacity-0" />
 
           {/* Green Rectangle Accent */}
-          <div className="absolute top-[20%] right-[15%] w-[6px] h-[40px] bg-green z-20" />
+          <div ref={greenRectRef} className="absolute top-[20%] right-[15%] w-[6px] h-[40px] bg-green z-20 opacity-0" />
 
         </div>
 

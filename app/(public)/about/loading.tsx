@@ -10,7 +10,7 @@ export default function Loading() {
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-left" style={{ background: "#0a0a0a" }}>
       {/* SECTION 1: Hero */}
-      <section className="relative min-h-[70vh] flex items-center pt-24 pb-12 w-full max-w-6xl mx-auto px-4 md:px-0">
+      <section className="relative min-h-[70vh] flex items-center pt-8 md:pt-24 pb-12 w-full max-w-6xl mx-auto px-4 md:px-0">
         <div className="w-full grid gap-8 items-center grid-cols-1 md:grid-cols-[55%_45%] animate-pulse">
           {/* Left Side */}
           <div className="flex flex-col justify-center text-left">

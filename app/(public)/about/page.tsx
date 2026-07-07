@@ -146,6 +146,8 @@ function formatCtaLink(val: string): string {
   return trimmed;
 }
 
+import EchoHero from "@/components/ui/EchoHero";
+
 export default async function AboutPage() {
   const settings = await getSiteSettings();
   const about = await getAboutSettings();
@@ -194,15 +196,17 @@ export default async function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       
-      {/* SECTION 1: Hero */}
-      <section className="relative min-h-[70vh] flex items-center pt-24 pb-12 w-full max-w-6xl mx-auto px-4 md:px-0">
+      {/* SECTION 1: Hero (Echo Animation) */}
+      <EchoHero />
+
+      {/* Hero Content (Tagline, Avatar, CTA) */}
+      <section className="relative flex items-center pb-12 pt-8 w-full max-w-6xl mx-auto px-4 md:px-0 border-b border-border">
         <div className={`w-full grid gap-8 items-center ${
           hasAvatar ? "grid-cols-1 md:grid-cols-[55%_45%]" : "grid-cols-1"
         }`}>
           {/* Left Side */}
           <div className="flex flex-col justify-center text-left">
-            <SectionLabel text="ABOUT" />
-            <h1 className="font-syne font-extrabold text-[clamp(3rem,7vw,5.5rem)] leading-[0.95] text-white">
+            <h1 className="font-syne font-extrabold text-[clamp(2.5rem,5vw,4rem)] leading-[0.95] text-white">
               I&apos;m <span className="text-amber">{firstName}</span>.
             </h1>
             {about.about_hero_tagline && (

@@ -426,11 +426,19 @@ body {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-
+@keyframes marquee-scroll-reverse {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
 .animate-marquee-scroll {
-  display: inline-flex;
-  white-space: nowrap;
+  display: flex;
+  width: max-content;
   animation: marquee-scroll 20s linear infinite;
+}
+.animate-marquee-scroll-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll-reverse 20s linear infinite;
 }
 
 @keyframes pulsing-dot {
@@ -597,5 +605,9 @@ body {
   border-left-color: var(--bg-surface) !important;
 }
 
-
-
+/* Hide default cursor on devices that use a mouse to favor the custom cursor */
+@media (pointer: fine) {
+  body, a, button, [role="button"], input, select, textarea {
+    cursor: none !important;
+  }
+}

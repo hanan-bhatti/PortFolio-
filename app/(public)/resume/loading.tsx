@@ -28,7 +28,7 @@ export default function Loading() {
       />
 
       {/* Content Container */}
-      <div className="relative z-10 mx-auto max-w-[1000px] px-4 pt-28 pb-20 animate-pulse">
+      <div className="relative z-10 mx-auto max-w-[1000px] px-4 pt-8 md:pt-28 pb-20 animate-pulse">
         {/* Resume Card (WHITE Background Mockup) */}
         <div
           style={{

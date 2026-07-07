@@ -51,12 +51,14 @@ model Project {
 }
 
 model Skill {
-  id       String  @id @default(cuid())
-  name     String
-  icon     String?
-  level    Int
-  category String
-  order    Int     @default(0)
+  id          String  @id @default(cuid())
+  name        String
+  icon        String?
+  level       Int
+  category    String
+  order       Int     @default(0)
+  description String? @db.Text
+  color       String? @default("#F59E0B")
 }
 
 model Experience {

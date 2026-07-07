@@ -64,7 +64,7 @@ export default async function ProjectsPage() {
       />
 
       {/* Content Container */}
-      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-32 pb-20">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pt-8 md:pt-32 pb-20">
         <div className="relative mb-12">
           <h1 className="font-syne font-extrabold text-[clamp(2rem,8vw,5.5rem)] leading-none text-white uppercase">
             PROJECTS

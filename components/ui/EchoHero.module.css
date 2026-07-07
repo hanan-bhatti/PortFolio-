@@ -1,0 +1,89 @@
+.hero {
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: clamp(96px, 13vh, 150px) 0 0;
+  background-color: var(--bg);
+}
+
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.0324em;
+  width: 100%;
+  font-family: var(--font-pp-neue-montreal);
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: normal;
+  letter-spacing: -0.01em;
+  font-size: clamp(44px, 14vw, 27vh);
+}
+
+.echoGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.0324em;
+  width: 100%;
+  overflow: hidden;
+}
+
+.echoCell {
+  width: 100%;
+}
+
+.echoRow {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.echoRow[data-band="top"] { height: 0.373em; }
+.echoRow[data-band="bottom"] { height: 0.3365em; }
+
+.echoText {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  white-space: nowrap;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: clamp(1px, 0.0095em, 2.5px) currentColor;
+}
+.echoRow[data-band="top"] .echoText { top: -0.2108em; }
+.echoRow[data-band="bottom"] .echoText { top: -0.6405em; }
+
+.solid {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0.75em;
+}
+
+.solidText {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -0.227em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.solidInk { color: var(--text-primary); }
+.solidAccent { color: var(--amber); }
+
+.ink { color: var(--text-muted); }
+.accent { color: var(--amber); }

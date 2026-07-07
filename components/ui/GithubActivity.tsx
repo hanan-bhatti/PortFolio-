@@ -8,7 +8,10 @@
  * - GithubActivity (default): Main React component or function
  */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import Contributions from "./Contributions";
+import { useGSAP } from "@gsap/react";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 interface GithubActivityProps {
   socialGithub: string;
@@ -36,7 +39,7 @@ function GithubCard({ src, alt }: GithubCardProps) {
         border: "1px solid var(--border)",
         minHeight: "170px"
       }}
-      className="bg-[#0a0a0a] overflow-hidden w-full flex items-center justify-center relative"
+      className="bg-[#0a0a0a] overflow-hidden w-full flex items-center justify-center relative shadow-lg"
     >
       {hasError ? (
         <div className="flex flex-col items-center justify-center p-6 text-center gap-3 font-mono">
@@ -64,6 +67,8 @@ function GithubCard({ src, alt }: GithubCardProps) {
 }
 
 export default function GithubActivity({ socialGithub, statsCommits, socialGithubLink }: GithubActivityProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   // Extract username from socialGithub URL (e.g. "https://github.com/Hanan-Bhatti" -> "Hanan-Bhatti")
   // If the setting is empty, fallback to the default "Hanan-Bhatti"
   const githubUsername = socialGithub
@@ -75,6 +80,27 @@ export default function GithubActivity({ socialGithub, statsCommits, socialGithu
   const card1Url = `https://github-readme-stats.hanan-bhatti.site/api?username=${githubUsername}&show_icons=true&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&icon_color=16A34A&text_color=6B7280&ring_color=F59E0B&include_all_commits=true&count_private=true`;
   const card2Url = `https://github-readme-stats.hanan-bhatti.site/api/top-langs/?username=${githubUsername}&layout=compact&theme=dark&hide_border=true&bg_color=0a0a0a&title_color=F59E0B&text_color=6B7280&langs_count=8`;
   const cardStreakUrl = `https://streak-stats.demolab.com?user=${githubUsername}&theme=dark&hide_border=true&background=0a0a0a&ring=F59E0B&fire=F59E0B&currStreakLabel=F59E0B&sideLabels=6B7280&dates=6B7280`;
+
+  useGSAP(() => {
+    const rows = gsap.utils.toArray<HTMLElement>('.stack-row', containerRef.current);
+    
+    rows.forEach((row, i) => {
+      if (i === rows.length - 1) return; // don't fade/scale the last one
+
+      gsap.to(row, {
+        scale: 0.9,
+        opacity: 0.5,
+        transformOrigin: "top center",
+        scrollTrigger: {
+          trigger: row,
+          start: `top ${100 + i * 20}px`,
+          endTrigger: rows[i + 1],
+          end: `top ${120 + i * 20}px`,
+          scrub: true,
+        }
+      });
+    });
+  }, { scope: containerRef });
 
   return (
     <section className="bg-bg py-24 px-4 md:px-[8vw]">
@@ -95,38 +121,25 @@ export default function GithubActivity({ socialGithub, statsCommits, socialGithu
         </div>
 
         {/* Dashboard Grid */}
-        <div className="flex flex-col gap-4">
-          {/* ROW 1 — side by side 50/50 grid, gap: 1rem (gap-4) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div ref={containerRef} className="flex flex-col relative pb-32 gap-12">
+          {/* ROW 1 */}
+          <div className="stack-row sticky top-[100px] z-10 w-full grid grid-cols-1 md:grid-cols-2 gap-4 bg-bg pt-4">
             <GithubCard src={card1Url} alt="GitHub Stats Card" />
             <GithubCard src={card2Url} alt="Top Languages Card" />
           </div>
 
-          {/* ROW 2 — Jandi contribution heatmap */}
-          <div 
-            style={{
-              border: "1px solid var(--border)",
-              width: "100%",
-            }}
-            className="bg-[#0a0a0a] overflow-hidden"
-          >
-            <iframe
-              src={`https://jandi.firejune.io/${githubUsername}?scheme=dark&radius=0&margin=2&footer=false&tz=Asia/Karachi`}
-              frameBorder="0"
-              scrolling="no"
-              style={{
-                width: "100%",
-                height: "170px",
-                border: "none",
-                display: "block",
-                filter: "hue-rotate(65deg) saturate(1.8) brightness(0.9)",
-              }}
-              title="GitHub Contributions"
-            />
+          {/* ROW 2 */}
+          <div className="stack-row sticky top-[120px] z-20 w-full bg-bg pt-4">
+            <div 
+              style={{ border: "1px solid var(--border, #262626)" }}
+              className="bg-[#0a0a0a] overflow-hidden shadow-2xl rounded-lg"
+            >
+              <Contributions />
+            </div>
           </div>
 
-          {/* ROW 3 — Streak Stats */}
-          <div className="grid grid-cols-1 gap-4">
+          {/* ROW 3 */}
+          <div className="stack-row sticky top-[140px] z-30 w-full bg-bg pt-4 grid grid-cols-1 gap-4">
             <GithubCard src={cardStreakUrl} alt="Streak Stats" />
           </div>
         </div>

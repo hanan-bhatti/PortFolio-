@@ -12,6 +12,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import SkillIcon from "./SkillIcon";
 import InfoTooltip from "./InfoTooltip";
 
@@ -81,6 +83,8 @@ interface Skill {
   level: number;
   category: string;
   order: number;
+  description?: string | null;
+  color?: string | null;
 }
 
 interface SkillFormProps {
@@ -96,6 +100,8 @@ export default function SkillForm({ skill }: SkillFormProps) {
   const [level, setLevel] = useState(skill?.level || 80);
   const [icon, setIcon] = useState(skill?.icon || "SiReact");
   const [order, setOrder] = useState(skill?.order || 0);
+  const [description, setDescription] = useState(skill?.description || "");
+  const [color, setColor] = useState(skill?.color || "#F59E0B");
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -131,6 +137,8 @@ export default function SkillForm({ skill }: SkillFormProps) {
             level,
             icon: icon || null,
             order,
+            description: description || null,
+            color: color || null,
           }),
         });
 
@@ -155,19 +163,21 @@ export default function SkillForm({ skill }: SkillFormProps) {
   };
 
   return (
-    <div className="max-w-2xl">
-      <Link
-        href="/admin/skills"
-        className="inline-flex items-center text-xs font-mono text-zinc-500 hover:text-white mb-6"
-      >
-        ← Back to Skills
-      </Link>
+    <div className="flex flex-col lg:flex-row gap-12 items-start max-w-7xl">
+      {/* LEFT: FORM */}
+      <div className="w-full lg:w-1/2 max-w-2xl shrink-0">
+        <Link
+          href="/admin/skills"
+          className="inline-flex items-center text-xs font-mono text-zinc-500 hover:text-white mb-6"
+        >
+          ← Back to Skills
+        </Link>
 
-      <h2 className="font-syne text-xl font-bold text-white mb-8">
-        {skill ? `Edit Skill: ${skill.name}` : "Create New Skill"}
-      </h2>
+        <h2 className="font-syne text-xl font-bold text-white mb-8">
+          {skill ? `Edit Skill: ${skill.name}` : "Create New Skill"}
+        </h2>
 
-      <form data-tour="skill-editor-area" onSubmit={handleSubmit} className="space-y-6">
+        <form data-tour="skill-editor-area" onSubmit={handleSubmit} className="space-y-6">
         {/* Name */}
         <div className="space-y-2">
           <label className="flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
@@ -210,6 +220,50 @@ export default function SkillForm({ skill }: SkillFormProps) {
             <option value="Payments" />
             <option value="Other" />
           </datalist>
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2">
+          <label className="flex items-center justify-between text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+            <span className="flex items-center gap-1.5">
+              Description (Markdown Supported)
+              <InfoTooltip content="Details about this skill, where you used it, what it is, etc. Supports bold, lists, and links. Max 500 characters." />
+            </span>
+            <span className={description.length > 500 ? "text-red-500" : "text-zinc-500"}>
+              {description.length}/500
+            </span>
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={500}
+            placeholder="e.g. **Built high-performance UIs** at XYZ. See it in [Project X](/projects/x)."
+            rows={5}
+            className="w-full bg-[#1a1a1a] border border-[#262626] p-3 text-sm text-white font-sans focus:outline-none focus:border-[#F59E0B]"
+          />
+        </div>
+
+        {/* Brand Color */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-1.5 text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+            Brand Color
+            <InfoTooltip content="The hex color for this skill (e.g. #3178C6 for TypeScript)." />
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="w-12 h-12 rounded cursor-pointer border-0 p-0 bg-transparent"
+            />
+            <input
+              type="text"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              placeholder="#F59E0B"
+              className="flex-1 bg-[#1a1a1a] border border-[#262626] p-3 text-sm text-white font-sans focus:outline-none focus:border-[#F59E0B]"
+            />
+          </div>
         </div>
 
         {/* Level */}
@@ -339,7 +393,95 @@ export default function SkillForm({ skill }: SkillFormProps) {
         >
           {isPending ? "Saving..." : skill ? "Save Changes" : "Create Skill"}
         </button>
-      </form>
+        </form>
+      </div>
+
+      {/* RIGHT: LIVE PREVIEW */}
+      <div className="w-full lg:w-1/2 lg:sticky lg:top-8 hidden lg:block">
+        <div className="mb-6 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          <span className="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Live Preview</span>
+        </div>
+        
+        <div 
+          className="group rounded-3xl p-8 transition-colors duration-500 overflow-hidden shadow-2xl backdrop-blur-md"
+          style={{ 
+            '--brand-color': color || '#F59E0B',
+            backgroundColor: `color-mix(in srgb, var(--brand-color) 12%, #080808)`,
+            borderColor: `color-mix(in srgb, var(--brand-color) 30%, transparent)`,
+            borderWidth: '1px',
+            borderStyle: 'solid',
+          } as React.CSSProperties}
+        >
+          {/* Premium Hover Gradient Background - intensifies the color on hover */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--brand-color)]/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+          
+          <div className="flex flex-col xl:flex-row gap-8 relative z-10">
+            {/* Left Side: Icon, Name, Progress */}
+            <div className="xl:w-1/2 flex flex-col justify-center">
+              <div className="flex items-center gap-6 mb-8">
+                <div 
+                  className="w-16 h-16 rounded-2xl border flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-2xl"
+                  style={{
+                    backgroundColor: `color-mix(in srgb, var(--brand-color) 8%, #000)`,
+                    borderColor: `color-mix(in srgb, var(--brand-color) 25%, transparent)`
+                  }}
+                >
+                   <SkillIcon name={icon || ""} size={32} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-syne font-bold text-2xl text-white tracking-tight group-hover:text-white transition-colors duration-300 line-clamp-1">
+                    {name || "Skill Name"}
+                  </h4>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-white/50 text-xs tracking-wider uppercase font-inter block">Proficiency</span>
+                    <span className="font-syne font-bold text-sm transition-colors duration-300" style={{ color: 'var(--brand-color)' }}>{level}%</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="relative z-10">
+                <div 
+                  className="h-1.5 w-full rounded-full overflow-hidden border"
+                  style={{ 
+                    backgroundColor: `color-mix(in srgb, var(--brand-color) 15%, #000)`,
+                    borderColor: `color-mix(in srgb, var(--brand-color) 20%, #000)`
+                  }}
+                >
+                  <div 
+                    className="h-full opacity-80 group-hover:opacity-100 rounded-full transition-all duration-1000 ease-out origin-left shadow-[0_0_10px_var(--brand-color)]"
+                    style={{ width: `${level}%`, backgroundColor: 'var(--brand-color)' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side: Description */}
+            <div 
+              className="xl:w-1/2 flex items-center border-t xl:border-t-0 xl:border-l pt-6 xl:pt-0 xl:pl-8 relative z-10"
+              style={{ borderColor: `color-mix(in srgb, var(--brand-color) 20%, transparent)` }}
+            >
+              <div className="text-white/70 text-sm leading-relaxed font-inter group-hover:text-white/90 transition-colors duration-300 w-full">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({node, ...props}) => <p className="mb-4 last:mb-0" {...props} />,
+                    a: ({node, ...props}) => <a className="text-[var(--brand-color)] hover:text-amber-400 underline underline-offset-2 transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+                    strong: ({node, ...props}) => <strong className="text-white font-semibold" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-4" {...props} />,
+                    li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-white font-bold text-base mb-2 mt-4 first:mt-0" {...props} />,
+                    h4: ({node, ...props}) => <h4 className="text-white font-semibold text-sm mb-2 mt-3 first:mt-0" {...props} />
+                  }}
+                >
+                  {description || `Extensive experience utilizing **${name || "Skill Name"}** for building scalable applications and implementing robust solutions.`}
+                </ReactMarkdown>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

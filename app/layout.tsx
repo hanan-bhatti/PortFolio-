@@ -27,8 +27,31 @@ import { getSiteSettings } from "@/lib/settings";
 import { extractTwitterUsername } from "@/lib/utils";
 import NextTopLoader from "nextjs-toploader";
 import { Analytics } from "@vercel/analytics/next";
+import SmoothScrolling from "@/components/ui/SmoothScrolling";
+import CustomCursor from "@/components/ui/CustomCursor";
+import InteractiveBackground from "@/components/ui/InteractiveBackground";
+import ScrollAnimations from "@/components/ui/ScrollAnimations";
+import ClickSpark from "@/components/ui/ClickSpark";
 import "./globals.css";
 import "./bones/registry";
+
+import localFont from "next/font/local";
+
+const ppNeueMontreal = localFont({
+  src: [
+    {
+      path: "../public/fonts/ppneuemontreal-book.woff",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/ppneuemontreal-bold.woff",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-pp-neue-montreal",
+});
 
 const syne = Syne({
   subsets: ["latin"],
@@ -95,7 +118,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${syne.variable} ${inter.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${syne.variable} ${inter.variable} ${ppNeueMontreal.variable}`} data-scroll-behavior="smooth">
       <body className="antialiased">
         <NextTopLoader
           color="#F59E0B"
@@ -129,7 +152,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }),
           }}
         />
-        {children}
+        <InteractiveBackground />
+        <CustomCursor />
+        <ScrollAnimations />
+        <SmoothScrolling>
+          <ClickSpark
+            sparkColor="#F59E0B"
+            sparkSize={10}
+            sparkRadius={20}
+            sparkCount={12}
+            duration={500}
+            extraScale={1.2}
+          >
+            {children}
+          </ClickSpark>
+        </SmoothScrolling>
         <Analytics />
         <Toaster theme="dark" position="bottom-right" richColors />
       </body>

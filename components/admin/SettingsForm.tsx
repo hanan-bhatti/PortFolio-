@@ -31,6 +31,7 @@ import { cn, formatDate } from "@/lib/utils";
 import EditorialModal from "./EditorialModal";
 import ScrollingMarquee from "@/components/ui/ScrollingMarquee";
 import InfoTooltip from "./InfoTooltip";
+import MarqueeSkillsEditor from "./MarqueeSkillsEditor";
 import {
   FiGlobe,
   FiTag,
@@ -658,22 +659,9 @@ export default function SettingsForm({
 
             {/* Marquee Skills */}
             <div className="space-y-1.5">
-              <MarkdownTextarea
-                label={
-                  <span className="flex items-center gap-1.5">
-                    <FiCpu className="w-3.5 h-3.5 text-zinc-550" /> Marquee Skills (comma-separated)
-                    <InfoTooltip content="Comma-separated uppercase skill list for the marquee sliding text banner." />
-                  </span>
-                }
+              <MarqueeSkillsEditor
                 value={watch("marqueeSkills") || ""}
                 onChange={(v) => setValue("marqueeSkills", v, { shouldDirty: true })}
-                placeholder="FULL STACK, DEVOPS, C++"
-                rows={3}
-                customPreview={
-                  <div className="w-full pointer-events-none opacity-90 py-1 bg-black/40 border border-[#262626]">
-                    <ScrollingMarquee skills={watch("marqueeSkills") || ""} />
-                  </div>
-                }
               />
               {errors.marqueeSkills ? <p className="font-mono text-[10px] text-red-400">{errors.marqueeSkills?.message}</p> : null}
             </div>

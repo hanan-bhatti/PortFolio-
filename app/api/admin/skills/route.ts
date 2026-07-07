@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, icon, level, category, order } = body;
+    const { name, icon, level, category, order, description, color } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -57,13 +57,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Category is required" }, { status: 400 });
     }
 
+    if (description && description.length > 500) {
+      return NextResponse.json(
+        { error: "Description cannot exceed 500 characters." },
+        { status: 400 }
+      );
+    }
+
     const skill = await prisma.skill.create({
       data: {
         name,
         icon: icon || null,
         level: Math.round(level),
         category,
+        color: color || null,
         order: typeof order === "number" ? Math.round(order) : 0,
+        description: description || null,
       },
     });
 

@@ -251,7 +251,8 @@ export async function saveSettingsAction(input: SettingsInput): Promise<ActionRe
   await prisma.$transaction(
     entries.map(([key, value]) =>
       prisma.siteSettings.upsert({ where: { key }, update: { value }, create: { key, value } })
-    )
+    ),
+    { timeout: 15000 }
   );
   revalidatePath("/", "layout");
   revalidateTag("settings", "max");
@@ -266,7 +267,8 @@ export async function saveAboutSettingsAction(input: AboutInput): Promise<Action
   await prisma.$transaction(
     entries.map(([key, value]) =>
       prisma.siteSettings.upsert({ where: { key }, update: { value }, create: { key, value } })
-    )
+    ),
+    { timeout: 15000 }
   );
   revalidatePath("/", "layout");
   revalidatePath("/about");

@@ -12,7 +12,7 @@ import { Skeleton } from "boneyard-js/react";
 
 export default function Loading() {
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-32 pb-20">
+    <div className="mx-auto max-w-6xl px-4 pt-8 md:pt-32 pb-20">
       <div className="relative mb-12">
         <h1 className="text-4xl font-bold text-white md:text-5xl">
           <span className="gradient-text">Projects</span>

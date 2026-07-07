@@ -56,7 +56,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { name, icon, level, category, order } = body;
+    const { name, icon, level, category, order, description, color } = body;
 
     const existingSkill = await prisma.skill.findUnique({
       where: { id },
@@ -67,6 +67,13 @@ export async function PATCH(
     }
 
     // Prepare update data
+    if (description && description.length > 500) {
+      return NextResponse.json(
+        { error: "Description cannot exceed 500 characters." },
+        { status: 400 }
+      );
+    }
+
     const updateData: any = {};
     if (name !== undefined) {
       if (typeof name !== "string" || !name.trim()) {
@@ -98,6 +105,14 @@ export async function PATCH(
         return NextResponse.json({ error: "Order must be a number" }, { status: 400 });
       }
       updateData.order = Math.round(order);
+    }
+    
+    if (color !== undefined) {
+      updateData.color = color || null;
+    }
+
+    if (description !== undefined) {
+      updateData.description = description || null;
     }
 
     const updatedSkill = await prisma.skill.update({

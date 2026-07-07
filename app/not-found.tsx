@@ -61,7 +61,7 @@ export default async function NotFound() {
       />
 
       {/* Main Content Area */}
-      <div className="relative z-10 mx-auto max-w-4xl px-6 pt-24 pb-16 flex-1 flex flex-col items-center justify-center text-center">
+      <div className="relative z-10 mx-auto max-w-4xl px-6 pt-8 md:pt-24 pb-16 flex-1 flex flex-col items-center justify-center text-center">
         {/* SVG Animated Face */}
         <div className="face-container mb-8">
           <svg className="face" viewBox="0 0 320 380">

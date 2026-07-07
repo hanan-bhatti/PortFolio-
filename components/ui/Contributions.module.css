@@ -1,0 +1,124 @@
+/* ABOUT PAGE · Contributions — GitHub heatmap + accent snake. */
+
+.inner {
+  max-width: var(--canvas-max-width, 1200px);
+  margin: 0 auto;
+
+  /* The snake is the primary text colour, so it reads as ink crawling across
+     the grid. */
+  --snake: #F59E0B; /* amber */
+
+  /* Accent contribution scale */
+  --cell-0: #1a1a1a;
+  --cell-1: color-mix(in srgb, #F59E0B 25%, #1a1a1a);
+  --cell-2: color-mix(in srgb, #F59E0B 50%, #1a1a1a);
+  --cell-3: color-mix(in srgb, #F59E0B 75%, #1a1a1a);
+  --cell-4: #F59E0B;
+  
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--border, #262626);
+}
+
+.eyebrow { margin: 0; }
+
+.count {
+  font-family: var(--font-inter, sans-serif);
+  font-size: clamp(13px, 1.2vw, 16px);
+  letter-spacing: 0.1em;
+  color: var(--text-muted, #a3a3a3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── grid ── */
+.gridWrap { 
+  width: 100%; 
+  padding: 16px;
+}
+
+.grid {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible; /* let the bite-pulse scale spill past the viewBox edge */
+}
+
+.cell {
+  fill: var(--cell-0);
+  transition: fill 0.45s var(--ease-out-quart);
+}
+
+.cell[data-level="1"] { fill: var(--cell-1); }
+.cell[data-level="2"] { fill: var(--cell-2); }
+.cell[data-level="3"] { fill: var(--cell-3); }
+.cell[data-level="4"] { fill: var(--cell-4); }
+
+/* Consumed: drains back to empty (the transition above animates the colour). */
+.cell[data-eaten="true"] { fill: var(--cell-0); }
+
+/* The instant of the bite — a hard accent flash with no transition; removing
+   the class a beat later lets the cell transition down to the eaten colour. */
+.biting {
+  fill: var(--snake) !important;
+  transition: none !important;
+}
+
+/* ── snake ── */
+.seg {
+  fill: var(--snake);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Head reads a touch brighter with a soft accent halo. */
+.seg:first-child {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--snake) 70%, transparent));
+}
+
+/* ── footer: legend + controls ── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 0 16px 16px 16px;
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-inter, sans-serif);
+  font-size: clamp(11px, 1vw, 13px);
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #a3a3a3);
+}
+
+.legendLabel { margin: 0 2px; text-transform: uppercase; }
+
+.legendCell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--cell-0);
+}
+.legendCell[data-level="1"] { background: var(--cell-1); }
+.legendCell[data-level="2"] { background: var(--cell-2); }
+.legendCell[data-level="3"] { background: var(--cell-3); }
+.legendCell[data-level="4"] { background: var(--cell-4); }
+
+.controls { display: inline-flex; align-items: center; gap: 10px; }
+
+@media (max-width: 560px) {
+  .footer { flex-direction: column; align-items: flex-start; }
+}

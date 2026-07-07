@@ -27,7 +27,7 @@ export default async function BlogPage() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-32 pb-20">
+    <div className="mx-auto max-w-6xl px-4 pt-8 md:pt-32 pb-20">
       <div className="relative mb-12 flex flex-col items-start text-left">
         <span className="font-inter font-semibold text-[11px] tracking-[0.2em] text-text-muted mb-4 uppercase">
           WRITING
