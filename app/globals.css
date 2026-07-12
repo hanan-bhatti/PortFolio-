@@ -605,9 +605,10 @@ body {
   border-left-color: var(--bg-surface) !important;
 }
 
-/* Hide default cursor on devices that use a mouse to favor the custom cursor */
+/* Hide default cursor on devices that use a mouse only when custom cursor is active */
 @media (pointer: fine) {
-  body, a, button, [role="button"], input, select, textarea {
+  .custom-cursor-active,
+  .custom-cursor-active * {
     cursor: none !important;
   }
 }
