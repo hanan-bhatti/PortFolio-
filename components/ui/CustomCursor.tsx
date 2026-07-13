@@ -2,10 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 type CursorType = "default" | "pointer" | "text" | "loading";
 
 export default function CustomCursor() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
   const [cursorType, setCursorType] = useState<CursorType>("loading");
@@ -15,6 +19,8 @@ export default function CustomCursor() {
   const isVisibleRef = useRef<boolean>(false);
 
   useEffect(() => {
+    if (!isHome) return;
+
     // Disable on touch devices
     if (window.matchMedia("(pointer: coarse)").matches) return;
 
@@ -76,11 +82,6 @@ export default function CustomCursor() {
       }
     };
 
-    const handleMouseLeave = () => {
-      // Don't hide immediately on mouseout to prevent flickering
-      // Only hide if the mouse actually leaves the window
-    };
-    
     const handleWindowLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 || e.clientX <= 0 || (e.clientX >= window.innerWidth || e.clientY >= window.innerHeight)) {
         isVisibleRef.current = false;
@@ -93,10 +94,8 @@ export default function CustomCursor() {
     window.addEventListener("mouseleave", handleWindowLeave, { passive: true });
     document.addEventListener("mouseleave", handleWindowLeave, { passive: true });
 
-    // Hide native cursor globally (forced)
-    const style = document.createElement("style");
-    style.innerHTML = `* { cursor: none !important; }`;
-    document.head.appendChild(style);
+    // Hide native cursor globally (forced) via class toggling
+    document.documentElement.classList.add("custom-cursor-active");
 
     return () => {
       clearTimeout(timer);
@@ -104,12 +103,11 @@ export default function CustomCursor() {
       window.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("mouseleave", handleWindowLeave);
       document.removeEventListener("mouseleave", handleWindowLeave);
-      if (document.head.contains(style)) {
-        document.head.removeChild(style);
-      }
+      document.documentElement.classList.remove("custom-cursor-active");
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, isHome]);
 
+  if (!isHome) return null;
   if (!isVisible && cursorType !== "loading") return null;
 
   return (
