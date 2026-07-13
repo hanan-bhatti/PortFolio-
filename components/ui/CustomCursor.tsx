@@ -14,6 +14,7 @@ export default function CustomCursor() {
   const cursorY = useMotionValue(-100);
   const [cursorType, setCursorType] = useState<CursorType>("loading");
   const [isVisible, setIsVisible] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const cursorTypeRef = useRef<CursorType>("loading");
   const isVisibleRef = useRef<boolean>(false);
@@ -22,13 +23,22 @@ export default function CustomCursor() {
     if (!isHome) return;
 
     // Disable on touch devices
-    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      setIsTouchDevice(true);
+      return;
+    }
 
     // Simulate page load loading cursor for a brief moment
-    const timer = setTimeout(() => {
-      setCursorType("default");
-      cursorTypeRef.current = "default";
-    }, 1200);
+    // Use ref check to avoid listing cursorType in the dependencies array
+    let timer: NodeJS.Timeout | undefined;
+    if (cursorTypeRef.current === "loading") {
+      timer = setTimeout(() => {
+        if (cursorTypeRef.current === "loading") {
+          setCursorType("default");
+          cursorTypeRef.current = "default";
+        }
+      }, 1200);
+    }
 
     const updateMousePosition = (e: MouseEvent) => {
       let xOffset = -12;
@@ -107,7 +117,7 @@ export default function CustomCursor() {
     };
   }, [cursorX, cursorY, isHome]);
 
-  if (!isHome) return null;
+  if (!isHome || isTouchDevice) return null;
   if (!isVisible && cursorType !== "loading") return null;
 
   return (
