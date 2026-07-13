@@ -30,7 +30,7 @@ export default function CustomCursor() {
 
     // Simulate page load loading cursor for a brief moment
     // Use ref check to avoid listing cursorType in the dependencies array
-    let timer: NodeJS.Timeout | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     if (cursorTypeRef.current === "loading") {
       timer = setTimeout(() => {
         if (cursorTypeRef.current === "loading") {
@@ -114,6 +114,8 @@ export default function CustomCursor() {
       window.removeEventListener("mouseleave", handleWindowLeave);
       document.removeEventListener("mouseleave", handleWindowLeave);
       document.documentElement.classList.remove("custom-cursor-active");
+      setIsVisible(false);
+      isVisibleRef.current = false;
     };
   }, [cursorX, cursorY, isHome]);
 
