@@ -1,7 +1,7 @@
 /**
  * @file lib/actions.ts
  * @description Next.js Server Actions for admin panel functionalities including user authentication, 2FA setup, blog posts, project management, email replies, message routing, password resets, and session revoking.
- * 
+ *
  * @exports
  * - ActionResult: Interface defining standard error and ID responses for actions
  * - loginAction(input): Handles admin credentials and returns authentication result
@@ -45,7 +45,7 @@ export interface ActionResult {
 async function requireAdmin(): Promise<void> {
   const session = await auth();
   if (!session?.user || !session.sessionToken) throw new Error("Unauthorized");
-  
+
   const dbSession = await prisma.adminSession.findUnique({
     where: { token: session.sessionToken },
   });
@@ -281,7 +281,7 @@ export async function saveAboutSettingsAction(input: AboutInput): Promise<Action
 export async function sendReplyAction(email: string, replyMessage: string): Promise<ActionResult> {
   await requireAdmin();
   if (!email || !replyMessage.trim()) return { error: "Invalid input" };
-  
+
   try {
     const message = await prisma.contactMessage.create({
       data: {
@@ -367,7 +367,8 @@ export async function sendReplyAction(email: string, replyMessage: string): Prom
         ${replyMessage}
       </div>
       <div class="footer">
-        This is a response to your inquiry on the <a href="https://hananbhatti.com">Hanan Bhatti Portfolio</a>.<br>
+        This is a response to your inquiry on the <a href="https://hanan-bhatti.site">Hanan Bhatti Portfolio</a>.<br>
+        If you have any further questions, feel free to drop a message at <a href="mailto:hanan@hanan-bhatti.site">hanan@hanan-bhatti.site</a> or visit the <a href="https://hanan-bhatti.site/contact">contact page</a>.<br><br>
         © 2026 Abdul Hannan Bhatti. All rights reserved.
       </div>
     </div>
@@ -394,10 +395,10 @@ export async function sendReplyAction(email: string, replyMessage: string): Prom
 export async function enable2FAAction(secret: string, code: string): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
-  
+
   const isValid = verifyTOTP(code, secret);
   if (!isValid) return { error: "Invalid verification code" };
-  
+
   await prisma.adminUser.update({
     where: { id: session.user.id },
     data: {
@@ -405,7 +406,7 @@ export async function enable2FAAction(secret: string, code: string): Promise<Act
       twoFactorEnabled: true,
     }
   });
-  
+
   revalidatePath("/admin/settings");
   return {};
 }
@@ -413,15 +414,15 @@ export async function enable2FAAction(secret: string, code: string): Promise<Act
 export async function disable2FAAction(code: string): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
-  
+
   const user = await prisma.adminUser.findUnique({
     where: { id: session.user.id }
   });
   if (!user || !user.twoFactorEnabled) return { error: "2FA is not enabled" };
-  
+
   const isValid = verifyTOTP(code, user.twoFactorSecret || "");
   if (!isValid) return { error: "Invalid verification code" };
-  
+
   await prisma.adminUser.update({
     where: { id: session.user.id },
     data: {
@@ -429,7 +430,7 @@ export async function disable2FAAction(code: string): Promise<ActionResult> {
       twoFactorEnabled: false,
     }
   });
-  
+
   revalidatePath("/admin/settings");
   return {};
 }
@@ -438,12 +439,12 @@ export async function disable2FAAction(code: string): Promise<ActionResult> {
 
 export async function revokeSessionAction(sessionId: string): Promise<ActionResult> {
   await requireAdmin();
-  
+
   await prisma.adminSession.update({
     where: { id: sessionId },
     data: { active: false }
   });
-  
+
   revalidatePath("/admin/settings");
   return {};
 }
@@ -457,10 +458,10 @@ export async function requestPasswordResetAction(email: string): Promise<ActionR
   if (!user) {
     return {};
   }
-  
+
   const token = crypto.randomBytes(32).toString("hex");
   const expires = new Date(Date.now() + 3600000); // 1 hour
-  
+
   await prisma.adminUser.update({
     where: { id: user.id },
     data: {
@@ -468,7 +469,7 @@ export async function requestPasswordResetAction(email: string): Promise<ActionR
       resetTokenExpiry: expires,
     }
   });
-  
+
   const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/login?resetToken=${token}`;
   await sendEmail({
     to: user.email,
@@ -477,20 +478,20 @@ export async function requestPasswordResetAction(email: string): Promise<ActionR
           `Please click the link below to reset your password (valid for 1 hour):\n\n${resetUrl}\n\n` +
           `If you didn't request this, you can safely ignore this email.`,
   });
-  
+
   return {};
 }
 
 export async function resetPasswordAction(token: string, newPassword: string): Promise<ActionResult> {
   if (!token || !newPassword) return { error: "Invalid request" };
-  
+
   const user = await prisma.adminUser.findUnique({
     where: { resetToken: token }
   });
   if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
     return { error: "Token is invalid or has expired" };
   }
-  
+
   const hashedPassword = await hash(newPassword, 10);
   await prisma.adminUser.update({
     where: { id: user.id },
@@ -506,22 +507,22 @@ export async function resetPasswordAction(token: string, newPassword: string): P
       }
     }
   });
-  
+
   return {};
 }
 
 export async function changePasswordAction(currentPassword: string, newPassword: string): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
-  
+
   const user = await prisma.adminUser.findUnique({
     where: { id: session.user.id }
   });
   if (!user) return { error: "User not found" };
-  
+
   const valid = await compare(currentPassword, user.passwordHash);
   if (!valid) return { error: "Incorrect current password" };
-  
+
   const hashedPassword = await hash(newPassword, 10);
   await prisma.adminUser.update({
     where: { id: session.user.id },
@@ -529,7 +530,7 @@ export async function changePasswordAction(currentPassword: string, newPassword:
       passwordHash: hashedPassword,
     }
   });
-  
+
   return {};
 }
 
@@ -650,7 +651,7 @@ export async function dispatchCampaignAction(
     await Promise.all(
       subscribers.map(async (sub) => {
         const trackingPixel = `<img src="${siteUrl}/api/newsletter/track/open?c=${campaign.id}&e=${encodeURIComponent(sub.email)}" width="1" height="1" style="display:none;" />`;
-        
+
         const htmlBody = `
           <div style="background-color: #0c0c0c; color: #ffffff; font-family: sans-serif; padding: 40px; max-width: 600px; margin: 0 auto; border: 1px solid #262626;">
             <div style="text-align: center; margin-bottom: 30px;">
@@ -769,4 +770,3 @@ export async function setHasSeenAdminTourAction(seen: boolean): Promise<ActionRe
 
   return {};
 }
-
